@@ -1,2 +1,1 @@
-# mscs-thesis-project
-Repository for my MSCS thesis work
+# Repository for my MSCS Thesis Work
