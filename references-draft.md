@@ -64,9 +64,23 @@ Comparing parallel Rust and C++:
 
 ## References to be Evaluated
 
-References that have not yet been read or vetted.
+
 
 ### Papers Not Yet Read
+
+References that have not yet been read or vetted.
+
+---
+
+### rj - I got these ideas from Sridhar
+
+Programming languages ranked by expressiveness
+https://redmonk.com/dberkholz/2013/03/25/programming-languages-ranked-by-expressiveness/
+
+On the Expressive Power of Programming Languages
+<https://jgbm.github.io/eecs762f19/papers/felleisen.pdf>
+
+---
 
 Multipattern string matching with q-grams
 <https://dl.acm.org/doi/10.1145/1187436.1187438>
