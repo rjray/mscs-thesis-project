@@ -53,7 +53,7 @@ let http_port: u32 = if user_port > 1023 {
 
 Noteworthy in these sample listings is a particular syntactic feature of Rust: if the last expression of a block lacks a semicolon at the end, that value become the expression value of the block itself. So, in the above example all of \texttt{user\_port}, \texttt{443} and \texttt{80} are potential expression values of the \texttt{if}-block. The blocks they are in could have had many other statements prior to these lines, and the value of the expression would still be the line with no semicolon.
 
-While it is true that a C or C++ program could also use a multi-armed \texttt{if}-\texttt{else} construct in place of a nested ternary, the expression in Rust allows \texttt{httpPort} to be declared immutable from the outset. Were a C program to declare \texttt{httpPort} as \texttt{const}, it could not then assign it within the arms of the \texttt{if}-\texttt{else} construct.
+While it is true that a C or C++ program could also use a multi-armed \texttt{if}-\texttt{else} construct in place of a nested ternary, the expression in Rust allows \texttt{http_port} to be declared immutable from the outset. Were a C program to declare \texttt{http_port} as \texttt{const}, it could not then assign it within the arms of the \texttt{if}-\texttt{else} construct.
 
 \subsection{Rust Typing}
 
