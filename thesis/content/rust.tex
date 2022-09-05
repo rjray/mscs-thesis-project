@@ -91,7 +91,52 @@ An object packages both data and the procedures that operate on that data.
 
 While Rust does not explicitly have classes and inheritance, it does have the capability to attach functionality to data types (both structures and enumerations) through its traits system.
 
-Defining a trait is a matter of giving it a name and listing the methods along with their type signatures. Traits may be declared as extensions of other traits, in which case a type that implements the subtrait must also implement the original trait.
+Defining a trait is a matter of giving it a name and listing the methods along with their type signatures:
+
+\begin{lstlisting}
+trait Quote {
+    // Implementing Quote for a type means the values of
+    // that type now have quoted() as a method.
+    fn quoted(self) -> String;
+}
+\end{lstlisting}
+
+Traits may be declared as extensions of other traits, in which case a type that implements the sub-trait must also implement the original trait:
+
+\begin{lstlisting}
+trait BlockQuote: Quote {
+    // Implementing BlockQuote means values of that type
+    // have a blockquoted() method, as well as the
+    // quoted() method.
+    fn blockquoted(self) -> String;
+}
+\end{lstlisting}
+
+Traits are applied to types by way of the \texttt{impl} keyword:
+
+\begin{lstlisting}
+// Implement the Quote trait for the String type:
+impl Quote for String {
+    fn quoted(self) -> String {
+        format!("\"{}\"", self)
+    }
+}
+\end{lstlisting}
+
+Generics are the other means of polymorphism in Rust. Generics can be applied to functions, to type declarations, and to traits as well. Using a syntax similar to C++ templates or Java generics, a generic function can be declared that will be applicable to multiple types:
+
+\begin{lstlisting}
+// A generics version of the quoted() function:
+fn quoted<T: ToString>(input: T) -> String {
+    format!("\"{}\"", input.to_string())
+}
+\end{lstlisting}
+
+In this example, the function \texttt{quoted} can be called on any type of argument. However, the argument's type \textit{must} implement the \texttt{ToString} trait; this ensures that the call to the \texttt{to\_string()} method on line 3 will not fail.
+
+The generics approach differs from the trait approach in that it will work with any type, not just types that have implemented the given trait. The trait approach, in contrast, generally yields smaller code.
+
+A parameter specified with generics does not have to be bound to a trait.
 
 \subsection{Ownership and Memory Management}
 
