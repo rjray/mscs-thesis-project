@@ -13,16 +13,16 @@ But string matching means extensive reading and manipulation of blocks of alloca
 
 \subsection{DNA Strings}
 
-For this study, string matching will be applied to the problem of finding sub-sequences within DNA strings. DNA sequence strings have some interesting properties, in that they can be \textit{extremely} long but at the same time the alphabet is limited to just four distinct characters (``A'', ``C'', ``G'' and ``T''). The limited alphabet may prove useful for optimizations in the code developed for comparison of the solutions.
+For this study, string matching will be applied to the problem of finding sub-sequences within DNA strings. DNA sequence strings have some interesting properties, in that they can be \textit{extremely} long but at the same time the alphabet is limited to just four characters (``A'', ``C'', ``G'' and ``T''). The limited alphabet may prove useful for optimizations in the code developed for comparison of the solutions.
 
 \subsection{Comparison Bases}
 
 Solutions to the problem will be developed in three languages: C, C++, and Rust. Each language will be evaluated against the others on three axes:
 
 \begin{enumerate}
-\item Energy efficiency (``power''): Energy usage will be measured for each solution using the Running Average Power Limit (RAPL) tools available to Intel processors.
 \item Execution speed (``performance''): Overall run-times for each solution will be gathered using existing timer mechanisms. Time-measurements will be somewhat coarse, as overhead operations such as I/O will be included in the times.
 \item Readability and expressiveness (``perspicuity''): Each solution will also be measured on several source-level metrics in an effort to evaluate the expressiveness and clarity of the code.
+\item Energy efficiency (``power''): Energy usage will be measured for each solution using the Running Average Power Limit (RAPL) tools available to Intel processors.
 \end{enumerate}
 
-These three bases cover modern concerns in software development: the general performance of an application, the readability/maintainability of the application, and the power consumption of the system running the application. Concern over power consumption has been steadily growing in the data center industry and in the mobile computing field~\cite{pereira.et.al.2017}.
+These three bases cover modern concerns in software development: the general performance of an application, the readability/maintainability of the application, and the power consumption of the system running the application. This last basis is used because concern over power consumption has been steadily growing in the data center industry and in the mobile computing field~\cite{pereira.et.al.2017}.

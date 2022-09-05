@@ -1,30 +1,34 @@
 \section{An Introduction to Rust}
 \label{sec:rust}
 
-The Rust language began as a personal project of an employee of the Mozilla Corporation in 2006, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay.2021}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.63.0 and was released in August of 2022.
+Rust is a multi-paradigm, general-purpose language. It draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature.rust.2020}.
+
+The Rust language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay.2021}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.63.0 and was released in August of 2022.
 
 This section will briefly highlight some basic elements of the Rust language so as to help in understanding later code samples.
 
-\subsection{Rust Variables}
+\subsection{Variables and Data Types}
 
 Rust variables are declared with the \texttt{let} keyword. By default, a Rust variable is declared as an immutable value. This can be changed by including the \texttt{mut} keyword in the declaration:
 
 \begin{lstlisting}
 // This value is immutable:
 let value = 0;
-// This value can be changed, however:
-let mut value2 = 0;
+\end{lstlisting}
+\begin{lstlisting}
+// This value can be changed:
+let mut value = 0;
 \end{lstlisting}
 
 A variable's declaration can include a type specification, but it is not required in cases where the type can be inferred from the right-hand side of the expression.
 
-Rust supports pointers to data, using the \texttt{\&} character to indicate a pointer value rather than a direct value. Pointers may be immutable or mutable, and the data to which they point may be declared as mutable or immutable.
+The basic types provided by Rust include a range of fixed-width numeric types covering signed and unsigned integers, float-point numbers, Boolean values, and characters. Rust also supports pointers to data, using the \texttt{\&} character to indicate a pointer value rather than a direct value. Pointers may be immutable or mutable, and the data to which they point may be declared as mutable or immutable.
 
 There are two compound types supported: the \textit{tuple} and the \textit{array}. These differ mainly in that a tuple's elements are not required to be all of the same type, whereas an array's elements must all be of the same type.
 
 Lastly, Rust also provides support for structured types, enumerated types, and functions as first-class data types. Additionally, the standard library includes a range of common collection types, such as vectors, strings, and hash-maps.
 
-\subsection{Rust Syntax}
+\subsection{General Syntax}
 
 Syntactically, Rust most resembles C and C++. However, much of Rust's design is more influenced by functional programming principles~\cite[Chapter~13]{rpl.2019}. It organizes code into blocks using curly brackets and features typical control flow keywords such as \texttt{if}, \texttt{else}, \texttt{while}, and \texttt{for}. But it also treats almost every part of a function body as an expression, including the control flow operators~\cite[Chapter~6]{programming.rust.2021}. For example, the ternary operator of C is not provided but because an \texttt{if}-block is an expression one can get the same effect in code:
 
@@ -35,7 +39,7 @@ int offset = needs_offset ? 4 : 0;
 
 \begin{lstlisting}
 // Ternary in Rust:
-let offset: u32 = if needs_offset { 4 } else { 0 };
+let offset = if needs_offset { 4 } else { 0 };
 \end{lstlisting}
 
 The Rust version of the ternary is not limited to a single Boolean comparison. Just as C and C++ can nest ternary operators, the \texttt{if}-block equivalent in Rust can have multiple \texttt{else if} branches as well:
@@ -44,21 +48,51 @@ The Rust version of the ternary is not limited to a single Boolean comparison. J
 // Select an HTTP listening port
 let http_port: u32 = if user_port > 1023 {
     user_port
-} else if is_secure {
+} else if is_https {
     443
 } else {
     80
 };
 \end{lstlisting}
 
-Noteworthy in these sample listings is a particular syntactic feature of Rust: if the last expression of a block lacks a semicolon at the end, that value become the expression value of the block itself. So, in the above example all of \texttt{user\_port}, \texttt{443} and \texttt{80} are potential expression values of the \texttt{if}-block. The blocks they are in could have had many other statements prior to these lines, and the value of the expression would still be the line with no semicolon.
+In these sample listings is a particular syntactic feature of Rust: if the last expression of a block lacks a semicolon at the end, that value become the expression value of the block itself. So, in the above example all of \texttt{user\_port}, \texttt{443} and \texttt{80} are potential expression values of the \texttt{if}-block. The blocks they are in could have had many other statements prior to these lines, and the value of the expression would still be the line with no semicolon. Also, the declaration of \texttt{http\_port} includes a type specification so as to explicitly set the variable as being an unsigned 32-bit integer. Types are specified with a colon after the variable name and a type identifier following the colon.
 
-While it is true that a C or C++ program could also use a multi-armed \texttt{if}-\texttt{else} construct in place of a nested ternary, the expression in Rust allows \texttt{http_port} to be declared immutable from the outset. Were a C program to declare \texttt{http_port} as \texttt{const}, it could not then assign it within the arms of the \texttt{if}-\texttt{else} construct.
+While it is true that a C or C++ program could also use a multi-armed \texttt{if}-\texttt{else} construct in place of a nested ternary, the expression in Rust allows \texttt{http\_port} to be declared immutable from the outset. Were a C program to declare \texttt{http\_port} as \texttt{const}, it could not then assign it within the arms of the \texttt{if}-\texttt{else} construct.
 
-\subsection{Rust Typing}
+Functions are defined with the \texttt{fn} keyword. Functions that return a value specify their return type between the closing parenthesis of the argument declaration and the opening curly bracket of the function body:
 
-Rust is a strongly typed and statically typed language, with generic functions to achieve type polymorphism.
+\begin{lstlisting}
+// A basic factorial function:
+fn factorial(n: u128) -> u128 {
+    // Creates a range from 1 to n inclusive and
+    // calculates the product of all the numbers.
+    (1..=n).product()
+}
+\end{lstlisting}
 
-\subsection{Rust and Memory Management}
+Functions that do not return a value (the equivalent of \texttt{void} returns in C/C++) simply omit the return specification:
 
-An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021} , with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through a convention of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers~\cite{taste.of.rust.2013}, or data races~\cite[Chapter~8.1]{rustonomicon}.
+\begin{lstlisting}
+// Toggle a Boolean value in-place:
+fn toggle(value: &mut bool) {
+    *value ^= true;
+}
+\end{lstlisting}
+
+The remaining elements of syntax are close-enough to C as to not need specific mentioning.
+
+\subsection{Traits and Generics}
+
+Rust is a strongly typed and statically typed language, with traits and generic functions to achieve type polymorphism. Rust can also be considered an object-oriented language, as it meets the definition given in~\cite{design.patterns.1994} (quoted in~\cite[Chapter~17]{rpl.2019}):
+
+\begin{quote}
+An object packages both data and the procedures that operate on that data.
+\end{quote}
+
+While Rust does not explicitly have classes and inheritance, it does have the capability to attach functionality to data types (both structures and enumerations) through its traits system.
+
+Defining a trait is a matter of giving it a name and listing the methods along with their type signatures. Traits may be declared as extensions of other traits, in which case a type that implements the subtrait must also implement the original trait.
+
+\subsection{Ownership and Memory Management}
+
+An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through a convention of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
