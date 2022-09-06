@@ -132,12 +132,51 @@ fn quoted<T: ToString>(input: T) -> String {
 }
 \end{lstlisting}
 
-In this example, the function \texttt{quoted} can be called on any type of argument. However, the argument's type \textit{must} implement the \texttt{ToString} trait; this ensures that the call to the \texttt{to\_string()} method on line 3 will not fail.
+In this example, the function \texttt{quoted} can be called on any type of argument. However, the argument's type \textit{must} implement the \texttt{ToString} trait; this ensures that the call to the \texttt{to\_string()} method on line 3 will not fail. Note that a generic parameter may be bound to more than one trait, or to no traits at all.
 
-The generics approach differs from the trait approach in that it will work with any type, not just types that have implemented the given trait. The trait approach, in contrast, generally yields smaller code.
+Deciding whether to use trait objects or generic code is often based on subtle factors. The two features are both based on traits, so there is commonality between them. One notable difference is that Rust may have to compile a generic function several times, for each type it is used with. This can lead to larger executable code being produced by the compiler.
 
-A parameter specified with generics does not have to be bound to a trait.
+However, generics have three advantages over trait objects~\cite[Chapter~11]{programming.rust.2021}:
+
+\begin{enumerate}
+\item \textbf{Speed.} Types are specified at compile-time, either explicitly or through type inference. The enables the compiler to make optimization decisions when generating the code.
+\item \textbf{Support.} Traits support features such as associated functions. Some of these features will only work with generics.
+\item \textbf{Flexibility.} Generic type parameters can easily be bound to multiple traits, something trait objects cannot do. The sub-traits facility can be used to work around this, but it is more involved than the generics approach.
+\end{enumerate}
 
 \subsection{Ownership and Memory Management}
 
 An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through a convention of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
+
+With languages such as C and C++, \textit{data ownership} is handled largely through practice and convention. An instance of a C++ \texttt{std::string} owns the buffer allocated for the storage of the string data. Other variables may be created, though, that point to the same buffer or a single character within it. These other interests in the content of the string buffer have their own responsibility for noticing when the original string object is destroyed and the buffer freed. After such point, the outside interests are each responsible for marking their references as no longer valid.
+
+In contrast, Rust integrates the concept of ownership directly into the language itself. Compile-time checks enforce ownership and report violations. When the owner of a value is ``dropped'' (Rust terminology for freeing) the owned value is dropped as well. While the variables themselves are on the stack, the content is allocated on the heap. Variables own their values, and the complex datatypes (structs, tuples, arrays, and vectors) own their elements.
+
+For most types in Rust, an operation on a variable such as assignment or passing it to a function (or returning it from a function) does not copy the value: it moves the value. The current owner (``source'') gives up ownership of the value and the new owner (``destination'') assumes control of the value's lifetime. The source becomes uninitialized and is no longer usable. This is referred to as \textit{moving} the value. Rust does excuse the very simple types (integers, floating-point numbers and characters) from ownership rules; they are considered \texttt{Copy} types and have a trait called \texttt{Copy} associated with them.
+
+Consider this simple example:
+
+\begin{lstlisting}
+let a: &String;
+{
+    let b = "Data".to_string();
+    // This assigns a reference to b:
+    a = &b;
+}
+// This line triggers a lifespan error:
+println!("{}", a);
+\end{lstlisting}
+
+Here, the variable \texttt{a} is declared in a higher scope than the variable \texttt{b}. Thus, it survives the end-of-scope (line 6) that leads to \texttt{b} being dropped. Because line 8 attempts to make use of \texttt{a}, Rust's compiler steps in and declares that \texttt{b} does not live long-enough for this code to be valid. Similarly:
+
+\begin{lstlisting}
+let a: String;
+let b = "Test".to_string();
+a = b; // This moves the value of b. b is now invalid.
+println!("{}", a);
+println!("{}", b); // Error here
+\end{lstlisting}
+
+The assignment on line 3 moves the value of the string from \texttt{b} to \texttt{a}. While line 4 is perfectly fine, line 5 is the source of an error because \texttt{b} is no longer a valid value.
+
+There is much more to the semantics of ownership and moving, particularly when pointers become involved. Both~\cite{rpl.2019} and~\cite{programming.rust.2021} go into greater depth on the topic.
