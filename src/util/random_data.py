@@ -102,11 +102,10 @@ def create_sequence(length, variance):
 
 
 def write_sequences(*, file, count, length, line_variance, **_):
-    print(
-        f"\nCreating {count} sequences of length {length} ± {line_variance}...",
-        end=""
-    )
+    print(f"\nCreating {count} sequences of length ", end="")
+    print(f"{length} ± {line_variance}...", end="")
     sequences = []
+
     with open(file, "w", newline="\n") as f:
         for _ in range(count):
             sequence = create_sequence(length, line_variance)
@@ -134,9 +133,8 @@ def create_pattern(place, length, sequences, threshold):
 
 
 def write_patterns(sequences, pfile, pcount, plength, pvariance, **_):
-    print(
-        f"\nGenerating {pcount} patterns of length {plength} ± {pvariance}...\n"
-    )
+    print(f"\nGenerating {pcount} patterns of length ", end="")
+    print(f"{plength} ± {pvariance}...\n")
     patterns = []
     avg_pct = 0.0
     # Current (hard-coded) threshold is 0.10% matching.
