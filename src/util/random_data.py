@@ -7,6 +7,7 @@
 import argparse
 from math import ceil
 import random
+from sys import stdout
 
 
 DEFAULT_SEQUENCES_FILE = "sequences.txt"
@@ -65,7 +66,7 @@ def parse_command_line():
         "-pl",
         "--pattern-length",
         type=int,
-        default=10,
+        default=9,
         dest="plength",
         help="Length of each pattern",
     )
@@ -104,6 +105,7 @@ def create_sequence(length, variance):
 def write_sequences(*, file, count, length, line_variance, **_):
     print(f"\nCreating {count} sequences of length ", end="")
     print(f"{length} ± {line_variance}...", end="")
+    stdout.flush()
     sequences = []
 
     with open(file, "w", newline="\n") as f:
@@ -160,7 +162,7 @@ def write_patterns(sequences, pfile, pcount, plength, pvariance, **_):
             avg_pct += pct
 
     avg_pct /= pcount
-    print(f"\nAverage matching: {(avg_pct * 100):.2f}.")
+    print(f"\nAverage matching: {(avg_pct * 100):.2f}%.")
 
 
 def main():
