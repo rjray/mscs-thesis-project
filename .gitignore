@@ -279,3 +279,6 @@ thesis.pdf
 ACM-Reference-Format.*
 
 .DS_Store
+
+sequences*.txt
+patterns*.txt
