@@ -6,17 +6,18 @@
 
 \begin{document}
 
+% Front-matter:
 \input{content/title}
-
 \input{content/committee}
-
 \input{content/copyright}
 
+% Table of contents - numbering starts at 4, Roman numerals
 \pagenumbering{roman}
 \setcounter{page}{4}
 \tableofcontents
 \pagebreak
 
+% Paper content - numbering in Arabic numerals, reset to 1
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \input{content/intro}
