@@ -120,6 +120,7 @@ def write_sequences(*, file, count, length, line_variance, **_):
     sequences = []
 
     with open(file, "w", newline="\n") as f:
+        f.write(f"{count} {length + line_variance}\n")
         for _ in range(count):
             sequence = create_sequence(length, line_variance)
             f.write(sequence + "\n")
@@ -158,7 +159,9 @@ def write_patterns(sequences, afile, pfile, pcount, plength, pvariance, **_):
     count = len(sequences)
 
     with open(pfile, "w", newline="\n") as pf:
+        pf.write(f"{pcount} {plength + pvariance}\n")
         with open(afile, "w", newline="\n") as af:
+            af.write(f"{pcount} {count}\n")
             for idx in range(pcount):
                 print(f"    Pattern {idx+1}/{pcount}: ", end="")
                 stdout.flush()
