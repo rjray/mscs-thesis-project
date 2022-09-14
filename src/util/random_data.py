@@ -7,11 +7,14 @@
 import argparse
 from math import ceil
 import random
+import re
 from sys import stdout
 
 
 DEFAULT_SEQUENCES_FILE = "sequences.txt"
 DEFAULT_PATTERNS_FILE = "patterns.txt"
+DEFAULT_ANSWERS_FILE = "answers.txt"
+
 ALPHABET = ["A", "C", "G", "T"]
 
 
@@ -39,6 +42,14 @@ def parse_command_line():
         default=DEFAULT_PATTERNS_FILE,
         dest="pfile",
         help="Name of file to write pattern data to",
+    )
+    parser.add_argument(
+        "-a",
+        "--answers",
+        type=str,
+        default=DEFAULT_ANSWERS_FILE,
+        dest="afile",
+        help="Name of file to write answers data to",
     )
     parser.add_argument(
         "-c",
@@ -125,41 +136,49 @@ def create_pattern(place, length, sequences, threshold):
     while matched < threshold:
         base = random.randrange(0, len(source) - length)
         pattern = source[base:base + length]
+        re_pat = f"(?={pattern})"
 
         matched = 0
+        matches = []
         for sequence in sequences:
-            if pattern in sequence:
+            matches.append([m.start() for m in re.finditer(re_pat, sequence)])
+            if len(matches[-1]):
                 matched += 1
 
-    return pattern, matched / len(sequences)
+    return pattern, matched, matches
 
 
-def write_patterns(sequences, pfile, pcount, plength, pvariance, **_):
+def write_patterns(sequences, afile, pfile, pcount, plength, pvariance, **_):
     print(f"\nGenerating {pcount} patterns of length ", end="")
     print(f"{plength} ± {pvariance}...\n")
     patterns = []
     avg_pct = 0.0
     # Current (hard-coded) threshold is 0.10% matching.
     threshold = ceil(len(sequences) / 1000)
+    count = len(sequences)
 
-    with open(pfile, "w", newline="\n") as f:
-        for idx in range(pcount):
-            print(f"    {idx+1}/{pcount}: ", end="")
-            place = idx / pcount
-            length = plength + \
-                (random.randrange(0, 2 * pvariance + 1) - pvariance)
+    with open(pfile, "w", newline="\n") as pf:
+        with open(afile, "w", newline="\n") as af:
+            for idx in range(pcount):
+                print(f"    Pattern {idx+1}/{pcount}: ", end="")
+                stdout.flush()
+                place = idx / pcount
+                length = plength + \
+                    (random.randrange(0, 2 * pvariance + 1) - pvariance)
 
-            while True:
-                pattern, pct = create_pattern(
-                    place, length, sequences, threshold
-                )
-                if pattern not in patterns:
-                    break
+                while True:
+                    pattern, matched, matches = create_pattern(
+                        place, length, sequences, threshold
+                    )
+                    if pattern not in patterns:
+                        break
 
-            f.write(pattern + "\n")
-            patterns.append(pattern)
-            print(f"{(pct * 100):.2f}% matching.")
-            avg_pct += pct
+                pf.write(pattern + "\n")
+                patterns.append(pattern)
+                af.write(",".join(map(lambda x: str(len(x)), matches)) + "\n")
+                pct = matched / count
+                print(f"{(pct * 100):.2f}% matching ({matched}).")
+                avg_pct += pct
 
     avg_pct /= pcount
     print(f"\nAverage matching: {(avg_pct * 100):.2f}%.")

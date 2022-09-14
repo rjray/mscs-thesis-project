@@ -1,10 +1,11 @@
 # The DATA_SEED value is used to control the randomness of the random_data.py
-# script. The value is my wife's birthdate and time.
+# script. The value isn't random to me, but don't worry about it.
 DATA_SEED ?= $(shell TZ=America/Los_Angeles date '+%s' --date "1976-10-28 12:10:00 -7:00")
 
 # Files and such
 RANDOM_SEQUENCES := sequences-random.txt
 RANDOM_PATTERNS := patterns-random.txt
+RANDOM_ANSWERS := answers-random.txt
 
 # Tools.
 RANDOM_DATA := ./util/random_data.py
@@ -16,10 +17,11 @@ clean: clean-all
 clean-all: clean-data
 
 clean-data:
-	$(RM) $(RANDOM_PATTERNS) $(RANDOM_SEQUENCES)
+	$(RM) $(RANDOM_PATTERNS) $(RANDOM_SEQUENCES) $(RANDOM_ANSWERS)
 
-data: random_data
+data: random-data
 
-random_data: $(RANDOM_DATA)
+random-data: $(RANDOM_DATA)
 	$(RANDOM_DATA) --seed $(DATA_SEED) --file $(RANDOM_SEQUENCES) \
-		--patterns $(RANDOM_PATTERNS) --line-variance 16 --pattern-variance 1
+		--patterns $(RANDOM_PATTERNS) --answers $(RANDOM_ANSWERS) \
+		--line-variance 16 --pattern-variance 1
