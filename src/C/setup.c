@@ -16,7 +16,10 @@ void read_two_ints(FILE *input, int *first, int *second) {
   char line[80] = {0};
   char *s;
 
-  fgets(line, 80, input);
+  if (fgets(line, 80, input) == NULL) {
+    fprintf(stderr, "Error reading file's header line, stopped\n");
+    exit(-1);
+  }
   s = strtok(line, " ");
   *first = (int)strtol(s, NULL, 10);
   s = strtok(NULL, " ");
