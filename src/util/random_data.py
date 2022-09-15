@@ -138,12 +138,12 @@ def create_pattern(place, length, sequences, threshold):
         base = random.randrange(0, len(source) - length)
         pattern = source[base:base + length]
         # Use this pattern if we want to find overlapping matches:
-        # re_pat = f"(?={pattern})"
+        re_pat = f"(?={pattern})"
 
         matched = 0
         matches = []
         for sequence in sequences:
-            matches.append([m.start() for m in re.finditer(pattern, sequence)])
+            matches.append([m.start() for m in re.finditer(re_pat, sequence)])
             if len(matches[-1]):
                 matched += 1
 
