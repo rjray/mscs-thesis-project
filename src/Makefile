@@ -1,6 +1,6 @@
 # The DATA_SEED value is used to control the randomness of the random_data.py
 # script. The value isn't random to me, but don't worry about it.
-DATA_SEED ?= $(shell TZ=America/Los_Angeles date '+%s' --date "1976-10-28 12:10:00 -7:00")
+DATA_SEED ?= 215377800
 
 # Files and such
 RANDOM_SEQUENCES := sequences-random.txt
