@@ -281,6 +281,6 @@ ACM-Reference-Format.*
 .DS_Store
 .vscode
 
-sequences*.txt
-patterns*.txt
-answers*.txt
+*sequences*.txt
+*patterns*.txt
+*answers*.txt

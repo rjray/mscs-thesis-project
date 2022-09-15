@@ -1,0 +1,4 @@
+*.o
+
+kmp-gcc
+kmp-clang
