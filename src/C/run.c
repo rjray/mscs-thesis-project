@@ -35,19 +35,20 @@ double get_time() {
   instances in all sequences, and the number of misses otherwise.
 */
 int run(runnable code, char *name, int argc, char *argv[]) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s <sequences> <patterns> <answers>\n", argv[0]);
+  if (argc < 3 || argc > 4) {
+    fprintf(stderr, "Usage: %s <sequences> <patterns> [ <answers> ]\n",
+            argv[0]);
     exit(-1);
   }
 
   // The filenames are in the order: sequences patterns answers
   const char *sequences_file = argv[1];
   const char *patterns_file = argv[2];
-  const char *answers_file = argv[3];
+  const char *answers_file = argc == 4 ? argv[3] : NULL;
 
   // These will be alloc'd by the routines that read the files.
   char **sequences_data, **patterns_data;
-  int **answers_data;
+  int **answers_data = NULL;
 
   // Read the three data files. Any of these that return 0 means an error. Any
   // error has already been reported to stderr.
@@ -57,9 +58,16 @@ int run(runnable code, char *name, int argc, char *argv[]) {
   int patterns_count = read_patterns(patterns_file, &patterns_data);
   if (patterns_count == 0)
     exit(-1);
-  int answers_count = read_answers(answers_file, &answers_data);
-  if (answers_count == 0)
-    exit(-1);
+  if (answers_file != NULL) {
+    int answers_count = read_answers(answers_file, &answers_data);
+    if (answers_count == 0)
+      exit(-1);
+    if (answers_count != patterns_count) {
+      fprintf(stderr,
+              "Count mismatch between patterns file and answers file\n");
+      exit(-1);
+    }
+  }
 
   // Run it. For each sequence, try each pattern against it. The code function
   // pointer will return the number of matches found, which will be compared to
@@ -81,7 +89,7 @@ int run(runnable code, char *name, int argc, char *argv[]) {
       int pat_len = strlen(pattern_str);
       int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);
 
-      if (matches != answers_data[pattern][sequence]) {
+      if (answers_data && matches != answers_data[pattern][sequence]) {
         fprintf(stderr, "Pattern %d mismatch against sequences %d (%d != %d)\n",
                 pattern + 1, sequence + 1, matches,
                 answers_data[pattern][sequence]);
@@ -95,12 +103,16 @@ int run(runnable code, char *name, int argc, char *argv[]) {
   fprintf(stdout, "runtime: %.6g\n", end_time - start_time);
 
   // Free all the memory that was allocated by the routines in setup.c:
-  for (int i = 0; i < patterns_count; i++) {
+  for (int i = 0; i < patterns_count; i++)
     free(patterns_data[i]);
-    free(answers_data[i]);
-  }
   free(patterns_data);
-  free(answers_data);
+
+  if (answers_data) {
+    for (int i = 0; i < patterns_count; i++)
+      free(answers_data[i]);
+    free(answers_data);
+  }
+
   for (int i = 0; i < sequences_count; i++)
     free(sequences_data[i]);
   free(sequences_data);
