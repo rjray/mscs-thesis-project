@@ -1,4 +1,4 @@
 *.o
 
-kmp-gcc
-kmp-clang
+*-gcc
+*-clang
