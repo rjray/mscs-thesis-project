@@ -14,7 +14,7 @@
 #include "setup.h"
 
 /*
-  Simple measure of the wall-clock down the usec. Adapted from StackOverflow.
+  Simple measure of the wall-clock down to the usec. Adapted from StackOverflow.
 */
 double get_time() {
   struct timeval t;
