@@ -1,18 +1,28 @@
-KMP_TARGETS := kmp-gcc kmp-llvm
-BOYER_MOORE_TARGETS := boyer_moore-gcc boyer_moore-llvm
+GCC_TARGETS := kmp-gcc boyer_moore-gcc
+LLVM_TARGETS := kmp-llvm boyer_moore-llvm
 
-TARGETS := $(KMP_TARGETS) $(BOYER_MOORE_TARGETS)
+# Default this to unset
+DEBUG=
 
-CFLAGS=-g
+# Determine CFLAGS based on DEBUG:
+ifeq ($(DEBUG),)
+CFLAGS=-O3
+else
+CFLAGS=-g -DDEBUG
+endif
 
 GCC=gcc
 CLANG=clang
 
-all: $(TARGETS)
+all: gcc llvm
+
+gcc: $(GCC_TARGETS)
+
+llvm: $(LLVM_TARGETS)
 
 clean:
 	$(RM) *.o
-	$(RM) $(TARGETS)
+	$(RM) $(GCC_TARGETS) $(LLVM_TARGETS)
 
 # Rules for building with gcc:
 run-gcc.o: run.c run.h setup.h
