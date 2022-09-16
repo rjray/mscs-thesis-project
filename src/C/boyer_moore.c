@@ -5,27 +5,16 @@
   of Exact String-Matching Algorithms," by Christian Charras and Thierry Lecroq.
 */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
-#include <sys/time.h>
 
-#include "setup.h"
+#include "run.h"
 
 // Define the alphabet size, part of the Boyer-Moore pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
 #define ASIZE 128
-
-/*
-  Simple measure of the wall-clock down to the usec. Adapted from StackOverflow.
-*/
-double get_time() {
-  struct timeval t;
-  gettimeofday(&t, NULL);
-  return t.tv_sec + t.tv_usec * 1e-6;
-}
 
 /*
   Preprocessing step: calculate the bad-character shifts.
@@ -125,76 +114,13 @@ int boyer_moore(char *pattern, int m, char *sequence, int n) {
   return matches;
 }
 
+/*
+  All that is done here is call the run() function with a pointer to the
+  algorithm implementation, the label for the algorithm, and the argc/argv
+  values.
+*/
 int main(int argc, char *argv[]) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s <sequences> <patterns> <answers>\n", argv[0]);
-    exit(-1);
-  }
+  int return_code = run(&boyer_moore, "boyer_moore", argc, argv);
 
-  // The filenames are in the order: sequences patterns answers
-  const char *sequences_file = argv[1];
-  const char *patterns_file = argv[2];
-  const char *answers_file = argv[3];
-
-  // These will be alloc'd by the routines that read the files.
-  char **sequences_data, **patterns_data;
-  int **answers_data;
-
-  // Read the three data files. Any of these that return 0 means an error.
-  // Any error has already been reported to stderr.
-  int sequences_count = read_sequences(sequences_file, &sequences_data);
-  if (sequences_count == 0)
-    exit(-1);
-  int patterns_count = read_patterns(patterns_file, &patterns_data);
-  if (patterns_count == 0)
-    exit(-1);
-  int answers_count = read_answers(answers_file, &answers_data);
-  if (answers_count == 0)
-    exit(-1);
-
-  // Run it. For each sequence, try each pattern against it. The kmp()
-  // routine will return the number of matches found, which will be compared
-  // to the table of answers for that pattern. Report any mismatches.
-  double start_time = get_time();
-  int return_code = 0; // Used for noting that some number of matches failed
-  for (int sequence = 0; sequence < sequences_count; sequence++) {
-#ifdef DEBUG
-    fprintf(stderr, "Starting sequence #%d:\n", sequence + 1);
-#endif // DEBUG
-    char *sequence_str = sequences_data[sequence];
-    int sequence_len = strlen(sequence_str);
-
-    for (int pattern = 0; pattern < patterns_count; pattern++) {
-#ifdef DEBUG
-      fprintf(stderr, "  Starting pattern #%d:\n", pattern + 1);
-#endif // DEBUG
-      char *pattern_str = patterns_data[pattern];
-      int pattern_len = strlen(pattern_str);
-      int matches =
-          boyer_moore(pattern_str, pattern_len, sequence_str, sequence_len);
-
-      if (matches != answers_data[pattern][sequence]) {
-        fprintf(stderr, "Pattern %d mismatch against sequences %d (%d != %d)\n",
-                pattern + 1, sequence + 1, matches,
-                answers_data[pattern][sequence]);
-        return_code = -1;
-      }
-    }
-  }
-  // Note the end time, before freeing memory.
-  double end_time = get_time();
-  fprintf(stdout, "%.6g\n", end_time - start_time);
-
-  // Free all the memory that was allocated by the routines in setup.c:
-  for (int i = 0; i < patterns_count; i++) {
-    free(patterns_data[i]);
-    free(answers_data[i]);
-  }
-  free(patterns_data);
-  free(answers_data);
-  for (int i = 0; i < sequences_count; i++)
-    free(sequences_data[i]);
-  free(sequences_data);
-
-  exit(return_code);
+  return return_code;
 }
