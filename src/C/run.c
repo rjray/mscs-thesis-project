@@ -11,6 +11,12 @@
 #include "run.h"
 #include "setup.h"
 
+#if defined(__llvm__)
+#define LANG "c-llvm"
+#elif defined(__GNUC__)
+#define LANG "c-gcc"
+#endif
+
 /*
   Simple measure of the wall-clock down to the usec. Adapted from StackOverflow.
 */
@@ -85,7 +91,7 @@ int run(runnable code, char *name, int argc, char *argv[]) {
   }
   // Note the end time, before freeing memory.
   double end_time = get_time();
-  fprintf(stdout, "---\nlanguage: c\nalgorithm: %s\n", name);
+  fprintf(stdout, "---\nlanguage: %s\nalgorithm: %s\n", LANG, name);
   fprintf(stdout, "runtime: %.6g\n", end_time - start_time);
 
   // Free all the memory that was allocated by the routines in setup.c:
