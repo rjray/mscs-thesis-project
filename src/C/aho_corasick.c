@@ -515,8 +515,7 @@ int run(int argc, char *argv[]) {
   free(sequences_data);
 
   // Free all memory allocated by the A-C initialization:
-  int state_count = sizeof(goto_fn) / sizeof(goto_fn[0]);
-  for (int i = 0; i < state_count; i++) {
+  for (int i = 0; i < num_states; i++) {
     // Pointers in goto_fn just point to int[]:
     free(goto_fn[i]);
     // But pointers in output_fn point to Set*, which needs to be destroyed:
