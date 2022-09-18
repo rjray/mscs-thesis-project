@@ -1,15 +1,15 @@
-ALGORITHMS := kmp boyer_moore shift_or
-GCC_TARGETS := kmp-gcc boyer_moore-gcc shift_or-gcc
-LLVM_TARGETS := kmp-llvm boyer_moore-llvm shift_or-llvm
+ALGORITHMS := kmp boyer_moore shift_or aho_corasick
+GCC_TARGETS := kmp-gcc boyer_moore-gcc shift_or-gcc aho_corasick-gcc
+LLVM_TARGETS := kmp-llvm boyer_moore-llvm shift_or-llvm aho_corasick-llvm
 
 # Default this to unset
 DEBUG=
 
 # Determine CFLAGS based on DEBUG:
 ifeq ($(DEBUG),)
-CFLAGS=-O3
+CFLAGS += -O3
 else
-CFLAGS=-g
+CFLAGS += -g
 endif
 
 GCC=gcc
@@ -50,6 +50,12 @@ shift_or-gcc.o: shift_or.c run.h
 shift_or-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
 	$(GCC) $(CFLAGS) -o shift_or-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
 
+aho_corasick-gcc.o: aho_corasick.c setup.h
+	$(GCC) $(CFLAGS) -c -o aho_corasick-gcc.o aho_corasick.c
+
+aho_corasick-gcc: aho_corasick-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o aho_corasick-gcc aho_corasick-gcc.o setup-gcc.o
+
 # Rules for building with LLVM:
 run-llvm.o: run.c run.h setup.h
 	$(CLANG) $(CFLAGS) -c -o run-llvm.o run.c
@@ -74,3 +80,9 @@ shift_or-llvm.o: shift_or.c run.h
 
 shift_or-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
 	$(CLANG) $(CFLAGS) -o shift_or-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
+
+aho_corasick-llvm.o: aho_corasick.c setup.h
+	$(CLANG) $(CFLAGS) -c -o aho_corasick-llvm.o aho_corasick.c
+
+aho_corasick-llvm: aho_corasick-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o aho_corasick-llvm aho_corasick-llvm.o setup-llvm.o
