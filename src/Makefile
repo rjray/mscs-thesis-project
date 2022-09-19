@@ -19,7 +19,9 @@ all: C
 
 clean: clean-all
 
-clean-all: clean-data C-clean
+realclean: clean clean-data
+
+clean-all: C-clean
 
 clean-data:
 	$(RM) $(RANDOM_FILES) $(TEST_FILES)
@@ -28,12 +30,16 @@ data: random-data
 
 testing-data: testing-random-data
 
-random-data: $(RANDOM_DATA_PY) $(RANDOM_FILES)
+random-data: $(RANDOM_FILES)
+
+$(RANDOM_FILES): $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(RANDOM_SEQUENCES) \
 		--patterns $(RANDOM_PATTERNS) --answers $(RANDOM_ANSWERS) \
 		--line-variance 16 --pattern-variance 1
 
-testing-random-data: $(RANDOM_DATA_PY) $(TEST_FILES)
+testing-random-data: $(TEST_FILES)
+
+$(TEST_FILES): $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(TEST_SEQUENCES) \
 		--patterns $(TEST_PATTERNS) --answers $(TEST_ANSWERS) --length 120 \
 		--line-variance 4 --pattern-length 4 --pattern-variance 1 \
