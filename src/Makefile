@@ -1,3 +1,5 @@
+# This uses features of GNU Make 4.3, and might not work with older versions.
+
 # The DATA_SEED value is used to control the randomness of the random_data.py
 # script. The value isn't random to me, but don't worry about it.
 DATA_SEED ?= 215377800
@@ -28,18 +30,20 @@ clean-data:
 
 data: random-data
 
+all-data: testing-data random-data
+
 testing-data: testing-random-data
 
 random-data: $(RANDOM_FILES)
 
-$(RANDOM_FILES): $(RANDOM_DATA_PY)
+$(RANDOM_FILES) &: $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(RANDOM_SEQUENCES) \
 		--patterns $(RANDOM_PATTERNS) --answers $(RANDOM_ANSWERS) \
 		--line-variance 16 --pattern-variance 1
 
 testing-random-data: $(TEST_FILES)
 
-$(TEST_FILES): $(RANDOM_DATA_PY)
+$(TEST_FILES) &: $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(TEST_SEQUENCES) \
 		--patterns $(TEST_PATTERNS) --answers $(TEST_ANSWERS) --length 120 \
 		--line-variance 4 --pattern-length 4 --pattern-variance 1 \
