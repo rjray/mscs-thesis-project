@@ -90,7 +90,7 @@ int run(runnable code, char *name, int argc, char *argv[]) {
       int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);
 
       if (answers_data && matches != answers_data[pattern][sequence]) {
-        fprintf(stderr, "Pattern %d mismatch against sequences %d (%d != %d)\n",
+        fprintf(stderr, "Pattern %d mismatch against sequence %d (%d != %d)\n",
                 pattern + 1, sequence + 1, matches,
                 answers_data[pattern][sequence]);
         return_code++;

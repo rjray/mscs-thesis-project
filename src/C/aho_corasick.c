@@ -484,7 +484,7 @@ int run(int argc, char *argv[]) {
       for (int pattern = 0; pattern < patterns_count; pattern++)
         if (matches[pattern] != answers_data[pattern][sequence]) {
           fprintf(stderr,
-                  "Pattern %d mismatch against sequences %d (%d != %d)\n",
+                  "Pattern %d mismatch against sequence %d (%d != %d)\n",
                   pattern + 1, sequence + 1, matches[pattern],
                   answers_data[pattern][sequence]);
           return_code++;
