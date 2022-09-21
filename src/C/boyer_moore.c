@@ -100,9 +100,6 @@ int boyer_moore(char *pattern, int m, char *sequence, int n) {
       ;
     if (i < 0) {
       matches++;
-#ifdef DEBUG
-      fprintf(stderr, "    Pattern found at location %d\n", j);
-#endif // DEBUG
       j += good_suffix[0];
     } else {
       j += MAX(good_suffix[i], bad_char[sequence[i + j]] - m + 1 + i);

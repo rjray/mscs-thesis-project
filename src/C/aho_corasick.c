@@ -468,9 +468,6 @@ int run(int argc, char *argv[]) {
   build_failure(&failure_fn, goto_fn, output_fn, num_states);
 
   for (int sequence = 0; sequence < sequences_count; sequence++) {
-#ifdef DEBUG
-    fprintf(stderr, "Starting sequence #%d:\n", sequence + 1);
-#endif // DEBUG
     char *sequence_str = sequences_data[sequence];
     int seq_len = strlen(sequence_str);
 

@@ -65,9 +65,6 @@ int shift_or(char *pattern, int m, char *sequence, int n) {
     state = (state << 1) | s_positions[sequence[j]];
     if (state < lim) {
       matches++;
-#ifdef DEBUG
-      fprintf(stderr, "    Pattern found at location %d\n", j - m + 1);
-#endif // DEBUG
     }
   }
 

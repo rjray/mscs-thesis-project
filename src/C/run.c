@@ -75,16 +75,10 @@ int run(runnable code, char *name, int argc, char *argv[]) {
   double start_time = get_time();
   int return_code = 0; // Used for noting if some number of matches fail
   for (int sequence = 0; sequence < sequences_count; sequence++) {
-#ifdef DEBUG
-    fprintf(stderr, "Starting sequence #%d:\n", sequence + 1);
-#endif // DEBUG
     char *sequence_str = sequences_data[sequence];
     int seq_len = strlen(sequence_str);
 
     for (int pattern = 0; pattern < patterns_count; pattern++) {
-#ifdef DEBUG
-      fprintf(stderr, "  Starting pattern #%d:\n", pattern + 1);
-#endif // DEBUG
       char *pattern_str = patterns_data[pattern];
       int pat_len = strlen(pattern_str);
       int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);

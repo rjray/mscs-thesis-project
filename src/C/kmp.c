@@ -54,9 +54,6 @@ int kmp(char *pattern, int m, char *sequence, int n) {
     j++;
     if (i >= m) {
       matches++;
-#ifdef DEBUG
-      fprintf(stderr, "    Pattern found at location %d\n", j - i);
-#endif // DEBUG
       i = next_table[i];
     }
   }
