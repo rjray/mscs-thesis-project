@@ -1,9 +1,22 @@
+/*
+    Implementation of the Boyer-Moore algorithm.
+
+    This is based heavily on the C code given in chapter 14 of the book,
+    "Handbook of Exact String-Matching Algorithms," by Christian Charras and
+    Thierry Lecroq.
+*/
+
 use common::run::run;
 use std::cmp::max;
 use std::env;
 
+// Define the alphabet size, part of the Boyer-Moore pre-processing. Here, we
+// are just using ASCII characters, so 128 is fine.
 const ASIZE: usize = 128;
 
+/*
+    Preprocessing step: calculate the bad-character shifts.
+*/
 fn calc_bad_char(pat: &[u8], m: usize) -> Vec<i32> {
     let mut bad_char: Vec<i32> = vec![m as i32; ASIZE];
 
@@ -14,6 +27,9 @@ fn calc_bad_char(pat: &[u8], m: usize) -> Vec<i32> {
     bad_char
 }
 
+/*
+    Preprocessing step: calculate suffixes for good-suffix shifts.
+*/
 fn calc_suffixes(pat: &[u8], m: usize) -> Vec<i32> {
     let mut suffix_list: Vec<i32> = vec![0; m];
     let mut f = 0;
@@ -47,6 +63,9 @@ fn calc_suffixes(pat: &[u8], m: usize) -> Vec<i32> {
     suffix_list
 }
 
+/*
+  Preprocessing step: calculate the good-suffix shifts.
+*/
 fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     let mut i: i32;
     let mut j: i32;
@@ -74,17 +93,32 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     good_suffix
 }
 
+/*
+    Perform the Boyer-Moore algorithm on the given pattern of length m, against
+    the sequence of length n.
+*/
 fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
+    // Because the C code takes advantage of the presence of a null byte at the
+    // end of strings, we have to force this in before converting the pattern
+    // to a [u8].
     let mut pattern_p = String::from(pattern);
     pattern_p.push('\0');
+    // For indexing that would be comparable to C's, convert the String objects
+    // to arrays of bytes. This works because the UTF-8 data won't have any
+    // wide characters.
     let pattern = pattern_p.as_bytes();
     let sequence = sequence.as_bytes();
     let mut i: i32;
     let mut j: i32;
+    // Convert m and n from usize to i32 to cut down on the number of casts
+    // that have to be done. The casts don't really contribute to the run-time
+    // of the code, but they affect the readability.
     let m: i32 = m as i32;
     let n: i32 = n as i32;
+    // Track the number of times the pattern is found in the sequence.
     let mut matches: u32 = 0;
 
+    // Get the bad-character and good-suffix shift tables:
     let good_suffix: Vec<i32> = calc_good_suffix(&pattern, m as usize);
     let bad_char: Vec<i32> = calc_bad_char(&pattern, m as usize);
 
@@ -109,6 +143,10 @@ fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
     matches
 }
 
+/*
+    All that is done here is call the run() function with a pointer to the
+    algorithm implementation, the label for the algorithm, and the argv values.
+*/
 fn main() {
     let argv: Vec<String> = env::args().collect();
     run(&boyer_moore, "boyer_moore", &argv);

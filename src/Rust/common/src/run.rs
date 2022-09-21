@@ -9,8 +9,20 @@ use std::time::Instant;
 
 const LANG: &str = "rust";
 
+// A type alias for the signature of the single-pattern matching algorithms.
 pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
 
+/*
+   This is the "runner" routine. It takes a pointer to the code that implements
+   the given algorithm, the text name of the algorithm for the output block,
+   and the vector of command-line arguments that were passed to the program.
+
+   After reading the data files given on the command-line, the code starts the
+   clock on execution and iterates over the patterns and sequences. Once all
+   have been run, the total run-time for the computation phase is calculated
+   and a block of output is written that identifies the language, the
+   algorithm and the run-time.
+*/
 pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
     let argc = argv.len();
     if argc < 3 || argc > 4 {
@@ -28,6 +40,8 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
         return -1;
     }
 
+    // Get the data file names. Note that the answers file is optional, so it
+    // is handled here with the Option<> structure of Rust.
     let sequences_file: String = String::from(&argv[1]);
     let patterns_file: String = String::from(&argv[2]);
     let answers_file: Option<String> = if argc == 4 {
@@ -36,6 +50,8 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
         None
     };
 
+    // Read the data files using the routines from common::setup. Again, the
+    // answers data uses Option<> since it does not have to be provided.
     let sequences_data: Vec<String> = read_sequences(&sequences_file);
     let patterns_data: Vec<String> = read_patterns(&patterns_file);
     let answers_data: Option<Vec<Vec<u32>>> = if let Some(file) = answers_file {
@@ -44,6 +60,8 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
         None
     };
 
+    // If answers were provided, check that the number of lines matches the
+    // number of patterns.
     if let Some(ref answers) = answers_data {
         if answers.len() != patterns_data.len() {
             match writeln!(
