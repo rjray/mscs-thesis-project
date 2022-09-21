@@ -11,7 +11,7 @@ const LANG: &str = "rust";
 
 pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
 
-pub fn run(code: &Runnable, name: &String, argv: &Vec<String>) -> i32 {
+pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
     let argc = argv.len();
     if argc < 3 || argc > 4 {
         match writeln!(
