@@ -100,7 +100,7 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
     print!("---\nlanguage: {}\nalgorithm: {}\n", &LANG, &name);
-    print!("runtime: {:.6?}\n", elapsed);
+    print!("runtime: {:.8}\n", elapsed.as_secs_f64());
 
     return_code
 }
