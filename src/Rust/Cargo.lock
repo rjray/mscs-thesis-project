@@ -3,11 +3,32 @@
 version = 3
 
 [[package]]
+name = "aho_corasick"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
+name = "boyer_moore"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
 name = "common"
 version = "0.1.0"
 
 [[package]]
 name = "kmp"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
+name = "shift_or"
 version = "0.1.0"
 dependencies = [
  "common",
