@@ -58,7 +58,7 @@ void calc_suffixes(char *pat, int m, int suffix_list[]) {
 */
 void calc_good_suffix(char *pat, int m, int good_suffix[]) {
   int i, j, *suffixes;
-  suffixes = (int *)calloc(strlen(pat), sizeof(int));
+  suffixes = (int *)calloc(m, sizeof(int));
 
   calc_suffixes(pat, m, suffixes);
 
@@ -86,7 +86,7 @@ int boyer_moore(char *pattern, int m, char *sequence, int n) {
   int matches = 0;
 
   // Allocate space for the good-suffix/bad-char tables:
-  good_suffix = (int *)calloc(strlen(pattern), sizeof(int));
+  good_suffix = (int *)calloc(m, sizeof(int));
   bad_char = (int *)calloc(ASIZE, sizeof(int));
 
   /* Preprocessing */
