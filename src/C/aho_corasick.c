@@ -486,8 +486,9 @@ int run(int argc, char *argv[]) {
                   answers_data[pattern][sequence]);
           return_code++;
         }
+    }
 
-      free(matches);
+    free(matches);
     }
   }
 
