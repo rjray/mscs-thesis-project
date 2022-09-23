@@ -7,8 +7,6 @@ use crate::setup::*;
 use std::io::{stderr, Write};
 use std::time::Instant;
 
-const LANG: &str = "rust";
-
 // A type alias for the signature of the single-pattern matching algorithms.
 pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
 
@@ -40,22 +38,12 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
         return -1;
     }
 
-    // Get the data file names. Note that the answers file is optional, so it
-    // is handled here with the Option<> structure of Rust.
-    let sequences_file: String = String::from(&argv[1]);
-    let patterns_file: String = String::from(&argv[2]);
-    let answers_file: Option<String> = if argc == 4 {
-        Some(String::from(&argv[3]))
-    } else {
-        None
-    };
-
-    // Read the data files using the routines from common::setup. Again, the
-    // answers data uses Option<> since it does not have to be provided.
-    let sequences_data: Vec<String> = read_sequences(&sequences_file);
-    let patterns_data: Vec<String> = read_patterns(&patterns_file);
-    let answers_data: Option<Vec<Vec<u32>>> = if let Some(file) = answers_file {
-        Some(read_answers(&file))
+    // Read the data files using the routines from common::setup. The answers
+    // data uses Option<> since it does not have to be provided.
+    let sequences_data: Vec<String> = read_sequences(&argv[1]);
+    let patterns_data: Vec<String> = read_patterns(&argv[2]);
+    let answers_data: Option<Vec<Vec<u32>>> = if argc == 4 {
+        Some(read_answers(&argv[3]))
     } else {
         None
     };
@@ -115,9 +103,10 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
             }
         }
     }
+
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    print!("---\nlanguage: {}\nalgorithm: {}\n", &LANG, &name);
+    print!("---\nlanguage: rust\nalgorithm: {}\n", &name);
     print!("runtime: {:.8}\n", elapsed.as_secs_f64());
 
     return_code
