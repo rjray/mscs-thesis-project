@@ -4,11 +4,11 @@
 */
 
 use crate::setup::*;
-use std::io::{stderr, Write};
+use std::io::{self, stderr, Write};
 use std::time::Instant;
 
 // A type alias for the signature of the single-pattern matching algorithms.
-pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
+pub type Runnable = dyn Fn(&String, usize, &String, usize) -> io::Result<u32>;
 
 /*
    This is the "runner" routine. It takes a pointer to the code that implements
@@ -21,21 +21,16 @@ pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
    and a block of output is written that identifies the language, the
    algorithm and the run-time.
 */
-pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
+pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> io::Result<i32> {
     let argc = argv.len();
     if argc < 3 || argc > 4 {
-        match writeln!(
+        writeln!(
             stderr(),
             "Usage: {} <sequences> <patterns> [ <answers> ]",
             &argv[0]
-        ) {
-            Err(err) => {
-                panic!("Failed to write to stderr: {:?}", err);
-            }
-            Ok(_) => 0,
-        };
+        )?;
 
-        return -1;
+        return Ok(-1);
     }
 
     // Read the data files using the routines from common::setup. The answers
@@ -52,17 +47,12 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
     // number of patterns.
     if let Some(ref answers) = answers_data {
         if answers.len() != patterns_data.len() {
-            match writeln!(
+            writeln!(
                 stderr(),
                 "Count mismatch between patterns file and answers file"
-            ) {
-                Err(err) => {
-                    panic!("Failed to write to stderr: {:?}", err);
-                }
-                Ok(_) => 0,
-            };
+            )?;
 
-            return -1;
+            return Ok(-1);
         }
     }
 
@@ -80,7 +70,8 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
         for pattern in 0..patterns_data.len() {
             let pattern_str = &patterns_data[pattern];
             let pat_len = pattern_str.len();
-            let matches = code(&pattern_str, pat_len, &sequence_str, seq_len);
+            let matches =
+                code(&pattern_str, pat_len, &sequence_str, seq_len).unwrap();
 
             if let Some(ref answers) = answers_data {
                 if matches != answers[pattern][sequence] {
@@ -109,5 +100,5 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
     print!("---\nlanguage: rust\nalgorithm: {}\n", &name);
     print!("runtime: {:.8}\n", elapsed.as_secs_f64());
 
-    return_code
+    Ok(return_code)
 }

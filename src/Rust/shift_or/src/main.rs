@@ -8,7 +8,7 @@
 
 use common::run::run;
 use std::env;
-use std::io::{stderr, Write};
+use std::io::{self, stderr, Write};
 
 // Define the alphabet size, part of the Shift-Or pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
@@ -53,7 +53,12 @@ fn calc_s_positions(
     Perform the Shift-Or algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
+fn shift_or(
+    pattern: &String,
+    m: usize,
+    sequence: &String,
+    n: usize,
+) -> io::Result<u32> {
     // For indexing that would be comparable to C's, convert the String objects
     // to arrays of bytes. This works because the UTF-8 data won't have any
     // wide characters.
@@ -66,14 +71,8 @@ fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
 
     // Verify that the pattern is not too long:
     if m > WORD {
-        match writeln!(stderr(), "shift_or: Pattern size must be <= {}", WORD) {
-            Err(err) => {
-                panic!("Failed to write to stderr: {:?}", err);
-            }
-            Ok(_) => 0,
-        };
-
-        return 0;
+        writeln!(stderr(), "shift_or: Pattern size must be <= {}", WORD)?;
+        return Ok(0);
     }
 
     // Preprocessing. Set up s_positions and lim.
@@ -87,14 +86,25 @@ fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
         }
     }
 
-    matches
+    Ok(matches)
 }
 
 /*
     All that is done here is call the run() function with a pointer to the
     algorithm implementation, the label for the algorithm, and the argv values.
 */
-fn main() {
+fn main() -> io::Result<()> {
     let argv: Vec<String> = env::args().collect();
-    run(&shift_or, "shift_or", &argv);
+    let code: i32 = match run(&shift_or, "shift_or", &argv) {
+        Ok(code) => code,
+        Err(err) => panic!("Run-time error: {:?}", err),
+    };
+
+    if code < 0 {
+        writeln!(stderr(), "Program encountered internal error.")?;
+    } else if code > 0 {
+        writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+    }
+
+    return Ok(());
 }
