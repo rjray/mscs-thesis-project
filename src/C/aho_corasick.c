@@ -253,7 +253,9 @@ void enter_pattern(char *pat, int idx, int **goto_fn, Set **output_fn) {
       break;
   }
 
-  // At this point,
+  // At this point, `state` points to the leaf in the automaton. Create new
+  // states from here on for the remaining characters in `pat` that weren't
+  // already in the automaton.
   for (int p = j; p < len; p++) {
     new_state++;
     goto_fn[state][pat[p]] = new_state;
@@ -274,7 +276,7 @@ void build_goto(char *pats[], int num_pats, int ***goto_fn, Set ***output_fn,
   Set **new_output;
   int max_states = 0;
 
-  int initial_state[ASIZE] = {FAIL};
+  int initial_state[ASIZE];
   for (int i = 0; i < ASIZE; i++)
     initial_state[i] = -1;
   int state_size = ASIZE * sizeof(int);
@@ -376,9 +378,16 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
   return;
 }
 
-int *aho_corasick(char *sequence, int pattern_count, int **goto_fn,
+/*
+  Perform the Aho-Corasick algorithm against the given sequence. No pattern is
+  passed in, as the machine of goto_fn/failure_fn/output_fn will handle all the
+  patterns in a single pass.
+
+  Instead of returning a single int, returns an array of ints as long as the
+  number of patterns (pattern_count).
+*/
+int *aho_corasick(char *sequence, int n, int pattern_count, int **goto_fn,
                   int *failure_fn, Set **output_fn) {
-  int seq_len = strlen(sequence);
   int state = 0;
   int *matches = (int *)calloc(pattern_count, sizeof(int));
   if (matches == NULL) {
@@ -386,7 +395,7 @@ int *aho_corasick(char *sequence, int pattern_count, int **goto_fn,
     exit(-1);
   }
 
-  for (int i = 0; i < seq_len; i++) {
+  for (int i = 0; i < n; i++) {
     while (goto_fn[state][sequence[i]] == FAIL)
       state = failure_fn[state];
 
@@ -474,7 +483,7 @@ int run(int argc, char *argv[]) {
     // Here, we don't iterate over the patterns. We just call the matching
     // function and pass it the three "machine" elements set up in the
     // initialization code, above.
-    int *matches = aho_corasick(sequence_str, patterns_count, goto_fn,
+    int *matches = aho_corasick(sequence_str, seq_len, patterns_count, goto_fn,
                                 failure_fn, output_fn);
 
     if (answers_data) {
@@ -489,7 +498,6 @@ int run(int argc, char *argv[]) {
     }
 
     free(matches);
-    }
   }
 
   // Note the end time, before freeing memory.
