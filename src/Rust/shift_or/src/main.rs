@@ -7,6 +7,7 @@
 */
 
 use common::run::run;
+use std::cmp::Ordering;
 use std::env;
 use std::io::{self, stderr, Write};
 
@@ -30,15 +31,13 @@ type WordType = u64;
 fn calc_s_positions(
     pat: &[u8],
     m: usize,
-    s_positions: &mut Vec<WordType>,
+    s_positions: &mut [WordType],
 ) -> WordType {
-    let mut j: WordType;
-    let mut lim: WordType;
+    let mut j: WordType = 1;
+    let mut lim: WordType = 0;
 
     // Assuming s_positions has already been initialized when it was created.
 
-    j = 1;
-    lim = 0;
     for i in 0..m {
         s_positions[pat[i] as usize] &= !j;
         lim |= j;
@@ -65,7 +64,6 @@ fn shift_or(
     let pattern = pattern.as_bytes();
     let sequence = sequence.as_bytes();
     let mut matches: u32 = 0;
-    let lim: WordType;
     let mut state: WordType = !0;
     let mut s_positions: Vec<WordType> = vec![state; ASIZE];
 
@@ -76,7 +74,7 @@ fn shift_or(
     }
 
     // Preprocessing. Set up s_positions and lim.
-    lim = calc_s_positions(&pattern, m, &mut s_positions);
+    let lim: WordType = calc_s_positions(pattern, m, &mut s_positions);
 
     // Perform the search:
     for j in 0..n {
@@ -100,11 +98,15 @@ fn main() -> io::Result<()> {
         Err(err) => panic!("Run-time error: {:?}", err),
     };
 
-    if code < 0 {
-        writeln!(stderr(), "Program encountered internal error.")?;
-    } else if code > 0 {
-        writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+    match code.cmp(&0) {
+        Ordering::Less => {
+            writeln!(stderr(), "Program encountered internal error.")?;
+            Ok(())
+        }
+        Ordering::Greater => {
+            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+            Ok(())
+        }
+        Ordering::Equal => Ok(()),
     }
-
-    return Ok(());
 }

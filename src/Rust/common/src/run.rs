@@ -23,7 +23,7 @@ pub type Runnable = dyn Fn(&String, usize, &String, usize) -> io::Result<u32>;
 */
 pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> io::Result<i32> {
     let argc = argv.len();
-    if argc < 3 || argc > 4 {
+    if !(3..=4).contains(&argc) {
         writeln!(
             stderr(),
             "Usage: {} <sequences> <patterns> [ <answers> ]",
@@ -63,31 +63,25 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> io::Result<i32> {
     let start_time = Instant::now();
     let mut return_code: i32 = 0;
 
-    for sequence in 0..sequences_data.len() {
-        let sequence_str = &sequences_data[sequence];
+    for (sequence, sequence_str) in sequences_data.iter().enumerate() {
         let seq_len = sequence_str.len();
 
         for pattern in 0..patterns_data.len() {
             let pattern_str = &patterns_data[pattern];
             let pat_len = pattern_str.len();
             let matches =
-                code(&pattern_str, pat_len, &sequence_str, seq_len).unwrap();
+                code(pattern_str, pat_len, sequence_str, seq_len).unwrap();
 
             if let Some(ref answers) = answers_data {
                 if matches != answers[pattern][sequence] {
-                    match writeln!(
+                    writeln!(
                         stderr(),
                         "Pattern {} mismatch against sequence {} ({} != {})",
                         pattern + 1,
                         sequence + 1,
                         matches,
                         answers[pattern][sequence]
-                    ) {
-                        Err(err) => {
-                            panic!("Failed to write to stderr: {:?}", err);
-                        }
-                        Ok(_) => 0,
-                    };
+                    )?;
 
                     return_code += 1;
                 }
@@ -97,8 +91,8 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> io::Result<i32> {
 
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    print!("---\nlanguage: rust\nalgorithm: {}\n", &name);
-    print!("runtime: {:.8}\n", elapsed.as_secs_f64());
+    println!("---\nlanguage: rust\nalgorithm: {}", &name);
+    println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     Ok(return_code)
 }

@@ -8,6 +8,7 @@
 */
 
 use common::setup::*;
+use std::cmp::Ordering;
 use std::collections::{HashSet, VecDeque};
 use std::env;
 use std::io::{self, stderr, Write};
@@ -27,7 +28,6 @@ const FAIL: i32 = -1;
     inefficient, given that our alphabet is actually just four characters. Use
     this array to shorten those loops.
 */
-const OFFSETS_COUNT: usize = 4;
 const ALPHA_OFFSETS: &[usize] = &[65, 67, 71, 84];
 
 /*
@@ -74,9 +74,9 @@ fn enter_pattern(
     // At this point, `state` points to the leaf in the automaton. Create new
     // states from here on for the remaining characters in `pat` that weren't
     // already in the automaton.
-    for p in j..len {
+    for p in pat.iter().take(len).skip(j) {
         *new_state += 1;
-        goto_fn[state][pat[p] as usize] = *new_state as i32;
+        goto_fn[state][*p as usize] = *new_state as i32;
         state = *new_state;
         // Unlike the C code, the availability of Vec as a native type allows
         // the automaton to be dynamically grown as needed. So we have to
@@ -94,7 +94,7 @@ fn enter_pattern(
   Build the goto function and the (partial) output function.
 */
 fn build_goto(
-    patterns: &Vec<String>,
+    patterns: &[String],
     goto_fn: &mut Vec<Vec<i32>>,
     output_fn: &mut Vec<HashSet<usize>>,
 ) {
@@ -110,8 +110,8 @@ fn build_goto(
     output_fn.push(HashSet::new());
 
     // Add each pattern in turn:
-    for i in 0..pats.len() {
-        enter_pattern(&mut new_state, &pats[i], i, goto_fn, output_fn);
+    for (i, pattern) in pats.iter().enumerate() {
+        enter_pattern(&mut new_state, pattern, i, goto_fn, output_fn);
     }
 
     // Set any unused transitions in state 0 to point back to state 0:
@@ -120,16 +120,14 @@ fn build_goto(
             goto_fn[0][i] = 0;
         }
     }
-
-    return;
 }
 
 /*
   Build the failure function and complete the output function.
 */
 fn build_failure(
-    goto_fn: &mut Vec<Vec<i32>>,
-    output_fn: &mut Vec<HashSet<usize>>,
+    goto_fn: &mut [Vec<i32>],
+    output_fn: &mut [HashSet<usize>],
 ) -> io::Result<Vec<usize>> {
     // Need a queue of state numbers:
     let mut queue: VecDeque<usize> = VecDeque::new();
@@ -140,8 +138,8 @@ fn build_failure(
 
     // The queue starts out empty. Set it to be all states reachable from state
     // 0 and set failure(state) for those states to be 0.
-    for i in 0..OFFSETS_COUNT {
-        let state = goto_fn[0][ALPHA_OFFSETS[i]];
+    for i in ALPHA_OFFSETS {
+        let state = goto_fn[0][*i];
         if state == 0 {
             continue;
         }
@@ -156,9 +154,8 @@ fn build_failure(
     while !queue.is_empty() {
         if let Some(r) = queue.pop_front() {
             // pop_front() returns an Option<> type, so we needed Some().
-            for i in 0..OFFSETS_COUNT {
-                let a = ALPHA_OFFSETS[i];
-                let s = goto_fn[r][a];
+            for a in ALPHA_OFFSETS {
+                let s = goto_fn[r][*a];
                 if s == FAIL {
                     continue;
                 }
@@ -166,13 +163,13 @@ fn build_failure(
 
                 queue.push_back(ss);
                 let mut state = failure_fn[r];
-                while goto_fn[state][a] == FAIL {
+                while goto_fn[state][*a] == FAIL {
                     state = failure_fn[state];
                 }
-                failure_fn[ss] = goto_fn[state][a] as usize;
+                failure_fn[ss] = goto_fn[state][*a] as usize;
                 output_fn[ss] = output_fn[ss]
                     .union(&output_fn[failure_fn[ss]])
-                    .map(|v| *v)
+                    .copied()
                     .collect();
             }
         } else {
@@ -193,23 +190,21 @@ fn build_failure(
 */
 fn aho_corasick(
     sequence: &String,
-    n: usize,
     pattern_count: usize,
-    goto_fn: &Vec<Vec<i32>>,
-    failure_fn: &Vec<usize>,
-    output_fn: &Vec<HashSet<usize>>,
+    goto_fn: &[Vec<i32>],
+    failure_fn: &[usize],
+    output_fn: &[HashSet<usize>],
 ) -> Vec<u32> {
     let sequence = sequence.as_bytes();
     let mut matches: Vec<u32> = vec![0; pattern_count];
     let mut state: usize = 0;
 
-    for i in 0..n {
-        let s = sequence[i] as usize;
-        while goto_fn[state][s] == FAIL {
+    for s in sequence.iter() {
+        while goto_fn[state][*s as usize] == FAIL {
             state = failure_fn[state];
         }
 
-        state = goto_fn[state][s] as usize;
+        state = goto_fn[state][*s as usize] as usize;
         for j in output_fn[state].iter() {
             matches[*j] += 1;
         }
@@ -229,7 +224,7 @@ fn aho_corasick(
 */
 pub fn run(argv: &Vec<String>) -> io::Result<i32> {
     let argc = argv.len();
-    if argc < 3 || argc > 4 {
+    if !(3..=4).contains(&argc) {
         writeln!(
             stderr(),
             "Usage: {} <sequences> <patterns> [ <answers> ]",
@@ -273,16 +268,12 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
     build_goto(&patterns_data, &mut goto_fn, &mut output_fn);
     let failure_fn = build_failure(&mut goto_fn, &mut output_fn).unwrap();
 
-    for sequence in 0..sequences_data.len() {
-        let sequence_str = &sequences_data[sequence];
-        let seq_len = sequence_str.len();
-
+    for (sequence, sequence_str) in sequences_data.iter().enumerate() {
         // Here, we don't iterate over the patterns. We just call the matching
         // function and pass it the three "machine" elements set up in the
         // initialization code, above.
         let matches = aho_corasick(
-            &sequence_str,
-            seq_len,
+            sequence_str,
             patterns_data.len(),
             &goto_fn,
             &failure_fn,
@@ -309,8 +300,8 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
 
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    print!("---\nlanguage: rust\nalgorithm: aho_corasick\n");
-    print!("runtime: {:.8}\n", elapsed.as_secs_f64());
+    println!("---\nlanguage: rust\nalgorithm: aho_corasick");
+    println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     Ok(return_code)
 }
@@ -322,11 +313,15 @@ fn main() -> io::Result<()> {
     let argv: Vec<String> = env::args().collect();
     let code: i32 = run(&argv).unwrap();
 
-    if code < 0 {
-        writeln!(stderr(), "Program encountered internal error.")?;
-    } else if code > 0 {
-        writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+    match code.cmp(&0) {
+        Ordering::Less => {
+            writeln!(stderr(), "Program encountered internal error.")?;
+            Ok(())
+        }
+        Ordering::Greater => {
+            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+            Ok(())
+        }
+        Ordering::Equal => Ok(()),
     }
-
-    return Ok(());
 }

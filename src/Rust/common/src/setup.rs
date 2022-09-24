@@ -55,7 +55,7 @@ pub fn read_sequences(filename: &String) -> Vec<String> {
 
     // This will consume the first line of the file, and get the number of
     // data-lines that are expected.
-    let ints = read_two_ints(&mut rdr, &filename);
+    let ints = read_two_ints(&mut rdr, filename);
     let sequences_count: u32 = ints[0];
 
     // Read the remaining lines, converting the Result<> types to String values
@@ -84,19 +84,19 @@ pub fn read_patterns(filename: &String) -> Vec<String> {
     for each pattern read) and how many comma-separated numbers there are on
     each data-line (one for each sequence read).
 */
-pub fn read_answers(path: &String) -> Vec<Vec<u32>> {
-    // Get a filehandle on the given path, panicking on error.
-    let file = match File::open(&path) {
+pub fn read_answers(filename: &String) -> Vec<Vec<u32>> {
+    // Get a filehandle on the given filename, panicking on error.
+    let file = match File::open(&filename) {
         Ok(file) => file,
         Err(err) => {
-            panic!("{}: File open error: {:?}", &path, err)
+            panic!("{}: File open error: {:?}", &filename, err)
         }
     };
     let mut rdr = BufReader::new(file);
 
     // This will consume the first line of the file, and get the number of
     // data-lines that are expected.
-    let ints = read_two_ints(&mut rdr, &path);
+    let ints = read_two_ints(&mut rdr, filename);
     // Here we use both values from the line, the second tells us how many ints
     // should be on each line that gets read.
     let lines_count: u32 = ints[0];
@@ -106,7 +106,7 @@ pub fn read_answers(path: &String) -> Vec<Vec<u32>> {
     let strings: Vec<String> = rdr.lines().filter_map(|l| l.ok()).collect();
     // Confirm the correct number of lines gathered.
     if strings.len() != lines_count as usize {
-        panic!("{}: wrong number of lines read successfully", &path);
+        panic!("{}: wrong number of lines read successfully", &filename);
     }
 
     let mut line_no = 1;
@@ -126,13 +126,13 @@ pub fn read_answers(path: &String) -> Vec<Vec<u32>> {
         if !errors.is_empty() {
             panic!(
                 "{}: Parse error on line {}: {:?}",
-                &path, line_no, errors[0]
+                &filename, line_no, errors[0]
             );
         }
         if line.len() != ans_count as usize {
             panic!(
                 "{}: Error on line {}: wrong number of answer values",
-                &path, line_no
+                &filename, line_no
             );
         }
 

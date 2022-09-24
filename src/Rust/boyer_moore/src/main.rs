@@ -7,7 +7,7 @@
 */
 
 use common::run::run;
-use std::cmp::max;
+use std::cmp::{max, Ordering};
 use std::env;
 use std::io::{self, stderr, Write};
 
@@ -70,7 +70,7 @@ fn calc_suffixes(pat: &[u8], m: usize) -> Vec<i32> {
 fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     let mut i: i32;
     let mut j: i32;
-    let suffixes = calc_suffixes(&pat, m);
+    let suffixes = calc_suffixes(pat, m);
     let mut good_suffix: Vec<i32> = vec![m as i32; m + 1];
 
     j = 0;
@@ -125,8 +125,8 @@ fn boyer_moore(
     let mut matches: u32 = 0;
 
     // Get the bad-character and good-suffix shift tables:
-    let good_suffix: Vec<i32> = calc_good_suffix(&pattern, m as usize);
-    let bad_char: Vec<i32> = calc_bad_char(&pattern, m as usize);
+    let good_suffix: Vec<i32> = calc_good_suffix(pattern, m as usize);
+    let bad_char: Vec<i32> = calc_bad_char(pattern, m as usize);
 
     // Perform the searching:
     j = 0;
@@ -157,11 +157,15 @@ fn main() -> io::Result<()> {
     let argv: Vec<String> = env::args().collect();
     let code: i32 = run(&boyer_moore, "boyer_moore", &argv).unwrap();
 
-    if code < 0 {
-        writeln!(stderr(), "Program encountered internal error.")?;
-    } else if code > 0 {
-        writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+    match code.cmp(&0) {
+        Ordering::Less => {
+            writeln!(stderr(), "Program encountered internal error.")?;
+            Ok(())
+        }
+        Ordering::Greater => {
+            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+            Ok(())
+        }
+        Ordering::Equal => Ok(()),
     }
-
-    return Ok(());
 }

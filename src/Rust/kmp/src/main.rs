@@ -7,6 +7,7 @@
 */
 
 use common::run::run;
+use std::cmp::Ordering;
 use std::env;
 use std::io::{self, stderr, Write};
 
@@ -63,7 +64,7 @@ fn kmp(
     // Track the number of times the pattern is found in the sequence.
     let mut matches = 0;
     // Obtain the jump-table.
-    let next_table = init_kmp(&pattern, m);
+    let next_table = init_kmp(pattern, m);
 
     // The core algorithm.
     while j < n {
@@ -89,11 +90,15 @@ fn main() -> io::Result<()> {
     let argv: Vec<String> = env::args().collect();
     let code: i32 = run(&kmp, "kmp", &argv).unwrap();
 
-    if code < 0 {
-        writeln!(stderr(), "Program encountered internal error.")?;
-    } else if code > 0 {
-        writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+    match code.cmp(&0) {
+        Ordering::Less => {
+            writeln!(stderr(), "Program encountered internal error.")?;
+            Ok(())
+        }
+        Ordering::Greater => {
+            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
+            Ok(())
+        }
+        Ordering::Equal => Ok(()),
     }
-
-    return Ok(());
 }
