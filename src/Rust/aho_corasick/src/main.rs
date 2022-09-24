@@ -172,8 +172,6 @@ fn build_failure(
                     .copied()
                     .collect();
             }
-        } else {
-            eprintln!("build_failure: Non-empty queue returned None");
         }
     }
 

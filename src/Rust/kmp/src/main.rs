@@ -43,7 +43,7 @@ fn init_kmp(pat: &[u8], m: usize) -> Vec<i32> {
     Perform the KMP algorithm on the given pattern of length m, against the
     sequence of length n.
 */
-fn kmp(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
+fn kmp(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
     // Because the C code takes advantage of the presence of a null byte at the
     // end of strings, we have to force this in before converting the pattern
     // to a [u8].
@@ -57,7 +57,7 @@ fn kmp(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
     let mut i: i32 = 0;
     let mut j: usize = 0;
     // Track the number of times the pattern is found in the sequence.
-    let mut matches = 0;
+    let mut matches: i32 = 0;
     // Obtain the jump-table.
     let next_table = init_kmp(pattern, m);
 

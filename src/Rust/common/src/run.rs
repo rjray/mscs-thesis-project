@@ -7,7 +7,7 @@ use crate::setup::*;
 use std::time::Instant;
 
 // A type alias for the signature of the single-pattern matching algorithms.
-pub type Runnable = dyn Fn(&String, usize, &String, usize) -> u32;
+pub type Runnable = dyn Fn(&String, usize, &String, usize) -> i32;
 
 /*
    This is the "runner" routine. It takes a pointer to the code that implements
@@ -62,9 +62,14 @@ pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
             let pattern_str = &patterns_data[pattern];
             let pat_len = pattern_str.len();
             let matches = code(pattern_str, pat_len, sequence_str, seq_len);
+            // If there was an error in the actual algorithm, `matches` will be
+            // <0.
+            if matches < 0 {
+                return matches;
+            }
 
             if let Some(ref answers) = answers_data {
-                if matches != answers[pattern][sequence] {
+                if matches as u32 != answers[pattern][sequence] {
                     eprintln!(
                         "Pattern {} mismatch against sequence {} ({} != {})",
                         pattern + 1,

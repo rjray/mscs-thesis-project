@@ -52,20 +52,20 @@ fn calc_s_positions(
     Perform the Shift-Or algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
+fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
     // For indexing that would be comparable to C's, convert the String objects
     // to arrays of bytes. This works because the UTF-8 data won't have any
     // wide characters.
     let pattern = pattern.as_bytes();
     let sequence = sequence.as_bytes();
-    let mut matches: u32 = 0;
+    let mut matches: i32 = 0;
     let mut state: WordType = !0;
     let mut s_positions: Vec<WordType> = vec![state; ASIZE];
 
     // Verify that the pattern is not too long:
     if m > WORD {
         eprintln!("shift_or: Pattern size must be <= {}", WORD);
-        return 0;
+        return -1;
     }
 
     // Preprocessing. Set up s_positions and lim.

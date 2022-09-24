@@ -98,7 +98,7 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     Perform the Boyer-Moore algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
+fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
     // Because the C code takes advantage of the presence of a null byte at the
     // end of strings, we have to force this in before converting the pattern
     // to a [u8].
@@ -117,7 +117,7 @@ fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
     let m: i32 = m as i32;
     let n: i32 = n as i32;
     // Track the number of times the pattern is found in the sequence.
-    let mut matches: u32 = 0;
+    let mut matches: i32 = 0;
 
     // Get the bad-character and good-suffix shift tables:
     let good_suffix: Vec<i32> = calc_good_suffix(pattern, m as usize);
