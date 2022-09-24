@@ -125,7 +125,7 @@ fn build_goto(
   Build the failure function and complete the output function.
 */
 fn build_failure(
-    goto_fn: &mut [Vec<i32>],
+    goto_fn: &[Vec<i32>],
     output_fn: &mut [HashSet<usize>],
 ) -> Vec<usize> {
     // Need a queue of state numbers:
