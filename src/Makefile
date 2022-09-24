@@ -17,7 +17,7 @@ TEST_FILES := $(TEST_SEQUENCES) $(TEST_PATTERNS) $(TEST_ANSWERS)
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
 
-all: C
+all: C Rust
 
 clean: clean-all
 
@@ -50,7 +50,20 @@ $(TEST_FILES) &: $(RANDOM_DATA_PY)
 		--count 100 --pattern-count 10
 
 C:
-	make -C C all
+	$(MAKE) -C C all
 
 C-clean:
-	make -C C clean
+	$(MAKE) -C C clean
+
+# TODO: When the harness is available, change these to "experiments".
+experiments: data C Rust
+	$(MAKE) -C C test-experiments SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) ANSWERS=../$(RANDOM_ANSWERS)
+	$(MAKE) -C Rust test-experiments SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) ANSWERS=../$(RANDOM_ANSWERS)
+
+test-experiments: testing-data C Rust
+	$(MAKE) -C C test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C Rust test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
