@@ -9,6 +9,7 @@
 use common::run::run;
 use std::cmp::{max, Ordering};
 use std::env;
+use std::process::exit;
 
 // Define the alphabet size, part of the Boyer-Moore pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
@@ -158,4 +159,6 @@ fn main() {
         }
         Ordering::Equal => (),
     };
+
+    exit(code);
 }

@@ -9,6 +9,7 @@
 use common::run::run;
 use std::cmp::Ordering;
 use std::env;
+use std::process::exit;
 
 /*
    Initialize the jump-table that KMP uses. Unlike the C code, which takes a
@@ -91,4 +92,6 @@ fn main() {
         }
         Ordering::Equal => (),
     };
+
+    exit(code);
 }

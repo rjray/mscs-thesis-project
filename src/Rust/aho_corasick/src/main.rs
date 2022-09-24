@@ -11,6 +11,7 @@ use common::setup::*;
 use std::cmp::Ordering;
 use std::collections::{HashSet, VecDeque};
 use std::env;
+use std::process::exit;
 use std::time::Instant;
 
 // Rather than implement a translation table for the four characters in the DNA
@@ -256,7 +257,7 @@ pub fn run(argv: &Vec<String>) -> i32 {
     let mut goto_fn: Vec<Vec<i32>> = Vec::new();
     let mut output_fn: Vec<HashSet<usize>> = Vec::new();
     build_goto(&patterns_data, &mut goto_fn, &mut output_fn);
-    let failure_fn = build_failure(&goto_fn, &mut output_fn);
+    let failure_fn = build_failure(&mut goto_fn, &mut output_fn);
 
     for (sequence, sequence_str) in sequences_data.iter().enumerate() {
         // Here, we don't iterate over the patterns. We just call the matching
@@ -309,4 +310,6 @@ fn main() {
         }
         Ordering::Equal => (),
     };
+
+    exit(code);
 }

@@ -9,6 +9,7 @@
 use common::run::run;
 use std::cmp::Ordering;
 use std::env;
+use std::process::exit;
 
 // Define the alphabet size, part of the Shift-Or pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
@@ -96,4 +97,6 @@ fn main() {
         }
         Ordering::Equal => (),
     };
+
+    exit(code);
 }
