@@ -8,12 +8,12 @@ DEBUG=
 
 # Set up PATHTYPE, TARGETS, etc. based on DEBUG:
 ifeq ($(DEBUG),)
-PATHTYPE=debug
-TARGETS := $(addprefix ./target/debug/,$(ALGORITHMS))
-else
 PATHTYPE=release
 CARGOFLAGS += --release
 TARGETS := $(addprefix ./target/release/,$(ALGORITHMS))
+else
+PATHTYPE=debug
+TARGETS := $(addprefix ./target/debug/,$(ALGORITHMS))
 endif
 
 ifeq ($(RUNCOUNT),)
