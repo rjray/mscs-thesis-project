@@ -11,7 +11,6 @@ use common::setup::*;
 use std::cmp::Ordering;
 use std::collections::{HashSet, VecDeque};
 use std::env;
-use std::io::{self, stderr, Write};
 use std::time::Instant;
 
 // Rather than implement a translation table for the four characters in the DNA
@@ -128,7 +127,7 @@ fn build_goto(
 fn build_failure(
     goto_fn: &mut [Vec<i32>],
     output_fn: &mut [HashSet<usize>],
-) -> io::Result<Vec<usize>> {
+) -> Vec<usize> {
     // Need a queue of state numbers:
     let mut queue: VecDeque<usize> = VecDeque::new();
 
@@ -173,11 +172,11 @@ fn build_failure(
                     .collect();
             }
         } else {
-            writeln!(stderr(), "build_failure: Non-empty queue returned None")?;
+            eprintln!("build_failure: Non-empty queue returned None");
         }
     }
 
-    Ok(failure_fn)
+    failure_fn
 }
 
 /*
@@ -222,15 +221,11 @@ fn aho_corasick(
     The return value is 0 if the experiment correctly identified all pattern
     instances in all sequences, and the number of misses otherwise.
 */
-pub fn run(argv: &Vec<String>) -> io::Result<i32> {
+pub fn run(argv: &Vec<String>) -> i32 {
     let argc = argv.len();
     if !(3..=4).contains(&argc) {
-        writeln!(
-            stderr(),
-            "Usage: {} <sequences> <patterns> [ <answers> ]",
-            &argv[0]
-        )?;
-        return Ok(-1);
+        eprintln!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
+        return -1;
     }
 
     // Read the data files using the routines from common::setup. The answers
@@ -247,11 +242,8 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
     // number of patterns.
     if let Some(ref answers) = answers_data {
         if answers.len() != patterns_data.len() {
-            writeln!(
-                stderr(),
-                "Count mismatch between patterns file and answers file"
-            )?;
-            return Ok(-1);
+            eprintln!("Count mismatch between patterns file and answers file");
+            return -1;
         }
     }
 
@@ -266,7 +258,7 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
     let mut goto_fn: Vec<Vec<i32>> = Vec::new();
     let mut output_fn: Vec<HashSet<usize>> = Vec::new();
     build_goto(&patterns_data, &mut goto_fn, &mut output_fn);
-    let failure_fn = build_failure(&mut goto_fn, &mut output_fn).unwrap();
+    let failure_fn = build_failure(&mut goto_fn, &mut output_fn);
 
     for (sequence, sequence_str) in sequences_data.iter().enumerate() {
         // Here, we don't iterate over the patterns. We just call the matching
@@ -283,14 +275,13 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
         if let Some(ref answers) = answers_data {
             for pattern in 0..patterns_data.len() {
                 if matches[pattern] != answers[pattern][sequence] {
-                    writeln!(
-                        stderr(),
+                    eprintln!(
                         "Pattern {} mismatch against sequence {} ({} != {})",
                         pattern + 1,
                         sequence + 1,
                         matches[pattern],
                         answers[pattern][sequence]
-                    )?;
+                    );
 
                     return_code += 1;
                 }
@@ -303,25 +294,21 @@ pub fn run(argv: &Vec<String>) -> io::Result<i32> {
     println!("---\nlanguage: rust\nalgorithm: aho_corasick");
     println!("runtime: {:.8}", elapsed.as_secs_f64());
 
-    Ok(return_code)
+    return_code
 }
 
 /*
     All that is done here is call the run() function with the argv values.
 */
-fn main() -> io::Result<()> {
+fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = run(&argv).unwrap();
+    let code: i32 = run(&argv);
 
     match code.cmp(&0) {
-        Ordering::Less => {
-            writeln!(stderr(), "Program encountered internal error.")?;
-            Ok(())
-        }
+        Ordering::Less => eprintln!("Program encountered internal error."),
         Ordering::Greater => {
-            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
-            Ok(())
+            eprintln!("Program encountered {} mismatches.", code)
         }
-        Ordering::Equal => Ok(()),
+        Ordering::Equal => (),
     }
 }

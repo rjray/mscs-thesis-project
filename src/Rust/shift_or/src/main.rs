@@ -9,7 +9,6 @@
 use common::run::run;
 use std::cmp::Ordering;
 use std::env;
-use std::io::{self, stderr, Write};
 
 // Define the alphabet size, part of the Shift-Or pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
@@ -52,12 +51,7 @@ fn calc_s_positions(
     Perform the Shift-Or algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn shift_or(
-    pattern: &String,
-    m: usize,
-    sequence: &String,
-    n: usize,
-) -> io::Result<u32> {
+fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
     // For indexing that would be comparable to C's, convert the String objects
     // to arrays of bytes. This works because the UTF-8 data won't have any
     // wide characters.
@@ -69,8 +63,8 @@ fn shift_or(
 
     // Verify that the pattern is not too long:
     if m > WORD {
-        writeln!(stderr(), "shift_or: Pattern size must be <= {}", WORD)?;
-        return Ok(0);
+        eprintln!("shift_or: Pattern size must be <= {}", WORD);
+        return 0;
     }
 
     // Preprocessing. Set up s_positions and lim.
@@ -84,29 +78,22 @@ fn shift_or(
         }
     }
 
-    Ok(matches)
+    matches
 }
 
 /*
     All that is done here is call the run() function with a pointer to the
     algorithm implementation, the label for the algorithm, and the argv values.
 */
-fn main() -> io::Result<()> {
+fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = match run(&shift_or, "shift_or", &argv) {
-        Ok(code) => code,
-        Err(err) => panic!("Run-time error: {:?}", err),
-    };
+    let code: i32 = run(&shift_or, "shift_or", &argv);
 
     match code.cmp(&0) {
-        Ordering::Less => {
-            writeln!(stderr(), "Program encountered internal error.")?;
-            Ok(())
-        }
+        Ordering::Less => eprintln!("Program encountered internal error."),
         Ordering::Greater => {
-            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
-            Ok(())
+            eprintln!("Program encountered {} mismatches.", code);
         }
-        Ordering::Equal => Ok(()),
+        Ordering::Equal => (),
     }
 }

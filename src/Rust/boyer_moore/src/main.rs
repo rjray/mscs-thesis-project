@@ -9,7 +9,6 @@
 use common::run::run;
 use std::cmp::{max, Ordering};
 use std::env;
-use std::io::{self, stderr, Write};
 
 // Define the alphabet size, part of the Boyer-Moore pre-processing. Here, we
 // are just using ASCII characters, so 128 is fine.
@@ -98,12 +97,7 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     Perform the Boyer-Moore algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn boyer_moore(
-    pattern: &String,
-    m: usize,
-    sequence: &String,
-    n: usize,
-) -> io::Result<u32> {
+fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> u32 {
     // Because the C code takes advantage of the presence of a null byte at the
     // end of strings, we have to force this in before converting the pattern
     // to a [u8].
@@ -146,26 +140,22 @@ fn boyer_moore(
         }
     }
 
-    Ok(matches)
+    matches
 }
 
 /*
     All that is done here is call the run() function with a pointer to the
     algorithm implementation, the label for the algorithm, and the argv values.
 */
-fn main() -> io::Result<()> {
+fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = run(&boyer_moore, "boyer_moore", &argv).unwrap();
+    let code: i32 = run(&boyer_moore, "boyer_moore", &argv);
 
     match code.cmp(&0) {
-        Ordering::Less => {
-            writeln!(stderr(), "Program encountered internal error.")?;
-            Ok(())
-        }
+        Ordering::Less => eprintln!("Program encountered internal error."),
         Ordering::Greater => {
-            writeln!(stderr(), "Program encountered {} mismatches.", code)?;
-            Ok(())
+            eprintln!("Program encountered {} mismatches.", code);
         }
-        Ordering::Equal => Ok(()),
+        Ordering::Equal => (),
     }
 }
