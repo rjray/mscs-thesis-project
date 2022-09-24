@@ -11,6 +11,7 @@ use common::setup::*;
 use std::cmp::Ordering;
 use std::collections::{HashSet, VecDeque};
 use std::env;
+use std::process::exit;
 use std::time::Instant;
 
 // Rather than implement a translation table for the four characters in the DNA
@@ -310,5 +311,7 @@ fn main() {
             eprintln!("Program encountered {} mismatches.", code)
         }
         Ordering::Equal => (),
-    }
+    };
+
+    exit(code);
 }
