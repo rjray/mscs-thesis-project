@@ -1,6 +1,8 @@
+include ../defines.mk
+
 ALGORITHMS := kmp boyer_moore shift_or aho_corasick
-GCC_TARGETS := kmp-gcc boyer_moore-gcc shift_or-gcc aho_corasick-gcc
-LLVM_TARGETS := kmp-llvm boyer_moore-llvm shift_or-llvm aho_corasick-llvm
+GCC_TARGETS := $(addprefix ./,$(addsuffix -gcc,$(ALGORITHMS)))
+LLVM_TARGETS := $(addprefix ./,$(addsuffix -llvm,$(ALGORITHMS)))
 
 # Default this to unset
 DEBUG=
@@ -86,3 +88,61 @@ aho_corasick-llvm.o: aho_corasick.c setup.h
 
 aho_corasick-llvm: aho_corasick-llvm.o setup-llvm.o
 	$(CLANG) $(CFLAGS) -o aho_corasick-llvm aho_corasick-llvm.o setup-llvm.o
+
+test-experiments-gcc: $(GCC_TARGETS)
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run tests)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run tests)
+endif
+ifeq ($(ANSWERS),)
+	$(warning Answer file not specified, no checking will be done)
+endif
+	$(foreach target,$(GCC_TARGETS),$(call RUN_test_experiment,$(target)))
+
+experiments-gcc: $(GCC_TARGETS)
+ifeq ($(HARNESS),)
+	$(error Harness not specified, cannot run experiments)
+endif
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run experiments)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run experiments)
+endif
+ifeq ($(ANSWERS),)
+	$(warning Answers file not specified, no checking will be done)
+endif
+	$(foreach target,$(GCC_TARGETS),$(call RUN_experiment,$(target)))
+
+test-experiments-llvm: $(LLVM_TARGETS)
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run tests)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run tests)
+endif
+ifeq ($(ANSWERS),)
+	$(warning Answer file not specified, no checking will be done)
+endif
+	$(foreach target,$(LLVM_TARGETS),$(call RUN_test_experiment,$(target)))
+
+experiments-llvm: $(LLVM_TARGETS)
+ifeq ($(HARNESS),)
+	$(error Harness not specified, cannot run experiments)
+endif
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run experiments)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run experiments)
+endif
+ifeq ($(ANSWERS),)
+	$(warning Answers file not specified, no checking will be done)
+endif
+	$(foreach target,$(LLVM_TARGETS),$(call RUN_experiment,$(target)))
+
+test-experiments: test-experiments-gcc test-experiments-llvm
+
+experiments: experiments-gcc experiments-llvm
