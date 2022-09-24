@@ -5,7 +5,7 @@ SOURCE += $(wildcard common/src/*.rs)
 # Default this to unset
 DEBUG=
 
-# Determine CFLAGS based on DEBUG:
+# Set up PATHTYPE, TARGETS, etc. based on DEBUG:
 ifeq ($(DEBUG),)
 PATHTYPE=debug
 TARGETS := $(addprefix target/debug/,$(ALGORITHMS))
