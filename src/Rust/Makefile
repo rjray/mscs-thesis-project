@@ -1,6 +1,5 @@
 include ../defines.mk
 
-ALGORITHMS := kmp boyer_moore shift_or aho_corasick
 SOURCE := $(addsuffix /src/main.rs,$(ALGORITHMS))
 SOURCE += $(wildcard common/src/*.rs)
 

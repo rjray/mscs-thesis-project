@@ -1,6 +1,5 @@
 include ../defines.mk
 
-ALGORITHMS := kmp boyer_moore shift_or aho_corasick
 GCC_TARGETS := $(addprefix ./,$(addsuffix -gcc,$(ALGORITHMS)))
 LLVM_TARGETS := $(addprefix ./,$(addsuffix -llvm,$(ALGORITHMS)))
 
