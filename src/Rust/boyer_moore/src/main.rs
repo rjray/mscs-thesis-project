@@ -150,7 +150,7 @@ fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = run(&boyer_moore, "boyer_moore", &argv);
+    let code: i32 = run(&boyer_moore, "boyer_moore", argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),

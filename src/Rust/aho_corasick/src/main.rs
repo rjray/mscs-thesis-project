@@ -220,7 +220,7 @@ fn aho_corasick(
     The return value is 0 if the experiment correctly identified all pattern
     instances in all sequences, and the number of misses otherwise.
 */
-pub fn run(argv: &Vec<String>) -> i32 {
+pub fn run(argv: Vec<String>) -> i32 {
     let argc = argv.len();
     if !(3..=4).contains(&argc) {
         eprintln!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
@@ -301,7 +301,7 @@ pub fn run(argv: &Vec<String>) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = run(&argv);
+    let code: i32 = run(argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),

@@ -88,7 +88,7 @@ fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let code: i32 = run(&shift_or, "shift_or", &argv);
+    let code: i32 = run(&shift_or, "shift_or", argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),

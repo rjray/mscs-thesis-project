@@ -20,7 +20,7 @@ pub type Runnable = dyn Fn(&String, usize, &String, usize) -> i32;
    and a block of output is written that identifies the language, the
    algorithm and the run-time.
 */
-pub fn run(code: &Runnable, name: &str, argv: &Vec<String>) -> i32 {
+pub fn run(code: &Runnable, name: &str, argv: Vec<String>) -> i32 {
     let argc = argv.len();
     if !(3..=4).contains(&argc) {
         eprintln!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
