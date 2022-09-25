@@ -9,7 +9,7 @@
 
 use common::setup::*;
 use std::cmp::Ordering;
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 use std::env;
 use std::process::exit;
 use std::time::Instant;
@@ -29,6 +29,39 @@ const FAIL: i32 = -1;
     this array to shorten those loops.
 */
 const ALPHA_OFFSETS: &[usize] = &[65, 67, 71, 84];
+
+#[derive(Clone, Debug)]
+struct Set {
+    elements: Vec<usize>,
+}
+
+impl Set {
+    fn new() -> Set {
+        Set {
+            elements: Vec::with_capacity(8),
+        }
+    }
+
+    fn insert(&mut self, element: usize) {
+        self.elements.push(element);
+    }
+
+    fn contains(&self, element: usize) -> bool {
+        self.elements.contains(&element)
+    }
+
+    fn iter(&self) -> core::slice::Iter<'_, usize> {
+        self.elements.iter()
+    }
+
+    fn union(&mut self, other: &Set) {
+        for &element in other.elements.iter() {
+            if !self.contains(element) {
+                self.insert(element);
+            }
+        }
+    }
+}
 
 /*
    Simple function to create a new state for the goto_fn.
@@ -52,7 +85,7 @@ fn enter_pattern(
     pat: &[u8],
     idx: usize,
     goto_fn: &mut Vec<Vec<i32>>,
-    output_fn: &mut Vec<HashSet<usize>>,
+    output_fn: &mut Vec<Set>,
 ) {
     let len = pat.len();
     let mut j: usize = 0;
@@ -83,7 +116,7 @@ fn enter_pattern(
         // create the new state and append it to goto_fn. Also have to create
         // a new set object and add it to output_fn.
         goto_fn.push(create_new_state());
-        output_fn.push(HashSet::new());
+        output_fn.push(Set::new());
     }
 
     // Add the index of this pattern to the output_fn set for this state:
@@ -93,10 +126,11 @@ fn enter_pattern(
 /*
   Build the goto function and the (partial) output function.
 */
+#[inline(never)]
 fn build_goto(
     patterns: &[String],
     goto_fn: &mut Vec<Vec<i32>>,
-    output_fn: &mut Vec<HashSet<usize>>,
+    output_fn: &mut Vec<Set>,
 ) {
     // Convert the vector of strings into arrays of `u8`.
     let pats: Vec<&[u8]> = patterns.iter().map(|p| p.as_bytes()).collect();
@@ -107,7 +141,7 @@ fn build_goto(
 
     // Initialize state 0 for goto_fn and output_fn.
     goto_fn.push(create_new_state());
-    output_fn.push(HashSet::new());
+    output_fn.push(Set::new());
 
     // Add each pattern in turn:
     for (i, pattern) in pats.iter().enumerate() {
@@ -125,10 +159,8 @@ fn build_goto(
 /*
   Build the failure function and complete the output function.
 */
-fn build_failure(
-    goto_fn: &[Vec<i32>],
-    output_fn: &mut [HashSet<usize>],
-) -> Vec<usize> {
+#[inline(never)]
+fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // Need a queue of state numbers:
     let mut queue: VecDeque<usize> = VecDeque::new();
 
@@ -167,10 +199,8 @@ fn build_failure(
                     state = failure_fn[state];
                 }
                 failure_fn[ss] = goto_fn[state][*a] as usize;
-                output_fn[ss] = output_fn[ss]
-                    .union(&output_fn[failure_fn[ss]])
-                    .copied()
-                    .collect();
+                let failure_set = output_fn[failure_fn[ss]].clone();
+                output_fn[ss].union(&failure_set);
             }
         }
     }
@@ -186,12 +216,13 @@ fn build_failure(
     Instead of returning a single u32, this returns a Vec<u32> with size equal
     to `pattern_count`.
 */
+#[inline(never)]
 fn aho_corasick(
     sequence: &String,
     pattern_count: usize,
     goto_fn: &[Vec<i32>],
     failure_fn: &[usize],
-    output_fn: &[HashSet<usize>],
+    output_fn: &[Set],
 ) -> Vec<u32> {
     let sequence = sequence.as_bytes();
     let mut matches: Vec<u32> = vec![0; pattern_count];
@@ -255,7 +286,7 @@ pub fn run(argv: Vec<String>) -> i32 {
 
     // Initialize the multi-patterns structure.
     let mut goto_fn: Vec<Vec<i32>> = Vec::new();
-    let mut output_fn: Vec<HashSet<usize>> = Vec::new();
+    let mut output_fn: Vec<Set> = Vec::new();
     build_goto(&patterns_data, &mut goto_fn, &mut output_fn);
     let failure_fn = build_failure(&goto_fn, &mut output_fn);
 
