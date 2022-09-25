@@ -126,6 +126,7 @@ fn enter_pattern(
 /*
   Build the goto function and the (partial) output function.
 */
+#[inline(never)]
 fn build_goto(
     patterns: &[String],
     goto_fn: &mut Vec<Vec<i32>>,
@@ -158,6 +159,7 @@ fn build_goto(
 /*
   Build the failure function and complete the output function.
 */
+#[inline(never)]
 fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // Need a queue of state numbers:
     let mut queue: VecDeque<usize> = VecDeque::new();
@@ -214,6 +216,7 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     Instead of returning a single u32, this returns a Vec<u32> with size equal
     to `pattern_count`.
 */
+#[inline(never)]
 fn aho_corasick(
     sequence: &String,
     pattern_count: usize,
