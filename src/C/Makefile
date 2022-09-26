@@ -88,7 +88,7 @@ aho_corasick-llvm.o: aho_corasick.c setup.h
 aho_corasick-llvm: aho_corasick-llvm.o setup-llvm.o
 	$(CLANG) $(CFLAGS) -o aho_corasick-llvm aho_corasick-llvm.o setup-llvm.o
 
-test-experiments-gcc: $(GCC_TARGETS)
+test-experiments-gcc:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
 endif
@@ -100,7 +100,7 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(GCC_TARGETS),$(call RUN_test_experiment,$(target)))
 
-experiments-gcc: $(GCC_TARGETS)
+experiments-gcc:
 ifeq ($(HARNESS),)
 	$(error Harness not specified, cannot run experiments)
 endif
@@ -115,7 +115,7 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(GCC_TARGETS),$(call RUN_experiment,$(target)))
 
-test-experiments-llvm: $(LLVM_TARGETS)
+test-experiments-llvm:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
 endif
@@ -127,7 +127,7 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(LLVM_TARGETS),$(call RUN_test_experiment,$(target)))
 
-experiments-llvm: $(LLVM_TARGETS)
+experiments-llvm:
 ifeq ($(HARNESS),)
 	$(error Harness not specified, cannot run experiments)
 endif

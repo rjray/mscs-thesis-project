@@ -13,17 +13,21 @@ TEST_SEQUENCES := test-random-sequences.txt
 TEST_PATTERNS := test-random-patterns.txt
 TEST_ANSWERS := test-random-answers.txt
 TEST_FILES := $(TEST_SEQUENCES) $(TEST_PATTERNS) $(TEST_ANSWERS)
+EXPERIMENTS_FILE := experiments_data.yml
+RUNCOUNT := 10
 
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
+HARNESS := ./harness/harness
 
-all: C Rust
+.PHONY: harness C Rust
+all: harness C Rust
 
 clean: clean-all
 
 realclean: clean clean-data
 
-clean-all: C-clean
+clean-all: C-clean Rust-clean harness-clean
 
 clean-data:
 	$(RM) $(RANDOM_FILES) $(TEST_FILES)
@@ -55,12 +59,34 @@ C:
 C-clean:
 	$(MAKE) -C C clean
 
-# TODO: When the harness is available, change these to "experiments".
-experiments: data C Rust
-	$(MAKE) -C C test-experiments SEQUENCES=../$(RANDOM_SEQUENCES) \
-		PATTERNS=../$(RANDOM_PATTERNS) ANSWERS=../$(RANDOM_ANSWERS)
-	$(MAKE) -C Rust test-experiments SEQUENCES=../$(RANDOM_SEQUENCES) \
-		PATTERNS=../$(RANDOM_PATTERNS) ANSWERS=../$(RANDOM_ANSWERS)
+Rust:
+	$(MAKE) -C Rust all
+
+Rust-clean:
+	$(MAKE) -C Rust clean
+
+harness:
+	$(MAKE) -C harness all
+
+harness-clean:
+	$(MAKE) -C harness clean
+
+experiments: data $(HARNESS)
+	echo "# Experiments run:" $(shell date) > $(EXPERIMENTS_FILE)
+	$(MAKE) -C C experiments \
+		HARNESS=../$(HARNESS) \
+		RUNCOUNT=$(RUNCOUNT) \
+		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
+	$(MAKE) -C Rust experiments \
+		HARNESS=../$(HARNESS) \
+		RUNCOUNT=$(RUNCOUNT) \
+		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
 
 test-experiments: testing-data C Rust
 	$(MAKE) -C C test-experiments SEQUENCES=../$(TEST_SEQUENCES) \

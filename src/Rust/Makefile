@@ -27,7 +27,7 @@ all: $(TARGETS)
 $(TARGETS) &: $(SOURCE)
 	$(CARGO) build $(CARGOFLAGS)
 
-test-experiments: $(TARGETS)
+test-experiments:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
 endif
@@ -39,7 +39,7 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(TARGETS),$(call RUN_test_experiment,$(target)))
 
-experiments: $(TARGETS)
+experiments:
 ifeq ($(HARNESS),)
 	$(error Harness not specified, cannot run experiments)
 endif

@@ -7,6 +7,6 @@ define RUN_test_experiment
 
 endef
 define RUN_experiment
-@$(HARNESS) -n $(RUNCOUNT) $(1) $(SEQUENCES) $(PATTERNS) $(ANSWERS)
+@$(HARNESS) -v -n $(RUNCOUNT) -f $(EXPERIMENTS_FILE) $(1) $(SEQUENCES) $(PATTERNS) $(ANSWERS)
 
 endef
