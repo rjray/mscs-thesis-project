@@ -10,6 +10,14 @@
 #include <unistd.h>
 
 #include "rapl.h"
+/*
+  This header file comes from the following GitHub repository:
+  https://github.com/sheredom/subprocess.h
+
+  See the file itself for its license information, which differs from the
+  license the rest of this repository is under.
+ */
+#include "subprocess.h"
 
 const int CORE = 0;
 
@@ -18,7 +26,6 @@ int main(int argc, char **argv) {
   int show_info = 0;
   char *output_file = (char *)calloc(256, sizeof(char));
   char **exec_argv = (char **)calloc(4, sizeof(char *));
-  char *program = (char *)calloc(256, sizeof(char));
   FILE *file;
 
   while ((opt = getopt(argc, argv, "in:f:")) != -1) {
@@ -52,13 +59,13 @@ int main(int argc, char **argv) {
 
   // Don't do these if show_info was passed, as there probably aren't any args.
   if (!show_info) {
-    // Copy the program argument
-    strcpy(program, argv[optind]);
+    // Copy the program argument's pointer to exec_argv:
+    exec_argv[0] = argv[optind];
     // Copy the input file arguments' pointers to exec_argv:
-    exec_argv[0] = argv[optind + 1]; // sequences
-    exec_argv[1] = argv[optind + 2]; // patterns
+    exec_argv[1] = argv[optind + 1]; // sequences
+    exec_argv[2] = argv[optind + 2]; // patterns
     if (remaining == 4)
-      exec_argv[2] = argv[optind + 3];
+      exec_argv[3] = argv[optind + 3];
   }
 
   rapl_init(CORE, show_info);
@@ -73,9 +80,29 @@ int main(int argc, char **argv) {
   file = fopen(output_file, "a");
 
   for (int i = 0; i < run_count; i++) {
+    int result, ret;
+    struct subprocess_s process;
+    char *line = (char *)calloc(80, sizeof(char));
+
     rapl_before(CORE);
 
-    // system(command);
+    result = subprocess_create((const char *const *)exec_argv, 0, &process);
+    if (0 != result) {
+      fprintf(stderr, "harness: Error creating subprocess: %d\n", result);
+      exit(EXIT_FAILURE);
+    }
+    result = subprocess_join(&process, &ret);
+    if (0 != result) {
+      fprintf(stderr, "harness: Error joining subprocess: %d\n", result);
+      exit(EXIT_FAILURE);
+    }
+    FILE *stdout_file = subprocess_stdout(&process);
+    while (fgets(line, 80, stdout_file) != NULL)
+      fputs(line, file);
+    subprocess_destroy(&process);
+
+    fprintf(file, "iteration: %d\n", i + 1);
+    fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
 
     rapl_after(file, CORE);
   }
@@ -83,7 +110,6 @@ int main(int argc, char **argv) {
   fclose(file);
 
   free(output_file);
-  free(program);
   free(exec_argv);
 
   return 0;
