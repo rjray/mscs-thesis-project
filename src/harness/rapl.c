@@ -229,22 +229,9 @@ void rapl_before(int core) {
   result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
 
   package_before = (double)result * energy_units;
-#ifdef DEBUG
-  printf("Package energy: %.6fJ\n", package_before);
-#endif // DEBUG
 
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
   pp0_before = (double)result * energy_units;
-#ifdef DEBUG
-  printf("PowerPlane0 (core) for core %d energy before: %.6fJ\n", core,
-         pp0_before);
-#endif // DEBUG
-
-#ifdef DEBUG
-  result = read_msr(fd, MSR_PP0_POLICY);
-  int pp0_policy = (int)result & 0x001f;
-  printf("PowerPlane0 (core) for core %d policy: %d\n", core, pp0_policy);
-#endif // DEBUG
 
   close(fd);
 
@@ -259,9 +246,6 @@ void rapl_after(FILE *fp, int core) {
 
   result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
   package_after = (double)result * energy_units;
-#ifdef DEBUG
-  printf("Package energy: %.6fJ consumed\n", package_after - package_before);
-#endif // DEBUG
   fprintf(fp, "package: %.18f\n", package_after - package_before);
 
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
