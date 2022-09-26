@@ -5,7 +5,7 @@ CC=gcc
 harness: harness.o rapl.o
 	$(CC) -O2 -Wall -o harness harness.o rapl.o -lm
 
-harness.o: harness.c
+harness.o: harness.c rapl.h subprocess.h
 	$(CC) -O2 -Wall -c harness.c
 
 rapl.o: rapl.c rapl.h
