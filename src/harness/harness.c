@@ -22,16 +22,18 @@
 const int CORE = 0;
 
 int main(int argc, char **argv) {
-  int opt, run_count = 10;
-  int show_info = 0;
+  int opt, run_count = 10, show_info = 0, verbose = 0;
   char *output_file = (char *)calloc(256, sizeof(char));
   char **exec_argv = (char **)calloc(4, sizeof(char *));
   FILE *file;
 
-  while ((opt = getopt(argc, argv, "in:f:")) != -1) {
+  while ((opt = getopt(argc, argv, "vin:f:")) != -1) {
     switch (opt) {
     case 'i':
       show_info = 1;
+      break;
+    case 'v':
+      verbose = 1;
       break;
     case 'n':
       run_count = atoi(optarg);
@@ -78,11 +80,17 @@ int main(int argc, char **argv) {
   }
 
   file = fopen(output_file, "a");
+  if (verbose)
+    fprintf(stdout, "Starting run of %d iterations of %s\n", run_count,
+            exec_argv[0]);
 
   for (int i = 0; i < run_count; i++) {
     int result, ret;
     struct subprocess_s process;
     char *line = (char *)calloc(80, sizeof(char));
+
+    if (verbose)
+      fprintf(stdout, "  Iteration %d/%d\n", i + 1, run_count);
 
     rapl_before(CORE);
 
@@ -105,6 +113,7 @@ int main(int argc, char **argv) {
     fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
 
     rapl_after(file, CORE);
+    fflush(file);
   }
 
   fclose(file);
