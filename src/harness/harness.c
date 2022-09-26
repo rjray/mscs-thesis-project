@@ -81,16 +81,16 @@ int main(int argc, char **argv) {
 
   file = fopen(output_file, "a");
   if (verbose)
-    fprintf(stdout, "Starting run of %d iterations of %s\n", run_count,
+    fprintf(stdout, "Starting run of %d iterations of %s\n", run_count + 1,
             exec_argv[0]);
 
-  for (int i = 0; i < run_count; i++) {
+  for (int i = 0; i <= run_count; i++) {
     int result, ret;
     struct subprocess_s process;
     char *line = (char *)calloc(80, sizeof(char));
 
     if (verbose)
-      fprintf(stdout, "  Iteration %d/%d\n", i + 1, run_count);
+      fprintf(stdout, "  Iteration %d/%d\n", i, run_count);
 
     rapl_before(CORE);
 
@@ -104,15 +104,18 @@ int main(int argc, char **argv) {
       fprintf(stderr, "harness: Error joining subprocess: %d\n", result);
       exit(EXIT_FAILURE);
     }
-    FILE *stdout_file = subprocess_stdout(&process);
-    while (fgets(line, 80, stdout_file) != NULL)
-      fputs(line, file);
+
+    if (i != 0) {
+      FILE *stdout_file = subprocess_stdout(&process);
+      while (fgets(line, 80, stdout_file) != NULL)
+        fputs(line, file);
+      fprintf(file, "iteration: %d\n", i);
+      fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
+
+      rapl_after(file, CORE);
+    }
+
     subprocess_destroy(&process);
-
-    fprintf(file, "iteration: %d\n", i + 1);
-    fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
-
-    rapl_after(file, CORE);
     fflush(file);
   }
 
