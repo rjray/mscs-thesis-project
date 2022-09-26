@@ -14,7 +14,7 @@ TEST_PATTERNS := test-random-patterns.txt
 TEST_ANSWERS := test-random-answers.txt
 TEST_FILES := $(TEST_SEQUENCES) $(TEST_PATTERNS) $(TEST_ANSWERS)
 EXPERIMENTS_FILE := experiments_data.yml
-RUNCOUNT := 10
+RUNCOUNT := 25
 
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
@@ -72,7 +72,7 @@ harness-clean:
 	$(MAKE) -C harness clean
 
 experiments: data $(HARNESS)
-	echo "# Experiments run:" $(shell date) > $(EXPERIMENTS_FILE)
+	echo "# Experiments started:" `date` > $(EXPERIMENTS_FILE)
 	$(MAKE) -C C experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
@@ -87,6 +87,7 @@ experiments: data $(HARNESS)
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
+	echo "# Experiments completed:" `date` >> $(EXPERIMENTS_FILE)
 
 test-experiments: testing-data C Rust
 	$(MAKE) -C C test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
