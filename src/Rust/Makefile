@@ -24,6 +24,9 @@ CARGO := cargo
 
 all: $(TARGETS)
 
+clean:
+	$(CARGO) clean
+
 $(TARGETS) &: $(SOURCE)
 	$(CARGO) build $(CARGOFLAGS)
 
