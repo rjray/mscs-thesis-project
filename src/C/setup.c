@@ -116,7 +116,7 @@ int read_answers(const char *fname, int ***data) {
   read_two_ints(input, &num_lines, &num_ints);
 
   // Allocate the list of pointers in `table`:
-  int **table = calloc(num_lines, sizeof(int *));
+  int **table = (int **)calloc(num_lines, sizeof(int *));
   if (table == NULL) {
     fprintf(stderr, "Error allocating answer pointer table\n");
     return 0;
@@ -128,14 +128,14 @@ int read_answers(const char *fname, int ***data) {
   int line_length = num_ints * 2 + 100;
 
   int count = 0;
-  char *line = calloc(line_length, sizeof(char));
+  char *line = (char *)calloc(line_length, sizeof(char));
   while (fgets(line, line_length, input) != NULL) {
     // Strip the trailing newline if it exists. Confuses strtok().
     if (line[strlen(line) - 1] == '\n')
       line[strlen(line) - 1] = '\0';
 
     // Allocate memory for the integers in the line:
-    int *answers = calloc(num_ints, sizeof(int));
+    int *answers = (int *)calloc(num_ints, sizeof(int));
     if (answers == NULL) {
       fprintf(stderr, "Error allocating answer table row\n");
       return 0;
