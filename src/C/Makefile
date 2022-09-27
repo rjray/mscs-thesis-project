@@ -1,7 +1,7 @@
 include ../defines.mk
 
-GCC_TARGETS := $(addprefix ./,$(addsuffix -gcc,$(ALGORITHMS)))
-LLVM_TARGETS := $(addprefix ./,$(addsuffix -llvm,$(ALGORITHMS)))
+GCC_TARGETS := $(addprefix ./,$(addsuffix -c-gcc,$(ALGORITHMS)))
+LLVM_TARGETS := $(addprefix ./,$(addsuffix -c-llvm,$(ALGORITHMS)))
 
 # Default this to unset
 DEBUG=
@@ -36,26 +36,26 @@ setup-gcc.o: setup.c setup.h
 kmp-gcc.o: kmp.c run.h
 	$(GCC) $(CFLAGS) -c -o kmp-gcc.o kmp.c
 
-kmp-gcc: kmp-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CFLAGS) -o kmp-gcc kmp-gcc.o run-gcc.o setup-gcc.o
+kmp-c-gcc: kmp-gcc.o run-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o kmp-c-gcc kmp-gcc.o run-gcc.o setup-gcc.o
 
 boyer_moore-gcc.o: boyer_moore.c run.h
 	$(GCC) $(CFLAGS) -c -o boyer_moore-gcc.o boyer_moore.c
 
-boyer_moore-gcc: boyer_moore-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CFLAGS) -o boyer_moore-gcc boyer_moore-gcc.o run-gcc.o setup-gcc.o
+boyer_moore-c-gcc: boyer_moore-gcc.o run-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o boyer_moore-c-gcc boyer_moore-gcc.o run-gcc.o setup-gcc.o
 
 shift_or-gcc.o: shift_or.c run.h
 	$(GCC) $(CFLAGS) -c -o shift_or-gcc.o shift_or.c
 
-shift_or-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CFLAGS) -o shift_or-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
+shift_or-c-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o shift_or-c-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
 
 aho_corasick-gcc.o: aho_corasick.c setup.h
 	$(GCC) $(CFLAGS) -c -o aho_corasick-gcc.o aho_corasick.c
 
-aho_corasick-gcc: aho_corasick-gcc.o setup-gcc.o
-	$(GCC) $(CFLAGS) -o aho_corasick-gcc aho_corasick-gcc.o setup-gcc.o
+aho_corasick-c-gcc: aho_corasick-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o aho_corasick-c-gcc aho_corasick-gcc.o setup-gcc.o
 
 # Rules for building with LLVM:
 run-llvm.o: run.c run.h setup.h
@@ -67,26 +67,26 @@ setup-llvm.o: setup.c setup.h
 kmp-llvm.o: kmp.c run.h
 	$(CLANG) $(CFLAGS) -c -o kmp-llvm.o kmp.c
 
-kmp-llvm: kmp-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CFLAGS) -o kmp-llvm kmp-llvm.o run-llvm.o setup-llvm.o
+kmp-c-llvm: kmp-llvm.o run-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o kmp-c-llvm kmp-llvm.o run-llvm.o setup-llvm.o
 
 boyer_moore-llvm.o: boyer_moore.c run.h
 	$(CLANG) $(CFLAGS) -c -o boyer_moore-llvm.o boyer_moore.c
 
-boyer_moore-llvm: boyer_moore-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CFLAGS) -o boyer_moore-llvm boyer_moore-llvm.o run-llvm.o setup-llvm.o
+boyer_moore-c-llvm: boyer_moore-llvm.o run-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o boyer_moore-c-llvm boyer_moore-llvm.o run-llvm.o setup-llvm.o
 
 shift_or-llvm.o: shift_or.c run.h
 	$(CLANG) $(CFLAGS) -c -o shift_or-llvm.o shift_or.c
 
-shift_or-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CFLAGS) -o shift_or-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
+shift_or-c-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o shift_or-c-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
 
 aho_corasick-llvm.o: aho_corasick.c setup.h
 	$(CLANG) $(CFLAGS) -c -o aho_corasick-llvm.o aho_corasick.c
 
-aho_corasick-llvm: aho_corasick-llvm.o setup-llvm.o
-	$(CLANG) $(CFLAGS) -o aho_corasick-llvm aho_corasick-llvm.o setup-llvm.o
+aho_corasick-c-llvm: aho_corasick-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o aho_corasick-c-llvm aho_corasick-llvm.o setup-llvm.o
 
 test-experiments-gcc:
 ifeq ($(SEQUENCES),)
