@@ -6,7 +6,8 @@ LLVM_TARGETS := $(addprefix ./,$(addsuffix -c-llvm,$(ALGORITHMS)))
 # Default this to unset
 DEBUG=
 
-# Determine CFLAGS based on DEBUG:
+CFLAGS := -Wall
+# Determine additional CFLAGS based on DEBUG:
 ifeq ($(DEBUG),)
 CFLAGS += -O3
 else
