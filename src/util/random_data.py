@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Generate random data for the string matching experiments. Data should be
 # drawn from the DNA alphabet, so as to simulate applying these techniques to
