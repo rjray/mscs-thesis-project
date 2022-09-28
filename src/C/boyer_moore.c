@@ -19,7 +19,7 @@
 /*
   Preprocessing step: calculate the bad-character shifts.
 */
-void calc_bad_char(char *pat, int m, int bad_char[]) {
+void calc_bad_char(unsigned char *pat, int m, int bad_char[]) {
   int i;
   for (i = 0; i < ASIZE; ++i)
     bad_char[i] = m;
@@ -32,8 +32,8 @@ void calc_bad_char(char *pat, int m, int bad_char[]) {
 /*
   Preprocessing step: calculate suffixes for good-suffix shifts.
 */
-void calc_suffixes(char *pat, int m, int suffix_list[]) {
-  int f, g, i;
+void calc_suffixes(unsigned char *pat, int m, int suffix_list[]) {
+  int f = 0, g, i;
   suffix_list[m - 1] = m;
 
   g = m - 1;
@@ -56,7 +56,7 @@ void calc_suffixes(char *pat, int m, int suffix_list[]) {
 /*
   Preprocessing step: calculate the good-suffix shifts.
 */
-void calc_good_suffix(char *pat, int m, int good_suffix[]) {
+void calc_good_suffix(unsigned char *pat, int m, int good_suffix[]) {
   int i, j, *suffixes;
   suffixes = (int *)calloc(m, sizeof(int));
 
@@ -81,7 +81,7 @@ void calc_good_suffix(char *pat, int m, int good_suffix[]) {
   Perform the Boyer-Moore algorithm on the given pattern of length m, against
   the sequence of length n.
 */
-int boyer_moore(char *pattern, int m, char *sequence, int n) {
+int boyer_moore(unsigned char *pattern, int m, unsigned char *sequence, int n) {
   int i, j, *good_suffix, *bad_char;
   int matches = 0;
 

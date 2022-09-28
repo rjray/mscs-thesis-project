@@ -236,8 +236,9 @@ int queue_empty(Queue *queue) { return (queue->head > queue->rear) ? 1 : 0; }
   needed. When done, add the index of the pattern into the partial output
   function for the state of the last character.
 */
-void enter_pattern(char *pat, int idx, int **goto_fn, Set **output_fn) {
-  int len = strlen(pat);
+void enter_pattern(unsigned char *pat, int idx, int **goto_fn,
+                   Set **output_fn) {
+  int len = strlen((char *)pat);
   int j = 0, state = 0;
   static int new_state = 0;
 
@@ -270,8 +271,8 @@ void enter_pattern(char *pat, int idx, int **goto_fn, Set **output_fn) {
 /*
   Build the goto function and the (partial) output function.
 */
-void build_goto(char *pats[], int num_pats, int ***goto_fn, Set ***output_fn,
-                int *num_states) {
+void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
+                Set ***output_fn, int *num_states) {
   int **new_goto;
   Set **new_output;
   int max_states = 0;
@@ -285,7 +286,7 @@ void build_goto(char *pats[], int num_pats, int ***goto_fn, Set ***output_fn,
   // patterns. This is overkill, but a more "serious" implementation would
   // have a more "serious" graph implementation for the goto function.
   for (int i = 0; i < num_pats; i++)
-    max_states += strlen(pats[i]);
+    max_states += strlen((char *)pats[i]);
   *num_states = max_states;
 
   // Allocate for the goto function
@@ -386,8 +387,8 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
   Instead of returning a single int, returns an array of ints as long as the
   number of patterns (pattern_count).
 */
-int *aho_corasick(char *sequence, int n, int pattern_count, int **goto_fn,
-                  int *failure_fn, Set **output_fn) {
+int *aho_corasick(unsigned char *sequence, int n, int pattern_count,
+                  int **goto_fn, int *failure_fn, Set **output_fn) {
   int state = 0;
   int *matches = (int *)calloc(pattern_count, sizeof(int));
   if (matches == NULL) {
@@ -473,7 +474,8 @@ int run(int argc, char *argv[]) {
   int *failure_fn;
   Set **output_fn;
   int num_states;
-  build_goto(patterns_data, patterns_count, &goto_fn, &output_fn, &num_states);
+  build_goto((unsigned char **)patterns_data, patterns_count, &goto_fn,
+             &output_fn, &num_states);
   build_failure(&failure_fn, goto_fn, output_fn, num_states);
 
   for (int sequence = 0; sequence < sequences_count; sequence++) {
@@ -483,8 +485,8 @@ int run(int argc, char *argv[]) {
     // Here, we don't iterate over the patterns. We just call the matching
     // function and pass it the three "machine" elements set up in the
     // initialization code, above.
-    int *matches = aho_corasick(sequence_str, seq_len, patterns_count, goto_fn,
-                                failure_fn, output_fn);
+    int *matches = aho_corasick((unsigned char *)sequence_str, seq_len,
+                                patterns_count, goto_fn, failure_fn, output_fn);
 
     if (answers_data) {
       for (int pattern = 0; pattern < patterns_count; pattern++)

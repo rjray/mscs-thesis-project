@@ -27,7 +27,7 @@
   Preprocessing step: Calculate the positions of each character of the
   alphabet within the pattern `pat`.
 */
-WORD_TYPE calc_s_positions(char *pat, int m, WORD_TYPE s_positions[]) {
+WORD_TYPE calc_s_positions(unsigned char *pat, int m, WORD_TYPE s_positions[]) {
   WORD_TYPE j, lim;
   int i;
 
@@ -46,7 +46,7 @@ WORD_TYPE calc_s_positions(char *pat, int m, WORD_TYPE s_positions[]) {
   Perform the Shift-Or algorithm on the given pattern of length m, against
   the sequence of length n.
 */
-int shift_or(char *pattern, int m, char *sequence, int n) {
+int shift_or(unsigned char *pattern, int m, unsigned char *sequence, int n) {
   WORD_TYPE lim, state;
   WORD_TYPE s_positions[ASIZE];
   int matches = 0;

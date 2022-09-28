@@ -13,7 +13,7 @@
 /*
   Initialize the jump-table that KMP uses.
 */
-void init_kmp(char *pat, int m, int next_table[]) {
+void init_kmp(unsigned char *pat, int m, int next_table[]) {
   int i, j;
 
   i = 0;
@@ -37,7 +37,7 @@ void init_kmp(char *pat, int m, int next_table[]) {
   Perform the KMP algorithm on the given pattern of length m, against the
   sequence of length n.
 */
-int kmp(char *pattern, int m, char *sequence, int n) {
+int kmp(unsigned char *pattern, int m, unsigned char *sequence, int n) {
   int i, j, *next_table;
   int matches = 0;
 

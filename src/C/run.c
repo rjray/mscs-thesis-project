@@ -81,7 +81,8 @@ int run(runnable code, char *name, int argc, char *argv[]) {
     for (int pattern = 0; pattern < patterns_count; pattern++) {
       char *pattern_str = patterns_data[pattern];
       int pat_len = strlen(pattern_str);
-      int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);
+      int matches = (*code)((unsigned char *)pattern_str, pat_len,
+                            (unsigned char *)sequence_str, seq_len);
 
       if (answers_data && matches != answers_data[pattern][sequence]) {
         fprintf(stderr, "Pattern %d mismatch against sequence %d (%d != %d)\n",

@@ -76,7 +76,7 @@ int read_sequences(const char *fname, char ***data) {
       fprintf(stderr, "Error allocating pointer for storing data\n");
       return 0;
     }
-    strncpy(ptr, line, strlen(line));
+    strcpy(ptr, line);
     table[count] = ptr;
 
     count++;
