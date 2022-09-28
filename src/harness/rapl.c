@@ -68,6 +68,7 @@ long long read_msr(int fd, int which) {
 #define CPU_SKYLAKE2 94
 #define CPU_BROADWELL 77
 #define CPU_BROADWELL2 79
+#define CPU_KABYLAKE_MOBILE 142
 #define CPU_KABYLAKE 158
 
 int detect_cpu(void) {
@@ -123,6 +124,7 @@ int detect_cpu(void) {
   case CPU_BROADWELL:
   case CPU_BROADWELL2:
   case CPU_KABYLAKE:
+  case CPU_KABYLAKE_MOBILE:
     break;
   default:
     fprintf(stderr, "Unsupported CPU model %d\n", model);
