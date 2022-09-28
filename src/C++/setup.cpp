@@ -11,11 +11,11 @@
   Read two numbers from a line of the file pointed to by `input`. Store them in
   a vector of int and return it.
 */
-std::vector<int> read_two_ints(std::ifstream *input) {
+std::vector<int> read_two_ints(std::ifstream &input) {
   std::string line;
   std::vector<int> ints;
 
-  std::getline(*input, line);
+  std::getline(input, line);
   std::istringstream ss(std::move(line));
 
   for (std::string value; std::getline(ss, value, ' ');) {
@@ -48,8 +48,8 @@ std::vector<std::string> read_sequences(std::string fname) {
     throw std::runtime_error{error.str()};
   }
 
-  std::vector<int> ints = read_two_ints(&input);
-  int num_lines = ints[0];
+  std::vector<int> ints = read_two_ints(input);
+  unsigned int num_lines = ints[0];
 
   std::vector<std::string> data;
   for (std::string line; std::getline(input, line);) {
@@ -88,9 +88,9 @@ std::vector<std::vector<int>> read_answers(std::string fname) {
     throw std::runtime_error{error.str()};
   }
 
-  std::vector<int> ints = read_two_ints(&input);
-  int num_lines = ints[0];
-  int num_ints = ints[1];
+  std::vector<int> ints = read_two_ints(input);
+  unsigned int num_lines = ints[0];
+  unsigned int num_ints = ints[1];
 
   // Allocate the vector-of-vectors in `table`:
   std::vector<std::vector<int>> table;
@@ -102,6 +102,11 @@ std::vector<std::vector<int>> read_answers(std::string fname) {
 
     for (std::string value; std::getline(ss, value, ',');) {
       row.push_back(std::stoi(value));
+    }
+    if (row.size() != num_ints) {
+      std::ostringstream error;
+      error << fname << ": wrong number of numbers read (" << row.size() << ")";
+      throw std::runtime_error{error.str()};
     }
 
     table.push_back(row);
