@@ -35,7 +35,8 @@ double get_time() {
   experiment over the given algorithm.
 
   The return value is 0 if the experiment correctly identified all pattern
-  instances in all sequences, and the number of misses otherwise.
+  instances in all sequences, and the number of misses otherwise. An exception
+  is thrown on non-recoverable errors.
 */
 int run(runnable code, std::string name, int argc, char *argv[]) {
   if (argc < 3 || argc > 4) {
@@ -88,8 +89,9 @@ int run(runnable code, std::string name, int argc, char *argv[]) {
       }
     }
   }
-  // Note the end time, before freeing memory.
+  // Note the end time.
   double end_time = get_time();
+
   std::cout << "---\n"
             << "language: " << LANG << "\n"
             << "runtime: " << std::setprecision(8) << end_time - start_time
