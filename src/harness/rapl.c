@@ -1,6 +1,14 @@
 /*
   Code for the RAPL interface, adapted from:
   https://github.com/greensoftwarelab/Energy-Languages
+
+  That code itself was adapted from:
+  https://github.com/deater/uarch-configure/blob/master/rapl-read/rapl-read.c
+
+  NOTE: Though I have tried to keep as much of the processor-agnostic nature of
+  this as I can, I've only run it on Kaby Lake family CPUs (a Kaby Lake and a
+  Kaby Lake Mobile). It might not work on earlier chips. I have, however, taken
+  out all of the AMD chip references.
  */
 
 #include <errno.h>
@@ -14,13 +22,40 @@
 
 #include "rapl.h"
 
+#define MSR_RAPL_POWER_UNIT 0x606
+
+/*
+ * Platform specific RAPL Domains.
+ */
+
+/* Package RAPL Domain */
+#define MSR_PKG_RAPL_POWER_LIMIT 0x610
+#define MSR_PKG_ENERGY_STATUS 0x611
+#define MSR_PKG_POWER_INFO 0x614
+
+/* PP0 RAPL Domain */
+#define MSR_PP0_ENERGY_STATUS 0x639
+
+/* PP1 RAPL Domain, may reflect to uncore devices */
+#define MSR_PP1_ENERGY_STATUS 0x641
+
+/* DRAM RAPL Domain */
+#define MSR_DRAM_ENERGY_STATUS 0x619
+
+/* PSYS RAPL Domain */
+#define MSR_PLATFORM_ENERGY_STATUS 0x64d
+
 int cpu_model;
 int core = 0;
 
+int pp0_avail, pp1_avail, dram_avail, psys_avail, different_units;
 double package_before, package_after;
 double pp0_before, pp0_after;
+double pp1_before, pp1_after;
+double dram_before, dram_after;
+double psys_before, psys_after;
 
-double power_units, energy_units, time_units;
+double power_units, cpu_energy_units, time_units, dram_energy_units;
 
 int open_msr(int core) {
   char msr_filename[32];
@@ -61,15 +96,27 @@ long long read_msr(int fd, int which) {
 #define CPU_IVYBRIDGE 58
 #define CPU_IVYBRIDGE_EP 62
 #define CPU_HASWELL 60
-#define CPU_HASWELL2 69
-#define CPU_HASWELL3 70
+#define CPU_HASWELL_ULT 69
+#define CPU_HASWELL_GT3E 70
 #define CPU_HASWELL_EP 63
-#define CPU_SKYLAKE1 78
-#define CPU_SKYLAKE2 94
-#define CPU_BROADWELL 77
-#define CPU_BROADWELL2 79
+#define CPU_BROADWELL 61
+#define CPU_BROADWELL_GT3E 71
+#define CPU_BROADWELL_EP 79
+#define CPU_BROADWELL_DE 86
+#define CPU_SKYLAKE 78
+#define CPU_SKYLAKE_HS 94
+#define CPU_SKYLAKE_X 85
+#define CPU_KNIGHTS_LANDING 87
+#define CPU_KNIGHTS_MILL 133
 #define CPU_KABYLAKE_MOBILE 142
 #define CPU_KABYLAKE 158
+#define CPU_ATOM_SILVERMONT 55
+#define CPU_ATOM_AIRMONT 76
+#define CPU_ATOM_MERRIFIELD 74
+#define CPU_ATOM_MOOREFIELD 90
+#define CPU_ATOM_GOLDMONT 92
+#define CPU_ATOM_GEMINI_LAKE 122
+#define CPU_ATOM_DENVERTON 95
 
 int detect_cpu(void) {
   FILE *file;
@@ -111,20 +158,62 @@ int detect_cpu(void) {
   fclose(file);
 
   switch (model) {
-  case CPU_SANDYBRIDGE:
   case CPU_SANDYBRIDGE_EP:
-  case CPU_IVYBRIDGE:
   case CPU_IVYBRIDGE_EP:
-  case CPU_HASWELL:
-  case CPU_HASWELL2:
-  case CPU_HASWELL3:
+    pp0_avail = 1;
+    pp1_avail = 0;
+    dram_avail = 1;
+    different_units = 0;
+    psys_avail = 0;
+    break;
   case CPU_HASWELL_EP:
-  case CPU_SKYLAKE1:
-  case CPU_SKYLAKE2:
+  case CPU_BROADWELL_EP:
+  case CPU_SKYLAKE_X:
+    pp0_avail = 1;
+    pp1_avail = 0;
+    dram_avail = 1;
+    different_units = 1;
+    psys_avail = 0;
+    break;
+  case CPU_KNIGHTS_LANDING:
+  case CPU_KNIGHTS_MILL:
+    pp0_avail = 0;
+    pp1_avail = 0;
+    dram_avail = 1;
+    different_units = 1;
+    psys_avail = 0;
+    break;
+  case CPU_SANDYBRIDGE:
+  case CPU_IVYBRIDGE:
+    pp0_avail = 1;
+    pp1_avail = 1;
+    dram_avail = 0;
+    different_units = 0;
+    psys_avail = 0;
+    break;
+  case CPU_HASWELL:
+  case CPU_HASWELL_ULT:
+  case CPU_HASWELL_GT3E:
   case CPU_BROADWELL:
-  case CPU_BROADWELL2:
+  case CPU_BROADWELL_GT3E:
+  case CPU_ATOM_GOLDMONT:
+  case CPU_ATOM_GEMINI_LAKE:
+  case CPU_ATOM_DENVERTON:
+    pp0_avail = 1;
+    pp1_avail = 1;
+    dram_avail = 1;
+    different_units = 0;
+    psys_avail = 0;
+    break;
+  case CPU_SKYLAKE:
+  case CPU_SKYLAKE_HS:
   case CPU_KABYLAKE:
   case CPU_KABYLAKE_MOBILE:
+    pp0_avail = 1;
+    pp1_avail = 1;
+    dram_avail = 1;
+    different_units = 0;
+    psys_avail = 1;
     break;
   default:
     fprintf(stderr, "Unsupported CPU model %d\n", model);
@@ -151,12 +240,19 @@ int rapl_init(int core, int show_info) {
   result = read_msr(fd, MSR_RAPL_POWER_UNIT);
 
   power_units = pow(0.5, (double)(result & 0xf));
-  energy_units = pow(0.5, (double)((result >> 8) & 0x1f));
+  cpu_energy_units = pow(0.5, (double)((result >> 8) & 0x1f));
   time_units = pow(0.5, (double)((result >> 16) & 0xf));
+  /* Do the DRAM units differ from the CPU ones? */
+  if (different_units) {
+    dram_energy_units = pow(0.5, (double)16);
+  } else {
+    dram_energy_units = cpu_energy_units;
+  }
 
   if (show_info) {
     printf("Power units = %.3fW\n", power_units);
-    printf("Energy units = %.8fJ\n", energy_units);
+    printf("CPU Energy units = %.8fJ\n", cpu_energy_units);
+    printf("DRAM Energy units = %.8fJ\n", dram_energy_units);
     printf("Time units = %.8fs\n", time_units);
     printf("\n");
   }
@@ -228,12 +324,32 @@ void rapl_before(int core) {
   long long result;
 
   fd = open_msr(core);
+
+  // Package energy
   result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
+  package_before = (double)result * cpu_energy_units;
 
-  package_before = (double)result * energy_units;
-
+  // PP0 energy
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
-  pp0_before = (double)result * energy_units;
+  pp0_before = (double)result * cpu_energy_units;
+
+  // PP1 energy, if available
+  if (pp1_avail) {
+    result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
+    pp1_before = (double)result * cpu_energy_units;
+  }
+
+  // DRAM energy, if available
+  if (dram_avail) {
+    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
+    dram_before = (double)result * dram_energy_units;
+  }
+
+  // PSYS energy, if available
+  if (psys_avail) {
+    result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
+    psys_before = (double)result * cpu_energy_units;
+  }
 
   close(fd);
 
@@ -247,12 +363,33 @@ void rapl_after(FILE *fp, int core) {
   fd = open_msr(core);
 
   result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
-  package_after = (double)result * energy_units;
+  package_after = (double)result * cpu_energy_units;
   fprintf(fp, "package: %.18f\n", package_after - package_before);
 
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
-  pp0_after = (double)result * energy_units;
+  pp0_after = (double)result * cpu_energy_units;
   fprintf(fp, "cpu: %.18f\n", pp0_after - pp0_before);
+
+  // PP1 energy, if available
+  if (pp1_avail) {
+    result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
+    pp1_after = (double)result * cpu_energy_units;
+    fprintf(fp, "oncoregpu: %.18f\n", pp1_after - pp1_before);
+  }
+
+  // DRAM energy, if available
+  if (dram_avail) {
+    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
+    dram_after = (double)result * dram_energy_units;
+    fprintf(fp, "dram: %.18f\n", dram_after - dram_before);
+  }
+
+  // PSYS energy, if available
+  if (psys_avail) {
+    result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
+    psys_after = (double)result * cpu_energy_units;
+    fprintf(fp, "psys: %.18f\n", psys_after - psys_before);
+  }
 
   close(fd);
 
