@@ -3,10 +3,13 @@
   an experiment.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <sys/time.h>
+#include <vector>
 
 #include "run.hpp"
 #include "setup.hpp"
@@ -36,37 +39,31 @@ double get_time() {
 */
 int run(runnable code, std::string name, int argc, char *argv[]) {
   if (argc < 3 || argc > 4) {
-    fprintf(stderr, "Usage: %s <sequences> <patterns> [ <answers> ]\n",
-            argv[0]);
-    exit(-1);
+    std::ostringstream error;
+    error << "Usage: " << argv[0] << " <sequences> <patterns> [ <answers> ]";
+    throw std::runtime_error{error.str()};
   }
 
   // The filenames are in the order: sequences patterns answers
-  const char *sequences_file = argv[1];
-  const char *patterns_file = argv[2];
-  const char *answers_file = argc == 4 ? argv[3] : NULL;
+  std::string sequences_file{argv[1]};
+  std::string patterns_file{argv[2]};
+  std::string answers_file;
+  if (argc == 4)
+    answers_file = std::string{argv[3]};
 
-  // These will be alloc'd by the routines that read the files.
-  char **sequences_data, **patterns_data;
-  int **answers_data = NULL;
-
-  // Read the three data files. Any of these that return 0 means an error. Any
-  // error has already been reported to stderr.
-  int sequences_count = read_sequences(sequences_file, &sequences_data);
-  if (sequences_count == 0)
-    exit(-1);
-  int patterns_count = read_patterns(patterns_file, &patterns_data);
-  if (patterns_count == 0)
-    exit(-1);
-  if (answers_file != NULL) {
-    int answers_count = read_answers(answers_file, &answers_data);
-    if (answers_count == 0)
-      exit(-1);
-    if (answers_count != patterns_count) {
-      fprintf(stderr,
-              "Count mismatch between patterns file and answers file\n");
-      exit(-1);
-    }
+  // Read the three data files. Any of these that encounter an error will
+  // throw an exception.
+  std::vector<std::string> sequences_data = read_sequences(sequences_file);
+  int sequences_count = sequences_data.size();
+  std::vector<std::string> patterns_data = read_patterns(patterns_file);
+  int patterns_count = patterns_data.size();
+  std::vector<std::vector<int>> answers_data;
+  if (!answers_file.empty()) {
+    answers_data = read_answers(answers_file);
+    int answers_count = answers_data.size();
+    if (answers_count != patterns_count)
+      throw std::runtime_error{
+          "Count mismatch between patterns file and answers file"};
   }
 
   // Run it. For each sequence, try each pattern against it. The code function
@@ -75,41 +72,28 @@ int run(runnable code, std::string name, int argc, char *argv[]) {
   double start_time = get_time();
   int return_code = 0; // Used for noting if some number of matches fail
   for (int sequence = 0; sequence < sequences_count; sequence++) {
-    char *sequence_str = sequences_data[sequence];
-    int seq_len = strlen(sequence_str);
+    std::string sequence_str = sequences_data[sequence];
+    int seq_len = sequence_str.length();
 
     for (int pattern = 0; pattern < patterns_count; pattern++) {
-      char *pattern_str = patterns_data[pattern];
-      int pat_len = strlen(pattern_str);
+      std::string pattern_str = patterns_data[pattern];
+      int pat_len = pattern_str.length();
       int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);
 
-      if (answers_data && matches != answers_data[pattern][sequence]) {
-        fprintf(stderr, "Pattern %d mismatch against sequence %d (%d != %d)\n",
-                pattern + 1, sequence + 1, matches,
-                answers_data[pattern][sequence]);
+      if (answers_data.size() && matches != answers_data[pattern][sequence]) {
+        std::cerr << "Pattern " << pattern + 1 << " mismatch against sequence "
+                  << sequence + 1 << " (" << matches
+                  << " != " << answers_data[pattern][sequence] << ")\n";
         return_code++;
       }
     }
   }
   // Note the end time, before freeing memory.
   double end_time = get_time();
-  fprintf(stdout, "---\nlanguage: %s\nalgorithm: %s\n", LANG, name);
-  fprintf(stdout, "runtime: %.8g\n", end_time - start_time);
-
-  // Free all the memory that was allocated by the routines in setup.c:
-  for (int i = 0; i < patterns_count; i++)
-    free(patterns_data[i]);
-  free(patterns_data);
-
-  if (answers_data) {
-    for (int i = 0; i < patterns_count; i++)
-      free(answers_data[i]);
-    free(answers_data);
-  }
-
-  for (int i = 0; i < sequences_count; i++)
-    free(sequences_data[i]);
-  free(sequences_data);
+  std::cout << "---\n"
+            << "language: " << LANG << "\n"
+            << "runtime: " << std::setprecision(8) << end_time - start_time
+            << "\n";
 
   return return_code;
 }
