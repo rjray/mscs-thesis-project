@@ -72,7 +72,8 @@ harness-clean:
 	$(MAKE) -C harness clean
 
 experiments: data $(HARNESS)
-	echo "# Experiments started:" `date` > $(EXPERIMENTS_FILE)
+	echo "# Running on host:" `hostname` > $(EXPERIMENTS_FILE)
+	echo "# Experiments started:" `date` >> $(EXPERIMENTS_FILE)
 	$(MAKE) -C C experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
