@@ -20,14 +20,14 @@ RUNCOUNT := 25
 RANDOM_DATA_PY := ./util/random_data.py
 HARNESS := ./harness/harness
 
-.PHONY: harness C Rust
-all: harness C Rust
+.PHONY: harness C Cpp Rust
+all: harness C Cpp Rust
 
 clean: clean-all
 
 realclean: clean clean-data
 
-clean-all: C-clean Rust-clean harness-clean
+clean-all: C-clean Cpp-clean Rust-clean harness-clean
 
 clean-data:
 	$(RM) $(RANDOM_FILES) $(TEST_FILES)
@@ -59,6 +59,12 @@ C:
 C-clean:
 	$(MAKE) -C C clean
 
+Cpp:
+	$(MAKE) -C C++ all
+
+Cpp-clean:
+	$(MAKE) -C C++ clean
+
 Rust:
 	$(MAKE) -C Rust all
 
@@ -81,6 +87,13 @@ experiments: data $(HARNESS)
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
+	$(MAKE) -C C++ experiments \
+		HARNESS=../$(HARNESS) \
+		RUNCOUNT=$(RUNCOUNT) \
+		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
 	$(MAKE) -C Rust experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
@@ -92,6 +105,8 @@ experiments: data $(HARNESS)
 
 test-experiments: testing-data C Rust
 	$(MAKE) -C C test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C C++ test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
 		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
 	$(MAKE) -C Rust test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
 		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
