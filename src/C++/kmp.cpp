@@ -13,8 +13,7 @@
 /*
   Initialize the jump-table that KMP uses.
 */
-void init_kmp(std::string pattern, int m, std::vector<int> &next_table) {
-  std::string pat = pattern + "\0";
+void init_kmp(std::string pat, int m, std::vector<int> &next_table) {
   int i, j;
 
   i = 0;
@@ -45,7 +44,7 @@ int kmp(std::string pattern, int m, std::string sequence, int n) {
 
   // Set up the next_table array for the algorithm to use:
   next_table.reserve(m + 1);
-  init_kmp(pattern, m, next_table);
+  init_kmp(pattern + "\0", m, next_table);
 
   // Perform the searching:
   i = j = 0;
