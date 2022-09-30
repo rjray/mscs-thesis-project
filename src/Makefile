@@ -16,6 +16,9 @@ TEST_FILES := $(TEST_SEQUENCES) $(TEST_PATTERNS) $(TEST_ANSWERS)
 EXPERIMENTS_FILE := experiments_data.yml
 RUNCOUNT := 25
 
+MEMCHECK_FILE := memcheck.txt
+VALGRIND := valgrind
+
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
 HARNESS := ./harness/harness
@@ -28,6 +31,26 @@ clean: clean-all
 realclean: clean clean-data
 
 clean-all: C-clean Cpp-clean Rust-clean harness-clean
+
+memcheck:
+	echo "# Running on host:" `hostname` > $(MEMCHECK_FILE)
+	echo "# Memory check started:" `date` >> $(MEMCHECK_FILE)
+	make -C C memcheck VALGRIND=$(VALGRIND) \
+		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
+	make -C C++ memcheck VALGRIND=$(VALGRIND) \
+		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
+	make -C Rust memcheck VALGRIND=$(VALGRIND) \
+		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
+	echo "# Memory check completed:" `date` >> $(EXPERIMENTS_FILE)
 
 clean-data:
 	$(RM) $(RANDOM_FILES) $(TEST_FILES)

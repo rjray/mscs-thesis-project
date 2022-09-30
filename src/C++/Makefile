@@ -2,6 +2,7 @@ include ../defines.mk
 
 GCC_TARGETS := $(addprefix ./,$(addsuffix -cpp-gcc,$(ALGORITHMS)))
 LLVM_TARGETS := $(addprefix ./,$(addsuffix -cpp-llvm,$(ALGORITHMS)))
+TARGETS := $(GCC_TARGETS) $(LLVM_TARGETS)
 
 # Default this to unset
 DEBUG=
