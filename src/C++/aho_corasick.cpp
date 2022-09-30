@@ -6,6 +6,7 @@
 */
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -344,8 +345,12 @@ int run(int argc, char *argv[]) {
 
   // Note the end time, before freeing memory.
   double end_time = get_time();
-  fprintf(stdout, "---\nlanguage: %s\nalgorithm: aho_corasick\n", LANG);
-  fprintf(stdout, "runtime: %.6g\n", end_time - start_time);
+
+  std::cout << "---\n"
+            << "language: " << LANG << "\n"
+            << "algorithm: aho_corasick\n"
+            << "runtime: " << std::setprecision(8) << end_time - start_time
+            << "\n";
 
   return return_code;
 }
