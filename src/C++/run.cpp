@@ -94,6 +94,7 @@ int run(runnable code, std::string name, int argc, char *argv[]) {
 
   std::cout << "---\n"
             << "language: " << LANG << "\n"
+            << "algorithm: " << name << "\n"
             << "runtime: " << std::setprecision(8) << end_time - start_time
             << "\n";
 
