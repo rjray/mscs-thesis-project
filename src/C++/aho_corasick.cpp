@@ -17,9 +17,9 @@
 #include "setup.hpp"
 
 #if defined(__llvm__)
-#define LANG "c-llvm"
+#define LANG "cpp-llvm"
 #elif defined(__GNUC__)
-#define LANG "c-gcc"
+#define LANG "cpp-gcc"
 #endif
 
 // Rather than implement a translation table for the four characters in the DNA
