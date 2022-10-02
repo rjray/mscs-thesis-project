@@ -3,8 +3,10 @@
 # Process the results from running the full test harness.
 
 import argparse
+import matplotlib.pyplot as plt
+import numpy as np
 from operator import itemgetter
-from statistics import mean, median
+from statistics import mean, median, stdev, variance
 import yaml
 
 NUMERICAL_KEYS = ["runtime", "package", "cpu", "oncoregpu", "dram", "psys"]
@@ -44,10 +46,9 @@ def validate(data):
         for key in NUMERICAL_KEYS:
             if record[key] < 0.0:
                 print(
-                    f"  Iteration {iteration} of {language} {algorithm} has a",
-                    f"negative numerical value in {key}"
+                    f"  ! Iteration {iteration} of {language} {algorithm}",
+                    f"has a negative numerical value in {key}"
                 )
-                good = False
                 continue
 
     return good
@@ -77,9 +78,6 @@ def build_structure(data):
 
         struct[language][algorithm].append(record)
 
-    languages.sort()
-    algorithms.sort()
-
     for language in languages:
         for algorithm in algorithms:
             struct[language][algorithm].sort(key=itemgetter("iteration"))
@@ -97,9 +95,8 @@ def get_max_size(data, langs, algos):
 
     return max(sizes)
 
-# Do the analysis over the data. Determine averages, means, etc.
 
-
+# Do the analysis over the data. Determine means, medians, etc.
 def analyze_data(data, langs, algos):
     # Start by getting the maximum size of iterations in the data. Everything
     # else will be held to this as the standard, and notes will be made on any
@@ -116,7 +113,6 @@ def analyze_data(data, langs, algos):
                 new_data[lang][algo] = {}
 
             iters = data[lang][algo]
-            size = len(iters)
             # For all of the numeric keys, gather the following:
             #
             #   1. Number of samples
@@ -125,16 +121,55 @@ def analyze_data(data, langs, algos):
             #   4. Any notes about short samples
             for key in NUMERICAL_KEYS:
                 cell = {"notes": None}
-                values = list(map(lambda x: x[key], iters))
+                values = map(lambda x: x[key], iters)
+                values = list(filter(lambda x: x >= 0.0, values))
+                size = len(values)
                 cell["samples"] = size
                 cell["mean"] = mean(values)
                 cell["median"] = median(values)
+                cell["stdev"] = stdev(values)
+                cell["variance"] = variance(values)
                 if size != max_size:
                     # It can only be smaller
                     cell["notes"] = f"Based on {size} samples"
                 new_data[lang][algo][key] = cell
 
     return new_data
+
+
+# Create a bar graph for run-times by algorithm.
+def runtimes_graph(data):
+    algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
+    algo_labels = ["Knuth-Morris-Pratt",
+                   "Boyer-Moore", "Shift Or", "Aho-Corasick"]
+    languages = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
+    lang_labels = ["C (GCC)", "C (LLVM)", "C++ (GCC)", "C++ (LLVM)", "Rust"]
+
+    # Total width of each algorithm's bars
+    width = 0.8
+    step = width / len(languages)
+    steps = list(map(lambda x: x * step, range(len(languages))))
+    x = np.arange(len(algorithms))
+
+    bars = {}
+    for lang in languages:
+        bars[lang] = []
+        for algo in algorithms:
+            bars[lang].append(data[lang][algo]["runtime"]["mean"])
+
+    fig, ax = plt.subplots()
+    rects = []
+    for idx, lang in enumerate(languages):
+        rects.append(ax.bar(x + steps[idx], bars[lang],
+                            step, label=lang_labels[idx]))
+
+    ax.set_xticks(x + step * 2, algo_labels)
+    ax.set_ylabel("Seconds")
+    ax.set_title("Run-Time Comparison by Algorithm")
+    ax.legend()
+
+    fig.tight_layout()
+    plt.show()
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -163,9 +198,10 @@ def main():
     print("\nAnalysis of data...")
     analyzed = analyze_data(struct, languages, algorithms)
     print("  Done.")
-    import pprint
-    pp = pprint.PrettyPrinter(indent=2)
-    pp.pprint(analyzed)
+    # import pprint
+    # pp = pprint.PrettyPrinter(indent=2)
+    # pp.pprint(analyzed)
+    runtimes_graph(analyzed)
 
     return
 
