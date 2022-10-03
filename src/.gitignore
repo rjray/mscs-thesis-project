@@ -1,2 +1,4 @@
 # Ignore PNG files from here down.
 *.png
+# Ignore YAML files from here down.
+*.yml
