@@ -250,14 +250,13 @@ def power_graph(data, filename, average=False):
             dram[lang] /= runtimes[lang]
             package[lang] /= runtimes[lang]
 
-    fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
+    fig, ax = plt.subplots()
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], pp0[lang], step,
-               label=f"{lang_labels[idx]} CPU")
-        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang],
-               label=f"{lang_labels[idx]} DRAM")
+               label=f"{lang_labels[idx]}")
+        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
         ax.bar(x + steps[idx], package[lang], step,
-               bottom=pp0[lang] + dram[lang], label=f"{lang_labels[idx]} PKG")
+               bottom=pp0[lang] + dram[lang])
 
     ax.set_xticks(x + step * 2, algo_labels)
     if average:
@@ -265,7 +264,10 @@ def power_graph(data, filename, average=False):
     else:
         ax.set_ylabel("Joules")
     ax.set_title("Energy Use (per second) Comparison by Algorithm")
-    ax.legend()
+    if average:
+        ax.legend(loc="lower right")
+    else:
+        ax.legend()
 
     fig.tight_layout()
     print(f"  Writing {filename}")
