@@ -368,13 +368,13 @@ void rapl_after(FILE *fp, int core) {
 
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
   pp0_after = (double)result * cpu_energy_units;
-  fprintf(fp, "cpu: %.18f\n", pp0_after - pp0_before);
+  fprintf(fp, "pp0: %.18f\n", pp0_after - pp0_before);
 
   // PP1 energy, if available
   if (pp1_avail) {
     result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
     pp1_after = (double)result * cpu_energy_units;
-    fprintf(fp, "oncoregpu: %.18f\n", pp1_after - pp1_before);
+    fprintf(fp, "pp1: %.18f\n", pp1_after - pp1_before);
   }
 
   // DRAM energy, if available
