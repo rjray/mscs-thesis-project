@@ -9,7 +9,11 @@ from operator import itemgetter
 from statistics import mean, median, stdev, variance
 import yaml
 
-NUMERICAL_KEYS = ["runtime", "package", "cpu", "oncoregpu", "dram", "psys"]
+NUMERICAL_KEYS = ["runtime", "package", "pp0", "pp1", "dram", "psys"]
+DEFAULT_DATA_FILE = "experiments_data.yml"
+DEFAULT_RUNTIMES_GRAPH = "runtimes.png"
+DEFAULT_POWER_GRAPH = "power.png"
+DEFAULT_PPS_GRAPH = "power_per_sec.png"
 
 
 # Grab command-line arguments for the script.
@@ -18,8 +22,29 @@ def parse_command_line():
 
     # Set up the arguments
     parser.add_argument(
-        "input", nargs="?", default="experiments_data.yml",
+        "input", nargs="?", default=DEFAULT_DATA_FILE,
         help="Input YAML data to process"
+    )
+    parser.add_argument(
+        "-r",
+        "--runtimes",
+        type=str,
+        default=DEFAULT_RUNTIMES_GRAPH,
+        help="File to write the run-times graph to"
+    )
+    parser.add_argument(
+        "-p",
+        "--power",
+        type=str,
+        default=DEFAULT_POWER_GRAPH,
+        help="File to write the power usage graph to"
+    )
+    parser.add_argument(
+        "-P",
+        "--power-per-sec",
+        type=str,
+        default=DEFAULT_PPS_GRAPH,
+        help="File to write the power-per-second usage graph to"
     )
 
     return parser.parse_args()
@@ -138,7 +163,7 @@ def analyze_data(data, langs, algos):
 
 
 # Create a bar graph for run-times by algorithm.
-def runtimes_graph(data):
+def runtimes_graph(data, filename):
     algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
     algo_labels = ["Knuth-Morris-Pratt",
                    "Boyer-Moore", "Shift Or", "Aho-Corasick"]
@@ -149,19 +174,19 @@ def runtimes_graph(data):
     width = 0.8
     step = width / len(languages)
     steps = list(map(lambda x: x * step, range(len(languages))))
-    x = np.arange(len(algorithms))
+    x_len = len(algorithms)
+    x = np.arange(x_len)
 
     bars = {}
     for lang in languages:
-        bars[lang] = []
-        for algo in algorithms:
-            bars[lang].append(data[lang][algo]["runtime"]["mean"])
+        bars[lang] = np.zeros(x_len, dtype=float)
+        for idx, algo in enumerate(algorithms):
+            bars[lang][idx] = data[lang][algo]["runtime"]["mean"]
 
-    fig, ax = plt.subplots()
-    rects = []
+    fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
     for idx, lang in enumerate(languages):
-        rects.append(ax.bar(x + steps[idx], bars[lang],
-                            step, label=lang_labels[idx]))
+        ax.bar(x + steps[idx], bars[lang],
+               step, label=lang_labels[idx])
 
     ax.set_xticks(x + step * 2, algo_labels)
     ax.set_ylabel("Seconds")
@@ -169,7 +194,84 @@ def runtimes_graph(data):
     ax.legend()
 
     fig.tight_layout()
-    plt.show()
+    print(f"  Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create a bar graph for run-times by algorithm.
+def power_graph(data, filename, average=False):
+    algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
+    algo_labels = ["Knuth-Morris-Pratt",
+                   "Boyer-Moore", "Shift Or", "Aho-Corasick"]
+    languages = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
+    lang_labels = ["C (GCC)", "C (LLVM)", "C++ (GCC)", "C++ (LLVM)", "Rust"]
+
+    # Total width of each algorithm's bars
+    width = 0.8
+    step = width / len(languages)
+    steps = list(map(lambda x: x * step, range(len(languages))))
+    x_len = len(algorithms)
+    x = np.arange(x_len)
+
+    runtimes = {}
+    for lang in languages:
+        runtimes[lang] = np.array(
+            [data[lang][algo]["runtime"]["mean"] for algo in algorithms],
+            dtype=float
+        )
+
+    pp0 = {}
+    for lang in languages:
+        pp0[lang] = np.array(
+            [data[lang][algo]["pp0"]["mean"] for algo in algorithms],
+            dtype=float
+        )
+
+    dram = {}
+    for lang in languages:
+        dram[lang] = np.array(
+            [data[lang][algo]["dram"]["mean"] for algo in algorithms],
+            dtype=float
+        )
+
+    package = {}
+    for lang in languages:
+        package[lang] = np.array(
+            [data[lang][algo]["package"]["mean"] for algo in algorithms],
+            dtype=float
+        )
+        package[lang] -= (pp0[lang] + dram[lang])
+
+    if average:
+        for lang in languages:
+            pp0[lang] /= runtimes[lang]
+            dram[lang] /= runtimes[lang]
+            package[lang] /= runtimes[lang]
+
+    fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
+    for idx, lang in enumerate(languages):
+        ax.bar(x + steps[idx], pp0[lang], step,
+               label=f"{lang_labels[idx]} CPU")
+        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang],
+               label=f"{lang_labels[idx]} DRAM")
+        ax.bar(x + steps[idx], package[lang], step,
+               bottom=pp0[lang] + dram[lang], label=f"{lang_labels[idx]} PKG")
+
+    ax.set_xticks(x + step * 2, algo_labels)
+    if average:
+        ax.set_ylabel("Avg Joules per Second")
+    else:
+        ax.set_ylabel("Joules")
+    ax.set_title("Energy Use (per second) Comparison by Algorithm")
+    ax.legend()
+
+    fig.tight_layout()
+    print(f"  Writing {filename}")
+    fig.savefig(filename)
+
+    return
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -198,10 +300,18 @@ def main():
     print("\nAnalysis of data...")
     analyzed = analyze_data(struct, languages, algorithms)
     print("  Done.")
-    # import pprint
-    # pp = pprint.PrettyPrinter(indent=2)
-    # pp.pprint(analyzed)
-    runtimes_graph(analyzed)
+
+    print("\nCreating runtimes graph...")
+    runtimes_graph(analyzed, args.runtimes)
+    print("  Done.")
+
+    print("\nCreating power usage graph...")
+    power_graph(analyzed, args.power)
+    print("  Done.")
+
+    print("\nCreating power-per-second usage graph...")
+    power_graph(analyzed, args.power_per_sec, True)
+    print("  Done.")
 
     return
 
