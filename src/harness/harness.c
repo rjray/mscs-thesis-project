@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "rapl.h"
@@ -20,6 +21,15 @@
 #include "subprocess.h"
 
 const int CORE = 0;
+
+/*
+  Simple measure of the wall-clock down to the usec. Adapted from StackOverflow.
+*/
+double get_time() {
+  struct timeval t;
+  gettimeofday(&t, NULL);
+  return t.tv_sec + t.tv_usec * 1e-6;
+}
 
 int main(int argc, char **argv) {
   int opt, run_count = 10, show_info = 0, verbose = 0;
@@ -93,6 +103,7 @@ int main(int argc, char **argv) {
       fprintf(stdout, "  Iteration %d/%d\n", i, run_count);
 
     rapl_before(CORE);
+    double start_time = get_time();
 
     result = subprocess_create((const char *const *)exec_argv, 0, &process);
     if (0 != result) {
@@ -111,6 +122,9 @@ int main(int argc, char **argv) {
         fputs(line, file);
       fprintf(file, "iteration: %d\n", i);
       fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
+      // Note the end time.
+      double end_time = get_time();
+      fprintf(file, "total_runtime: %.8g\n", end_time - start_time);
 
       rapl_after(file, CORE);
     }
