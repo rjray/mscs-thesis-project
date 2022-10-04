@@ -2,3 +2,5 @@
 *.png
 # Ignore YAML files from here down.
 *.yml
+# Data files from perf.
+perf.data
