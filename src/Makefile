@@ -100,6 +100,9 @@ harness:
 harness-clean:
 	$(MAKE) -C harness clean
 
+full-experiments:
+	$(MAKE) experiments RUNCOUNT=50 EXPERIMENTS_FILE=experiments_data-1000.yml
+
 experiments: data $(HARNESS)
 	@echo "# Running on host:" `hostname` > $(EXPERIMENTS_FILE)
 	@echo "#" >> $(EXPERIMENTS_FILE)
