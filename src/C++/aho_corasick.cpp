@@ -240,10 +240,11 @@ std::vector<int> build_failure(std::vector<std::vector<int>> goto_fn,
   Instead of returning a single int, returns an array of ints as long as the
   number of patterns (pattern_count).
 */
-std::vector<int> aho_corasick(std::string sequence, int n, int pattern_count,
-                              std::vector<std::vector<int>> goto_fn,
-                              std::vector<int> failure_fn,
-                              std::vector<Set> output_fn) {
+std::vector<int> aho_corasick(const std::string &sequence, int n,
+                              int pattern_count,
+                              std::vector<std::vector<int>> &goto_fn,
+                              std::vector<int> &failure_fn,
+                              std::vector<Set> &output_fn) {
   int state = 0;
   std::vector<int> matches;
   matches.resize(pattern_count, 0);
@@ -285,22 +286,16 @@ int run(int argc, char *argv[]) {
     throw std::runtime_error{error.str()};
   }
 
-  // The filenames are in the order: sequences patterns answers
-  std::string sequences_file{argv[1]};
-  std::string patterns_file{argv[2]};
-  std::string answers_file;
-  if (argc == 4)
-    answers_file = std::string{argv[3]};
-
   // Read the three data files. Any of these that encounter an error will
-  // throw an exception.
-  std::vector<std::string> sequences_data = read_sequences(sequences_file);
+  // throw an exception. The filenames are in the order: sequences patterns
+  // answers.
+  std::vector<std::string> sequences_data = read_sequences(argv[1]);
   int sequences_count = sequences_data.size();
-  std::vector<std::string> patterns_data = read_patterns(patterns_file);
+  std::vector<std::string> patterns_data = read_patterns(argv[2]);
   int patterns_count = patterns_data.size();
   std::vector<std::vector<int>> answers_data;
-  if (!answers_file.empty()) {
-    answers_data = read_answers(answers_file);
+  if (argc == 4) {
+    answers_data = read_answers(argv[3]);
     int answers_count = answers_data.size();
     if (answers_count != patterns_count)
       throw std::runtime_error{
@@ -322,7 +317,7 @@ int run(int argc, char *argv[]) {
   std::vector<int> failure_fn = build_failure(goto_fn, output_fn);
 
   for (int sequence = 0; sequence < sequences_count; sequence++) {
-    std::string sequence_str = sequences_data[sequence];
+    const std::string sequence_str = sequences_data[sequence];
     int seq_len = sequence_str.length();
 
     // Here, we don't iterate over the patterns. We just call the matching
