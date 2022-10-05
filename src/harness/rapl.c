@@ -51,9 +51,11 @@ int core = 0;
 int pp0_avail, pp1_avail, dram_avail, psys_avail, different_units;
 double package_before, package_after;
 double pp0_before, pp0_after;
-double pp1_before, pp1_after;
+/* Commenting-out, as these are always zeros on my systems. */
+// double pp1_before, pp1_after;
 double dram_before, dram_after;
-double psys_before, psys_after;
+/* Commenting-out, as these are not used in my experiments after all. */
+// double psys_before, psys_after;
 
 double power_units, cpu_energy_units, time_units, dram_energy_units;
 
@@ -333,11 +335,15 @@ void rapl_before(int core) {
   result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
   pp0_before = (double)result * cpu_energy_units;
 
+  /*
+    Always reads as zeros on my systems.
+
   // PP1 energy, if available
   if (pp1_avail) {
     result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
     pp1_before = (double)result * cpu_energy_units;
   }
+  */
 
   // DRAM energy, if available
   if (dram_avail) {
@@ -345,11 +351,15 @@ void rapl_before(int core) {
     dram_before = (double)result * dram_energy_units;
   }
 
+  /*
+    Not used by my experiments after all.
+
   // PSYS energy, if available
   if (psys_avail) {
     result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
     psys_before = (double)result * cpu_energy_units;
   }
+  */
 
   close(fd);
 
@@ -370,12 +380,16 @@ void rapl_after(FILE *fp, int core) {
   pp0_after = (double)result * cpu_energy_units;
   fprintf(fp, "pp0: %.18f\n", pp0_after - pp0_before);
 
+  /*
+    Always comes up zeros on my machines.
+
   // PP1 energy, if available
   if (pp1_avail) {
     result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
     pp1_after = (double)result * cpu_energy_units;
     fprintf(fp, "pp1: %.18f\n", pp1_after - pp1_before);
   }
+  */
 
   // DRAM energy, if available
   if (dram_avail) {
@@ -384,12 +398,16 @@ void rapl_after(FILE *fp, int core) {
     fprintf(fp, "dram: %.18f\n", dram_after - dram_before);
   }
 
+  /*
+    Not used by my experiments after all.
+
   // PSYS energy, if available
   if (psys_avail) {
     result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
     psys_after = (double)result * cpu_energy_units;
     fprintf(fp, "psys: %.18f\n", psys_after - psys_before);
   }
+  */
 
   close(fd);
 
