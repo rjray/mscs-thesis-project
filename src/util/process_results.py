@@ -265,9 +265,10 @@ def power_graph(data, filename, average=False):
     ax.set_xticks(x + step * 2, algo_labels)
     if average:
         ax.set_ylabel("Avg Joules per Second")
+        ax.set_title("Total Energy Use (per second) Comparison by Algorithm")
     else:
         ax.set_ylabel("Joules")
-    ax.set_title("Energy Use (per second) Comparison by Algorithm")
+        ax.set_title("Total Energy Use Comparison by Algorithm")
     if average:
         ax.legend(loc="lower right")
     else:
