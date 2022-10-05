@@ -3,7 +3,7 @@
 
 When evaluating a programming language for use on a project, we as programmers are faced with an ever-growing array of choices. These choices range from long-lived, well-established languages such as C or Fortran, to the very latest offerings such as Julia or Swift. Selecting a language is a process that is generally rooted in a combination of factors: suitability to the target platform, performance, expressiveness, and (often most importantly) the programmer's familiarity and comfort with the language.
 
-This thesis will be a comparison of the relative strengths of the Rust programming language when compared to C/C++. To explore this, the problem of large-scale string matching will be examined with a focus on matching within DNA strings.
+This thesis will be a comparison of the relative strengths of the Rust programming language when compared to C and C++. To explore this, the problem of large-scale string matching will be examined with a focus on matching within DNA-like strings.
 
 \subsection{String Matching}
 
@@ -16,6 +16,7 @@ But string matching means extensive reading and manipulation of blocks of alloca
 For this study, string matching will be applied to the problem of finding sub-sequences within DNA strings. DNA sequence strings have some interesting properties, in that they can be \textit{extremely} long but at the same time the alphabet is limited to just four characters (``A'', ``C'', ``G'' and ``T'').
 
 \subsection{Comparison Bases}
+\label{subsec:comparison}
 
 Solutions to the problem will be developed in three languages: C, C++, and Rust. Each language will be evaluated against the others on three bases:
 
