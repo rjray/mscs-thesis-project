@@ -243,34 +243,24 @@ def power_graph(data, filename, average=False):
             dtype=float
         )
 
-    dram = {}
-    for lang in languages:
-        dram[lang] = np.array(
-            [data[lang][algo]["dram"]["mean"] for algo in algorithms],
-            dtype=float
-        )
-
     package = {}
     for lang in languages:
         package[lang] = np.array(
             [data[lang][algo]["package"]["mean"] for algo in algorithms],
             dtype=float
         )
-        package[lang] -= (pp0[lang] + dram[lang])
+        package[lang] -= pp0[lang]
 
     if average:
         for lang in languages:
             pp0[lang] /= runtimes[lang]
-            dram[lang] /= runtimes[lang]
             package[lang] /= runtimes[lang]
 
     fig, ax = plt.subplots()
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], pp0[lang], step,
                label=f"{lang_labels[idx]}")
-        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
-        ax.bar(x + steps[idx], package[lang], step,
-               bottom=pp0[lang] + dram[lang])
+        ax.bar(x + steps[idx], package[lang], step, bottom=pp0[lang])
 
     ax.set_xticks(x + step * 2, algo_labels)
     if average:
