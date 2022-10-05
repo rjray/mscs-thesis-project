@@ -9,7 +9,7 @@ from operator import itemgetter
 from statistics import mean, median, stdev, variance
 import yaml
 
-NUMERICAL_KEYS = ["runtime", "package", "pp0", "pp1", "dram", "psys"]
+NUMERICAL_KEYS = ["runtime", "total_runtime", "package", "pp0", "dram"]
 DEFAULT_DATA_FILE = "experiments_data.yml"
 DEFAULT_RUNTIMES_GRAPH = "runtimes.png"
 DEFAULT_POWER_GRAPH = "power.png"
@@ -45,6 +45,18 @@ def parse_command_line():
         type=str,
         default=DEFAULT_PPS_GRAPH,
         help="File to write the power-per-second usage graph to"
+    )
+    parser.add_argument(
+        "-n",
+        "--no-plots",
+        action="store_true",
+        help="Suppress generation of plots"
+    )
+    parser.add_argument(
+        "-d",
+        "--dump",
+        action="store_true",
+        help="Dump processed data"
     )
 
     return parser.parse_args()
@@ -143,7 +155,9 @@ def analyze_data(data, langs, algos):
             #   1. Number of samples
             #   2. Mean
             #   3. Median
-            #   4. Any notes about short samples
+            #   4. Standard deviation
+            #   5. Variance
+            #   6. Any notes about short samples
             for key in NUMERICAL_KEYS:
                 cell = {"notes": None}
                 values = map(lambda x: x[key], iters)
@@ -218,7 +232,7 @@ def power_graph(data, filename, average=False):
     runtimes = {}
     for lang in languages:
         runtimes[lang] = np.array(
-            [data[lang][algo]["runtime"]["mean"] for algo in algorithms],
+            [data[lang][algo]["total_runtime"]["mean"] for algo in algorithms],
             dtype=float
         )
 
@@ -303,17 +317,25 @@ def main():
     analyzed = analyze_data(struct, languages, algorithms)
     print("  Done.")
 
-    print("\nCreating runtimes graph...")
-    runtimes_graph(analyzed, args.runtimes)
-    print("  Done.")
+    if args.dump:
+        import pprint
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(analyzed)
 
-    print("\nCreating power usage graph...")
-    power_graph(analyzed, args.power)
-    print("  Done.")
+    if not args.no_plots:
+        print("\nCreating runtimes graph...")
+        runtimes_graph(analyzed, args.runtimes)
+        print("  Done.")
 
-    print("\nCreating power-per-second usage graph...")
-    power_graph(analyzed, args.power_per_sec, True)
-    print("  Done.")
+    if not args.no_plots:
+        print("\nCreating power usage graph...")
+        power_graph(analyzed, args.power)
+        print("  Done.")
+
+    if not args.no_plots:
+        print("\nCreating power-per-second usage graph...")
+        power_graph(analyzed, args.power_per_sec, True)
+        print("  Done.")
 
     return
 
