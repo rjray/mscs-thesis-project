@@ -22,6 +22,12 @@
 
 #include "rapl.h"
 
+/*
+  All the ENERGY_STATUS registers are only significant to the first 32 bits
+  (31:0). Use this to mask it.
+ */
+#define ENERGY_MASK (long long)0x00000000ffffffff
+
 #define MSR_RAPL_POWER_UNIT 0x606
 
 /*
@@ -328,11 +334,11 @@ void rapl_before(int core) {
   fd = open_msr(core);
 
   // Package energy
-  result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
+  result = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
   package_before = (double)result * cpu_energy_units;
 
   // PP0 energy
-  result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
+  result = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
   pp0_before = (double)result * cpu_energy_units;
 
   /*
@@ -347,7 +353,7 @@ void rapl_before(int core) {
 
   // DRAM energy, if available
   if (dram_avail) {
-    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
+    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
     dram_before = (double)result * dram_energy_units;
   }
 
@@ -372,11 +378,11 @@ void rapl_after(FILE *fp, int core) {
 
   fd = open_msr(core);
 
-  result = read_msr(fd, MSR_PKG_ENERGY_STATUS);
+  result = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
   package_after = (double)result * cpu_energy_units;
   fprintf(fp, "package: %.18f\n", package_after - package_before);
 
-  result = read_msr(fd, MSR_PP0_ENERGY_STATUS);
+  result = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
   pp0_after = (double)result * cpu_energy_units;
   fprintf(fp, "pp0: %.18f\n", pp0_after - pp0_before);
 
@@ -393,7 +399,7 @@ void rapl_after(FILE *fp, int core) {
 
   // DRAM energy, if available
   if (dram_avail) {
-    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
+    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
     dram_after = (double)result * dram_energy_units;
     fprintf(fp, "dram: %.18f\n", dram_after - dram_before);
   }
