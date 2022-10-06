@@ -321,7 +321,7 @@ pub fn run(argv: Vec<String>) -> i32 {
 
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    println!("---\nlanguage: rust\nalgorithm: aho_corasick");
+    println!("language: rust\nalgorithm: aho_corasick");
     println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     return_code

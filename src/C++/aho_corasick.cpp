@@ -341,8 +341,7 @@ int run(int argc, char *argv[]) {
   // Note the end time, before freeing memory.
   double end_time = get_time();
 
-  std::cout << "---\n"
-            << "language: " << LANG << "\n"
+  std::cout << "language: " << LANG << "\n"
             << "algorithm: aho_corasick\n"
             << "runtime: " << std::setprecision(8) << end_time - start_time
             << "\n";

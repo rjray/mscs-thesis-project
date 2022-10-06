@@ -504,7 +504,7 @@ int run(int argc, char *argv[]) {
 
   // Note the end time, before freeing memory.
   double end_time = get_time();
-  fprintf(stdout, "---\nlanguage: %s\nalgorithm: aho_corasick\n", LANG);
+  fprintf(stdout, "language: %s\nalgorithm: aho_corasick\n", LANG);
   fprintf(stdout, "runtime: %.6g\n", end_time - start_time);
 
   // Free all the memory that was allocated by the routines in setup.c:

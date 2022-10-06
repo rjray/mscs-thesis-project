@@ -86,7 +86,7 @@ pub fn run(code: &Runnable, name: &str, argv: Vec<String>) -> i32 {
 
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    println!("---\nlanguage: rust\nalgorithm: {}", &name);
+    println!("language: rust\nalgorithm: {}", &name);
     println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     return_code
