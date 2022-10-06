@@ -34,7 +34,7 @@ double get_time() {
 int main(int argc, char **argv) {
   int opt, run_count = 10, show_info = 0, verbose = 0;
   char *output_file = (char *)calloc(256, sizeof(char));
-  char **exec_argv = (char **)calloc(4, sizeof(char *));
+  char **exec_argv = (char **)calloc(8, sizeof(char *));
   FILE *file;
 
   while ((opt = getopt(argc, argv, "vin:f:")) != -1) {
@@ -71,13 +71,18 @@ int main(int argc, char **argv) {
 
   // Don't do these if show_info was passed, as there probably aren't any args.
   if (!show_info) {
+    int idx = 0;
+    // Start with the elements that will run it under /bin/time for mem usage:
+    exec_argv[idx++] = "/bin/time";
+    exec_argv[idx++] = "-f";
+    exec_argv[idx++] = "max_memory: %M";
     // Copy the program argument's pointer to exec_argv:
-    exec_argv[0] = argv[optind];
+    exec_argv[idx++] = argv[optind];
     // Copy the input file arguments' pointers to exec_argv:
-    exec_argv[1] = argv[optind + 1]; // sequences
-    exec_argv[2] = argv[optind + 2]; // patterns
+    exec_argv[idx++] = argv[optind + 1]; // sequences
+    exec_argv[idx++] = argv[optind + 2]; // patterns
     if (remaining == 4)
-      exec_argv[3] = argv[optind + 3];
+      exec_argv[idx++] = argv[optind + 3];
   }
 
   rapl_init(CORE, show_info);
@@ -92,7 +97,7 @@ int main(int argc, char **argv) {
   file = fopen(output_file, "a");
   if (verbose)
     fprintf(stdout, "Starting run of %d iterations of %s\n", run_count + 1,
-            exec_argv[0]);
+            argv[optind]);
 
   for (int i = 0; i <= run_count; i++) {
     int result, ret;
@@ -117,15 +122,26 @@ int main(int argc, char **argv) {
     }
 
     if (i != 0) {
+      // Note the end time.
+      double end_time = get_time();
+      fprintf(file, "---\n");
+      fprintf(file, "iteration: %d\n", i);
+      fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
+      fprintf(file, "total_runtime: %.8g\n", end_time - start_time);
+
+      // Capture the stdout of the process.
       FILE *stdout_file = subprocess_stdout(&process);
       while (fgets(line, 80, stdout_file) != NULL)
         fputs(line, file);
-      fprintf(file, "iteration: %d\n", i);
-      fprintf(file, "success: %s\n", ret == 0 ? "true" : "false");
-      // Note the end time.
-      double end_time = get_time();
-      fprintf(file, "total_runtime: %.8g\n", end_time - start_time);
 
+      // Capture the stderr and add it.
+      FILE *stderr_file = subprocess_stderr(&process);
+      while (fgets(line, 80, stderr_file) != NULL) {
+        if (strstr(line, "max_memory: "))
+          fputs(line, file);
+      }
+
+      // Capture the energy readings.
       rapl_after(file, CORE);
     }
 
