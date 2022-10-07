@@ -9,7 +9,6 @@
 
 use common::setup::*;
 use std::cmp::Ordering;
-use std::collections::VecDeque;
 use std::env;
 use std::process::exit;
 use std::time::Instant;
@@ -60,6 +59,38 @@ impl Set {
                 self.insert(element);
             }
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Queue {
+    elements: Vec<usize>,
+    head: usize,
+}
+
+impl Queue {
+    fn new() -> Queue {
+        Queue {
+            elements: Vec::with_capacity(32),
+            head: 0,
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.head == self.elements.len()
+    }
+
+    fn enqueue(&mut self, element: usize) {
+        self.elements.push(element);
+    }
+
+    fn dequeue(&mut self) -> usize {
+        if self.is_empty() {
+            panic!("Queue::dequeue: underflow");
+        }
+        let value = self.elements[self.head];
+        self.head += 1;
+        value
     }
 }
 
@@ -162,7 +193,7 @@ fn build_goto(
 #[inline(never)]
 fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // Need a queue of state numbers:
-    let mut queue: VecDeque<usize> = VecDeque::new();
+    let mut queue = Queue::new();
 
     // The failure function is accessed more randomly than the goto function or
     // the output function. So, pre-allocate it to the size of goto_fn.
@@ -176,7 +207,7 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
             continue;
         }
 
-        queue.push_back(state as usize);
+        queue.enqueue(state as usize);
         failure_fn[state as usize] = 0;
     }
 
@@ -184,24 +215,23 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // algorithm. Their mnemonic isn't clear, or else I'd use more meaningful
     // names.
     while !queue.is_empty() {
-        if let Some(r) = queue.pop_front() {
-            // pop_front() returns an Option<> type, so we needed Some().
-            for a in ALPHA_OFFSETS {
-                let s = goto_fn[r][*a];
-                if s == FAIL {
-                    continue;
-                }
-                let ss = s as usize;
+        let r = queue.dequeue();
 
-                queue.push_back(ss);
-                let mut state = failure_fn[r];
-                while goto_fn[state][*a] == FAIL {
-                    state = failure_fn[state];
-                }
-                failure_fn[ss] = goto_fn[state][*a] as usize;
-                let failure_set = output_fn[failure_fn[ss]].clone();
-                output_fn[ss].union(&failure_set);
+        for a in ALPHA_OFFSETS {
+            let s = goto_fn[r][*a];
+            if s == FAIL {
+                continue;
             }
+            let ss = s as usize;
+
+            queue.enqueue(ss);
+            let mut state = failure_fn[r];
+            while goto_fn[state][*a] == FAIL {
+                state = failure_fn[state];
+            }
+            failure_fn[ss] = goto_fn[state][*a] as usize;
+            let failure_set = output_fn[failure_fn[ss]].clone();
+            output_fn[ss].union(&failure_set);
         }
     }
 
