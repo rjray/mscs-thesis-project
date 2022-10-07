@@ -9,11 +9,23 @@ from operator import itemgetter
 from statistics import mean, median, stdev, variance
 import yaml
 
-NUMERICAL_KEYS = ["runtime", "total_runtime", "package", "pp0", "dram"]
+NUMERICAL_KEYS = [
+    "runtime", "total_runtime", "package", "pp0", "dram", "max_memory"
+]
 DEFAULT_DATA_FILE = "experiments_data.yml"
 DEFAULT_RUNTIMES_GRAPH = "runtimes.png"
+DEFAULT_MEMORY_GRAPH = "memory.png"
 DEFAULT_POWER_GRAPH = "power.png"
 DEFAULT_PPS_GRAPH = "power_per_sec.png"
+
+SIMPLE_GRAPH_PARAMS = {
+    "runtime": [
+        "runtime", "Seconds", "Run-Time Comparison by Algorithm", "upper right"
+    ],
+    "memory": [
+        "max_memory", "Megabytes", "Memory Usage by Algorithm", "lower right"
+    ],
+}
 
 
 # Grab command-line arguments for the script.
@@ -31,6 +43,13 @@ def parse_command_line():
         type=str,
         default=DEFAULT_RUNTIMES_GRAPH,
         help="File to write the run-times graph to"
+    )
+    parser.add_argument(
+        "-m",
+        "--memory",
+        type=str,
+        default=DEFAULT_MEMORY_GRAPH,
+        help="File to write the memory graph to"
     )
     parser.add_argument(
         "-p",
@@ -161,7 +180,12 @@ def analyze_data(data, langs, algos):
             for key in NUMERICAL_KEYS:
                 cell = {"notes": None}
                 values = map(lambda x: x[key], iters)
-                values = list(filter(lambda x: x >= 0.0, values))
+                values = np.array(
+                    list(filter(lambda x: x >= 0.0, values)), dtype=float
+                )
+                # Scale memory down to Mb:
+                if key == "max_memory":
+                    values /= 1024.0
                 size = len(values)
                 cell["samples"] = size
                 cell["mean"] = mean(values)
@@ -177,7 +201,13 @@ def analyze_data(data, langs, algos):
 
 
 # Create a bar graph for run-times by algorithm.
-def runtimes_graph(data, filename):
+def simple_graph(which, data, filename):
+    if which not in SIMPLE_GRAPH_PARAMS:
+        print(f"  Unknown graph type: {which}")
+        return
+
+    key, ylabel, title, legend = SIMPLE_GRAPH_PARAMS[which]
+
     algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
     algo_labels = ["Knuth-Morris-Pratt",
                    "Boyer-Moore", "Shift Or", "Aho-Corasick"]
@@ -195,7 +225,7 @@ def runtimes_graph(data, filename):
     for lang in languages:
         bars[lang] = np.zeros(x_len, dtype=float)
         for idx, algo in enumerate(algorithms):
-            bars[lang][idx] = data[lang][algo]["runtime"]["mean"]
+            bars[lang][idx] = data[lang][algo][key]["mean"]
 
     fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
     for idx, lang in enumerate(languages):
@@ -203,9 +233,9 @@ def runtimes_graph(data, filename):
                step, label=lang_labels[idx])
 
     ax.set_xticks(x + step * 2, algo_labels)
-    ax.set_ylabel("Seconds")
-    ax.set_title("Run-Time Comparison by Algorithm")
-    ax.legend()
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.legend(loc=legend)
 
     fig.tight_layout()
     print(f"  Writing {filename}")
@@ -214,7 +244,7 @@ def runtimes_graph(data, filename):
     return
 
 
-# Create a bar graph for run-times by algorithm.
+# Create a stacked bar graph for energy used by algorithm.
 def power_graph(data, filename, average=False):
     algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
     algo_labels = ["Knuth-Morris-Pratt",
@@ -315,15 +345,14 @@ def main():
 
     if not args.no_plots:
         print("\nCreating runtimes graph...")
-        runtimes_graph(analyzed, args.runtimes)
+        simple_graph("runtime", analyzed, args.runtimes)
         print("  Done.")
-
-    if not args.no_plots:
+        print("\nCreating memory-usage graph...")
+        simple_graph("memory", analyzed, args.memory)
+        print("  Done.")
         print("\nCreating power usage graph...")
         power_graph(analyzed, args.power)
         print("  Done.")
-
-    if not args.no_plots:
         print("\nCreating power-per-second usage graph...")
         power_graph(analyzed, args.power_per_sec, True)
         print("  Done.")
