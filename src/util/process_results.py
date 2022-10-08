@@ -444,11 +444,19 @@ def create_tables(data, filename):
                 label=f"{algo}:runtime"
             )
 
-        # Create an energy-usage table for each algorithm:
+        # Create a pp0/dram energy-usage table for each algorithm:
         for algo in ALGORITHMS:
             create_computed_table(
                 f, data, LANGUAGES, algo, ["pp0", "dram"],
-                caption=f"{ALGORITHM_LABELS[algo]} combined energy usage",
+                caption=f"{ALGORITHM_LABELS[algo]} PP0/DRAM energy usage",
+                label=f"{algo}:energy"
+            )
+
+        # Create a package energy-usage table for each algorithm:
+        for algo in ALGORITHMS:
+            create_computed_table(
+                f, data, LANGUAGES, algo, "package",
+                caption=f"{ALGORITHM_LABELS[algo]} package energy usage",
                 label=f"{algo}:energy"
             )
 
