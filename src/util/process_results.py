@@ -474,7 +474,7 @@ def create_tables(data, filename):
             create_computed_table(
                 f, data, LANGUAGES, algo, "package",
                 caption=caption, label=f"{algo}:energy_runtime",
-                divisor="runtime"
+                divisor="total_runtime"
             )
 
     return
