@@ -44,6 +44,9 @@ SIMPLE_GRAPH_PARAMS = {
     ],
 }
 
+# Tracker for the number of tables written:
+tables_written = 0
+
 
 # Grab command-line arguments for the script.
 def parse_command_line():
@@ -329,11 +332,127 @@ def power_graph(data, filename, average=False):
     return
 
 
-def create_one_table(
-    f, data, langs, algos, field, *, xaxis="algorithm", caption=None,
+# Create a single table whose content is computed from the `data` parameter and
+# write the LaTeX code to the open file `f`.
+def create_computed_table(
+    f, data, langs, algos, fields, *, axis="algorithms", caption=None,
     label=None
 ):
-    pass
+    global tables_written
+
+    tables_written += 1
+
+    if type(langs) != list:
+        langs = [langs]
+    if type(algos) != list:
+        algos = [algos]
+    if type(fields) != list:
+        fields = [fields]
+
+    algo_labels = list(map(lambda a: ALGORITHM_LABELS[a], algos))
+    lang_labels = list(map(lambda l: LANGUAGE_LABELS[l], langs))
+
+    if axis == "algorithms":
+        width = len(algos)
+        x_axis = algos
+        x_labels = algo_labels
+        height = len(langs)
+        y_axis = langs
+        y_labels = lang_labels
+        headers = ["Language"]
+    else:
+        width = len(langs)
+        x_axis = langs
+        x_labels = lang_labels
+        height = len(algos)
+        y_axis = algos
+        y_labels = algo_labels
+        headers = ["Algorithm"]
+
+    colspec = ["l"]
+    for i in range(width):
+        colspec.append("r")
+        headers.append(x_labels[i])
+    colspec = "|".join(colspec)
+    headers = "&".join(headers)
+
+    # Create the table of numbers
+    table_data = np.zeros((height, width))
+    for y_idx, y_str in enumerate(y_axis):
+        for x_idx, x_str in enumerate(x_axis):
+            if axis == "algorithms":
+                table_data[y_idx][x_idx] = \
+                    sum([data[y_str][x_str][key]["mean"] for key in fields])
+            else:
+                table_data[y_idx][x_idx] = \
+                    sum([data[x_str][y_str][key]["mean"] for key in fields])
+    # Normalize:
+    table_data /= table_data.min()
+    # Figure out where the 1.0 is:
+    col = np.where(table_data == 1.0)
+    col = col[1][0]
+
+    # Now we need a map of the order to display rows in. We have to sort by the
+    # values in the column that holds the 1.0, but not sort table_data itself.
+    row_map = list(range(height))
+    row_map.sort(key=lambda i: table_data[i][col])
+
+    # Emit a newline before all subsequent tables:
+    if tables_written > 1:
+        print("", file=f)
+
+    # Emit the preamble:
+    print(f"%% Table #{tables_written}:", file=f)
+    print(f"%% Language(s): {langs}", file=f)
+    print(f"%% Algorithm(s): {algos}", file=f)
+    print(f"%% Field(s): {fields}", file=f)
+    print(f"%% Caption: {caption}", file=f)
+    print(f"%% Label: {label}", file=f)
+    print("\\begin{table}", file=f)
+    print(f"\\begin{{tabular}}{{|{colspec}|}}", file=f)
+    print("\\hline", file=f)
+    print(f"{headers}\\\\", file=f)
+    print("\\hline", file=f)
+
+    for y_idx in row_map:
+        row = [y_labels[y_idx]]
+        for x_idx in range(width):
+            row.append(f"{table_data[y_idx][x_idx]:.4f}")
+        print("&".join(row) + "\\\\", file=f)
+
+    print("\\hline", file=f)
+    print("\\end{tabular}", file=f)
+    if caption:
+        print(f"\\caption{{{caption}}}", file=f)
+    if label:
+        print(f"\\label{{table:{label}}}", file=f)
+    print("\\end{table}", file=f)
+
+    return
+
+
+# Create all the tables, using `data` and the `filename` given.
+def create_tables(data, filename):
+    with open(filename, "w", encoding="utf-8") as f:
+        # Create each table individually.
+
+        # Create a run-time table for each algorithm:
+        for algo in ALGORITHMS:
+            create_computed_table(
+                f, data, LANGUAGES, algo, "runtime",
+                caption=f"{ALGORITHM_LABELS[algo]} run-times",
+                label=f"{algo}:runtime"
+            )
+
+        # Create an energy-usage table for each algorithm:
+        for algo in ALGORITHMS:
+            create_computed_table(
+                f, data, LANGUAGES, algo, ["pp0", "dram"],
+                caption=f"{ALGORITHM_LABELS[algo]} combined energy usage",
+                label=f"{algo}:energy"
+            )
+
+    return
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -381,6 +500,12 @@ def main():
         print("\nCreating power-per-second usage graph...")
         power_graph(analyzed, args.power_per_sec, True)
         print("  Done.")
+
+    if not args.no_tables:
+        print("\nCreating tables...")
+        create_tables(analyzed, args.tables)
+
+    print("\nDone.")
 
     return
 
