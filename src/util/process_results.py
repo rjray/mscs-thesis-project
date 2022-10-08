@@ -294,32 +294,31 @@ def power_graph(data, filename, average=False):
             dtype=float
         )
 
-    package = {}
+    dram = {}
     for lang in LANGUAGES:
-        package[lang] = np.array(
-            [data[lang][algo]["package"]["mean"] for algo in ALGORITHMS],
+        dram[lang] = np.array(
+            [data[lang][algo]["dram"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
-        package[lang] -= pp0[lang]
 
     if average:
         for lang in LANGUAGES:
             pp0[lang] /= runtimes[lang]
-            package[lang] /= runtimes[lang]
+            dram[lang] /= runtimes[lang]
 
     fig, ax = plt.subplots()
     for idx, lang in enumerate(LANGUAGES):
         ax.bar(x + steps[idx], pp0[lang], step,
                label=f"{LANGUAGE_LABELS[lang]}")
-        ax.bar(x + steps[idx], package[lang], step, bottom=pp0[lang])
+        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
 
     ax.set_xticks(x + step * 2, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS))
     if average:
         ax.set_ylabel("Avg Joules per Second")
-        ax.set_title("Total Energy Use (per second) Comparison by Algorithm")
+        ax.set_title("Total Energy Use (CPU + DRAM) by Algorithm (per second)")
     else:
         ax.set_ylabel("Joules")
-        ax.set_title("Total Energy Use Comparison by Algorithm")
+        ax.set_title("Total Energy Use (CPU + DRAM) by Algorithm")
     if average:
         ax.legend(loc="lower right")
     else:
@@ -336,7 +335,7 @@ def power_graph(data, filename, average=False):
 # write the LaTeX code to the open file `f`.
 def create_computed_table(
     f, data, langs, algos, fields, *, axis="algorithms", caption=None,
-    label=None
+    label=None, divisor=None
 ):
     global tables_written
 
@@ -348,6 +347,9 @@ def create_computed_table(
         algos = [algos]
     if type(fields) != list:
         fields = [fields]
+    if divisor is not None:
+        if type(divisor) != list:
+            divisor = [divisor]
 
     algo_labels = list(map(lambda a: ALGORITHM_LABELS[a], algos))
     lang_labels = list(map(lambda l: LANGUAGE_LABELS[l], langs))
@@ -376,16 +378,29 @@ def create_computed_table(
     colspec = "|".join(colspec)
     headers = "&".join(headers)
 
-    # Create the table of numbers
+    # Create the table of numbers for the data:
     table_data = np.zeros((height, width))
+    # Create the table for the divisors (if any):
+    divisors = np.zeros((height, width))
     for y_idx, y_str in enumerate(y_axis):
         for x_idx, x_str in enumerate(x_axis):
             if axis == "algorithms":
                 table_data[y_idx][x_idx] = \
                     sum([data[y_str][x_str][key]["mean"] for key in fields])
+                if divisor:
+                    divisors[y_idx][x_idx] = \
+                        sum([data[y_str][x_str][key]["mean"]
+                            for key in divisor])
             else:
                 table_data[y_idx][x_idx] = \
                     sum([data[x_str][y_str][key]["mean"] for key in fields])
+                if divisor:
+                    divisors[y_idx][x_idx] = \
+                        sum([data[x_str][y_str][key]["mean"]
+                            for key in divisor])
+    # If divisor is set, divide across table_data:
+    if divisor:
+        table_data /= divisors
     # Normalize:
     table_data /= table_data.min()
     # Figure out where the 1.0 is:
@@ -452,12 +467,14 @@ def create_tables(data, filename):
                 label=f"{algo}:energy"
             )
 
-        # Create a package energy-usage table for each algorithm:
+        # Create a package energy-usage-per-second table for each algorithm:
         for algo in ALGORITHMS:
+            caption = \
+                f"{ALGORITHM_LABELS[algo]} package energy usage over run-time"
             create_computed_table(
                 f, data, LANGUAGES, algo, "package",
-                caption=f"{ALGORITHM_LABELS[algo]} package energy usage",
-                label=f"{algo}:energy"
+                caption=caption, label=f"{algo}:energy_runtime",
+                divisor="runtime"
             )
 
     return
