@@ -12,11 +12,28 @@ import yaml
 NUMERICAL_KEYS = [
     "runtime", "total_runtime", "package", "pp0", "dram", "max_memory"
 ]
+ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
+ALGORITHM_LABELS = {
+    "kmp": "Knuth-Morris-Pratt",
+    "boyer_moore": "Boyer-Moore",
+    "shift_or": "Shift-Or",
+    "aho_corasick": "Aho-Corasick",
+}
+LANGUAGES = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
+LANGUAGE_LABELS = {
+    "c-gcc": "C (GCC)",
+    "c-llvm": "C (LLVM)",
+    "cpp-gcc": "C++ (GCC)",
+    "cpp-llvm": "C++ (LLVM)",
+    "rust": "Rust",
+}
+
 DEFAULT_DATA_FILE = "experiments_data.yml"
 DEFAULT_RUNTIMES_GRAPH = "runtimes.png"
 DEFAULT_MEMORY_GRAPH = "memory.png"
 DEFAULT_POWER_GRAPH = "power.png"
 DEFAULT_PPS_GRAPH = "power_per_sec.png"
+DEFAULT_TABLES_FILE = "latex-tables.tex"
 
 SIMPLE_GRAPH_PARAMS = {
     "runtime": [
@@ -66,10 +83,23 @@ def parse_command_line():
         help="File to write the power-per-second usage graph to"
     )
     parser.add_argument(
+        "-t",
+        "--tables",
+        type=str,
+        default=DEFAULT_TABLES_FILE,
+        help="File to write the LaTeX tables into"
+    )
+    parser.add_argument(
         "-n",
         "--no-plots",
         action="store_true",
         help="Suppress generation of plots"
+    )
+    parser.add_argument(
+        "-N",
+        "--no-tables",
+        action="store_true",
+        help="Suppress generation of tables"
     )
     parser.add_argument(
         "-d",
@@ -194,13 +224,13 @@ def analyze_data(data, langs, algos):
                 cell["variance"] = variance(values)
                 if size != max_size:
                     # It can only be smaller
-                    cell["notes"] = f"Based on {size} samples"
+                    cell["notes"] = f"Based on {size} (of {max_size}) samples"
                 new_data[lang][algo][key] = cell
 
     return new_data
 
 
-# Create a bar graph for run-times by algorithm.
+# Create a bar graph for run-times or memory usage by algorithm.
 def simple_graph(which, data, filename):
     if which not in SIMPLE_GRAPH_PARAMS:
         print(f"  Unknown graph type: {which}")
@@ -208,31 +238,25 @@ def simple_graph(which, data, filename):
 
     key, ylabel, title, legend = SIMPLE_GRAPH_PARAMS[which]
 
-    algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
-    algo_labels = ["Knuth-Morris-Pratt",
-                   "Boyer-Moore", "Shift Or", "Aho-Corasick"]
-    languages = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
-    lang_labels = ["C (GCC)", "C (LLVM)", "C++ (GCC)", "C++ (LLVM)", "Rust"]
-
     # Total width of each algorithm's bars
     width = 0.8
-    step = width / len(languages)
-    steps = list(map(lambda x: x * step, range(len(languages))))
-    x_len = len(algorithms)
+    step = width / len(LANGUAGES)
+    steps = list(map(lambda x: x * step, range(len(LANGUAGES))))
+    x_len = len(ALGORITHMS)
     x = np.arange(x_len)
 
     bars = {}
-    for lang in languages:
+    for lang in LANGUAGES:
         bars[lang] = np.zeros(x_len, dtype=float)
-        for idx, algo in enumerate(algorithms):
+        for idx, algo in enumerate(ALGORITHMS):
             bars[lang][idx] = data[lang][algo][key]["mean"]
 
     fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
-    for idx, lang in enumerate(languages):
+    for idx, lang in enumerate(LANGUAGES):
         ax.bar(x + steps[idx], bars[lang],
-               step, label=lang_labels[idx])
+               step, label=LANGUAGE_LABELS[lang])
 
-    ax.set_xticks(x + step * 2, algo_labels)
+    ax.set_xticks(x + step * 2, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS))
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc=legend)
@@ -246,53 +270,47 @@ def simple_graph(which, data, filename):
 
 # Create a stacked bar graph for energy used by algorithm.
 def power_graph(data, filename, average=False):
-    algorithms = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
-    algo_labels = ["Knuth-Morris-Pratt",
-                   "Boyer-Moore", "Shift Or", "Aho-Corasick"]
-    languages = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
-    lang_labels = ["C (GCC)", "C (LLVM)", "C++ (GCC)", "C++ (LLVM)", "Rust"]
-
     # Total width of each algorithm's bars
     width = 0.8
-    step = width / len(languages)
-    steps = list(map(lambda x: x * step, range(len(languages))))
-    x_len = len(algorithms)
+    step = width / len(LANGUAGES)
+    steps = list(map(lambda x: x * step, range(len(LANGUAGES))))
+    x_len = len(ALGORITHMS)
     x = np.arange(x_len)
 
     runtimes = {}
-    for lang in languages:
+    for lang in LANGUAGES:
         runtimes[lang] = np.array(
-            [data[lang][algo]["total_runtime"]["mean"] for algo in algorithms],
+            [data[lang][algo]["total_runtime"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
 
     pp0 = {}
-    for lang in languages:
+    for lang in LANGUAGES:
         pp0[lang] = np.array(
-            [data[lang][algo]["pp0"]["mean"] for algo in algorithms],
+            [data[lang][algo]["pp0"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
 
     package = {}
-    for lang in languages:
+    for lang in LANGUAGES:
         package[lang] = np.array(
-            [data[lang][algo]["package"]["mean"] for algo in algorithms],
+            [data[lang][algo]["package"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
         package[lang] -= pp0[lang]
 
     if average:
-        for lang in languages:
+        for lang in LANGUAGES:
             pp0[lang] /= runtimes[lang]
             package[lang] /= runtimes[lang]
 
     fig, ax = plt.subplots()
-    for idx, lang in enumerate(languages):
+    for idx, lang in enumerate(LANGUAGES):
         ax.bar(x + steps[idx], pp0[lang], step,
-               label=f"{lang_labels[idx]}")
+               label=f"{LANGUAGE_LABELS[lang]}")
         ax.bar(x + steps[idx], package[lang], step, bottom=pp0[lang])
 
-    ax.set_xticks(x + step * 2, algo_labels)
+    ax.set_xticks(x + step * 2, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS))
     if average:
         ax.set_ylabel("Avg Joules per Second")
         ax.set_title("Total Energy Use (per second) Comparison by Algorithm")
@@ -309,6 +327,13 @@ def power_graph(data, filename, average=False):
     fig.savefig(filename)
 
     return
+
+
+def create_one_table(
+    f, data, langs, algos, field, *, xaxis="algorithm", caption=None,
+    label=None
+):
+    pass
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
