@@ -340,6 +340,10 @@ def create_computed_table(
     global tables_written
 
     tables_written += 1
+    if label:
+        print(f"  Creating table {label}")
+    else:
+        print(f"  Creating table #{tables_written}")
 
     if type(langs) != list:
         langs = [langs]
@@ -421,6 +425,8 @@ def create_computed_table(
     print(f"%% Language(s): {langs}", file=f)
     print(f"%% Algorithm(s): {algos}", file=f)
     print(f"%% Field(s): {fields}", file=f)
+    if divisor:
+        print(f"%% Divisor(s): {divisor}", file=f)
     print(f"%% Caption: {caption}", file=f)
     print(f"%% Label: {label}", file=f)
     print("\\begin{table}", file=f)
@@ -456,7 +462,7 @@ def create_tables(data, filename):
             create_computed_table(
                 f, data, LANGUAGES, algo, "runtime",
                 caption=f"{ALGORITHM_LABELS[algo]} run-times",
-                label=f"{algo}:runtime"
+                label=f"runtime:{algo}"
             )
 
         # Create a pp0/dram energy-usage table for each algorithm:
@@ -464,7 +470,7 @@ def create_tables(data, filename):
             create_computed_table(
                 f, data, LANGUAGES, algo, ["pp0", "dram"],
                 caption=f"{ALGORITHM_LABELS[algo]} PP0/DRAM energy usage",
-                label=f"{algo}:energy"
+                label=f"energy:{algo}"
             )
 
         # Create a package energy-usage-per-second table for each algorithm:
@@ -473,8 +479,17 @@ def create_tables(data, filename):
                 f"{ALGORITHM_LABELS[algo]} package energy usage over run-time"
             create_computed_table(
                 f, data, LANGUAGES, algo, "package",
-                caption=caption, label=f"{algo}:energy_runtime",
+                caption=caption, label=f"energy_runtime:{algo}",
                 divisor="total_runtime"
+            )
+
+        # Create a max-memory table for each algorithm:
+        for algo in ALGORITHMS:
+            caption = \
+                f"{ALGORITHM_LABELS[algo]} total memory usage"
+            create_computed_table(
+                f, data, LANGUAGES, algo, "max_memory",
+                caption=caption, label=f"memory:{algo}"
             )
 
     return
