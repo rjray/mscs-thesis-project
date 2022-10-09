@@ -85,6 +85,12 @@ int read_sequences(const char *fname, char ***data) {
   fclose(input);
   free(line);
 
+  if (count != num_lines) {
+    fprintf(stderr, "Incorrect number of lines read from %s: %d/%d\n", fname,
+            count, num_lines);
+    return 0;
+  }
+
   *data = table;
   return count;
 }
@@ -169,6 +175,12 @@ int read_answers(const char *fname, int ***data) {
 
   fclose(input);
   free(line);
+
+  if (count != num_lines) {
+    fprintf(stderr, "Incorrect number of lines read from %s: %d/%d\n", fname,
+            count, num_lines);
+    return 0;
+  }
 
   *data = table;
   return count;
