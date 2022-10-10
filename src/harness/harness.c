@@ -32,12 +32,12 @@ double get_time() {
 }
 
 int main(int argc, char **argv) {
-  int opt, run_count = 10, show_info = 0, verbose = 0;
+  int opt, run_count = 10, show_info = 0, verbose = 0, skip0 = 0;
   char *output_file = (char *)calloc(256, sizeof(char));
   char **exec_argv = (char **)calloc(8, sizeof(char *));
   FILE *file;
 
-  while ((opt = getopt(argc, argv, "vin:f:")) != -1) {
+  while ((opt = getopt(argc, argv, "vin:f:s")) != -1) {
     switch (opt) {
     case 'i':
       show_info = 1;
@@ -50,6 +50,9 @@ int main(int argc, char **argv) {
       break;
     case 'f':
       strcpy(output_file, optarg);
+      break;
+    case 's':
+      skip0 = 1;
       break;
     default:
       fprintf(stderr, "Usage: %s [ -i ] [ -n count ] [ -f output ] <files>\n",
@@ -96,10 +99,10 @@ int main(int argc, char **argv) {
 
   file = fopen(output_file, "a");
   if (verbose)
-    fprintf(stdout, "Starting run of %d iterations of %s\n", run_count + 1,
-            argv[optind]);
+    fprintf(stdout, "Starting run of %d iterations of %s\n",
+            run_count + 1 - skip0, argv[optind]);
 
-  for (int i = 0; i <= run_count; i++) {
+  for (int i = skip0; i <= run_count; i++) {
     int result, ret;
     struct subprocess_s process;
     char *line = (char *)calloc(80, sizeof(char));
