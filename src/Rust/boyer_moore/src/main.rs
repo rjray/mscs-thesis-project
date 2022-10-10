@@ -71,7 +71,7 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     let mut i: i32;
     let mut j: i32;
     let suffixes = calc_suffixes(pat, m);
-    let mut good_suffix: Vec<i32> = vec![m as i32; m + 1];
+    let mut good_suffix: Vec<i32> = vec![m as i32; m];
 
     j = 0;
     i = m as i32 - 1;
