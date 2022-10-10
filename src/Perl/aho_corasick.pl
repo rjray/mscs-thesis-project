@@ -181,10 +181,11 @@ sub run {
     my (@goto_fn, @output_fn);
     build_goto($patterns_data, \@goto_fn, \@output_fn);
     my $failure_fn = build_failure(\@goto_fn, \@output_fn);
+    my $pat_count = scalar @{$patterns_data};
 
     foreach my $sequence (0..$#{$sequences_data}) {
         my $sequence_str = $sequences_data->[$sequence];
-        my $matches = aho_corasick($sequence_str, scalar @{$patterns_data},
+        my $matches = aho_corasick($sequence_str, $pat_count,
                                    \@goto_fn, $failure_fn, \@output_fn);
 
         if ($answers_data) {
