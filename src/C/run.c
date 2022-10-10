@@ -41,25 +41,21 @@ int run(runnable code, char *name, int argc, char *argv[]) {
     exit(-1);
   }
 
-  // The filenames are in the order: sequences patterns answers
-  const char *sequences_file = argv[1];
-  const char *patterns_file = argv[2];
-  const char *answers_file = argc == 4 ? argv[3] : NULL;
-
   // These will be alloc'd by the routines that read the files.
   char **sequences_data, **patterns_data;
   int **answers_data = NULL;
 
   // Read the three data files. Any of these that return 0 means an error. Any
-  // error has already been reported to stderr.
-  int sequences_count = read_sequences(sequences_file, &sequences_data);
+  // error has already been reported to stderr. The filenames are in the order:
+  // sequences patterns answers.
+  int sequences_count = read_sequences(argv[1], &sequences_data);
   if (sequences_count == 0)
     exit(-1);
-  int patterns_count = read_patterns(patterns_file, &patterns_data);
+  int patterns_count = read_patterns(argv[2], &patterns_data);
   if (patterns_count == 0)
     exit(-1);
-  if (answers_file != NULL) {
-    int answers_count = read_answers(answers_file, &answers_data);
+  if (argc == 4) {
+    int answers_count = read_answers(argv[3], &answers_data);
     if (answers_count == 0)
       exit(-1);
     if (answers_count != patterns_count) {
