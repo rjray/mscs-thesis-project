@@ -14,12 +14,12 @@ sub init_kmp {
     my $j = $next_table->[0] = -1;
 
     while ($i < $m) {
-        while ($j > -1 && $pat->[$i] ne $pat->[$j]) {
+        while ($j > -1 && $pat->[$i] != $pat->[$j]) {
             $j = $next_table->[$j];
         }
         $i++;
         $j++;
-        if ($pat->[$i] eq $pat->[$j]) {
+        if ($pat->[$i] == $pat->[$j]) {
             $next_table->[$i] = $next_table->[$j];
         } else {
             $next_table->[$i] = $j;
@@ -31,9 +31,9 @@ sub init_kmp {
 
 sub kmp {
     my ($pattern, $m, $sequence, $n) = @_;
-    my @pat = split //, $pattern;
-    push @pat, "\0";
-    my @seq = split //, $sequence;
+    my @pat = map { ord } split //, $pattern;
+    push @pat, 0;
+    my @seq = map { ord } split //, $sequence;
     my $matches = 0;
     my @next_table = (0) x ($m + 1);
 
@@ -41,7 +41,7 @@ sub kmp {
     my ($i, $j) = (0, 0);
 
     while ($j < $n) {
-        while ($i > -1 && $pat[$i] ne $seq[$j]) {
+        while ($i > -1 && $pat[$i] != $seq[$j]) {
             $i = $next_table[$i];
         }
         $i++;
