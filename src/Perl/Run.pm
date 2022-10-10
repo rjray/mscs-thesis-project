@@ -43,7 +43,7 @@ sub run {
 
             if ($answers_data &&
                 ($matches != $answers_data->[$pattern][$sequence])) {
-                printf {*STDOUT}
+                printf {*STDERR}
                     "Pattern %d mismatch against sequence %d (%d != %d)\n",
                     $pattern + 1, $sequence + 1, $matches,
                     $answers_data->[$pattern][$sequence];
