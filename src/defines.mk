@@ -9,7 +9,7 @@ ifeq ($(RUNCOUNT),)
 RUNCOUNT := 10
 endif
 ifeq ($(LONG_RUNCOUNT),)
-LONG_RUNCOUNT := 3
+LONG_RUNCOUNT := 5
 endif
 
 # Macros for running the experiments. One for testing and one for real.
