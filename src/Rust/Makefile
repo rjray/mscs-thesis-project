@@ -16,10 +16,6 @@ PATHTYPE=debug
 TARGETS := $(addprefix ./target/debug/,$(ALGORITHMS))
 endif
 
-ifeq ($(RUNCOUNT),)
-RUNCOUNT := 10
-endif
-
 CARGO := cargo
 
 all: $(TARGETS)
