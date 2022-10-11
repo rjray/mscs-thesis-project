@@ -1,7 +1,7 @@
 \section{Details of the Experiments}
 \label{sec:experiments}
 
-To explore these hypotheses a range of experiments were performed in the three chosen languages (C, C++, Rust), with the programs being run under a ``harness'' application that measures various memory, performance, and energy metrics. Additional tools were used to examine the running programs for memory leaks, as well as measure aspects of the source code itself.
+To explore these hypotheses a range of experiments were executed in the chosen languages (C, C++, Rust, Perl, Python), with the programs being run under a ``harness'' application that measured various memory, performance, and energy metrics. Additional tools were used to examine the programs for memory leaks, as well as measure aspects of the source code itself.
 
 \subsection{Definitions and Measurements}
 
@@ -13,17 +13,29 @@ The \textit{Running Average Power Limit} (RAPL) measurement system was introduce
 
 \begin{description}
 \item[Package] The full (socketed) processor package, which may contain multiple cores.
-\item[Power-Plane 0] The domain that encompasses the combined cores within the package.
-\item[Power-Plane 1] Referred to as the ``uncore'', this domain generally covers the integrated GPU (if present).
+\item[Power-Plane 0] The domain that encompasses the combined cores within the package. This reading will cover all cores within the CPU of the package.
+\item[Power-Plane 1] Sometimes referred to as ``uncore'', this domain generally covers the integrated GPU (if present).
 \item[DRAM] The domain for the system's DRAM, whose energy usage is separate from the package.
 \item[Psys] The domain that covers the entire system-on-chip energy usage. This would include the package and DRAM values, as well as other system-level energy consumption.
 \end{description}
 
 A computer system may have more than one package, and the RAPL interface includes methods for determining the number of packages and gathering the energy readings for each package separately. It is not possible to measure a package's energy usage at the level of an individual core.
 
+Reading the RAPL data is done through the \textit{model-specific registers} (MSR) interface, as detailed in~\cite[Chapter~14]{intel.sdm.2022}. The method involves reading several registers to determine the number of packages the system has, then determining the scaling factors for each of time units (expressed in seconds), power units (Watts), and energy units (Joules). The scaling factors are stored in a single register referred to as \texttt{MSR\_RAPL\_POWER\_UNIT}, as groups of bits within the register. Each scaling factor is a 4-bit (5-bit in the case of energy units) value used to compute a fractional floating-point number (where $b$ represents the value of the n-bit factor):
+
+\[S~=~\frac{1}{2^{b}}\]
+
+In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S~=~61.04~\mu$J.
+
+Obtaining the data during run-time from RAPL requires reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
+
+An issue with the RAPL system was encountered during runs of the experiments: because the value of the energy registers is 32 bits in size, it wraps around to 0 when the maximum value is reached. This caused occasional anomalous readings in cases where the register would reset between the initial reading and the final reading, resulting in a negative overall value. The program that processes the output from the experiments was adjusted to recognize such values, discard them from consideration, and produce appropriate notes when a set of samples was thus shorter than the rest.
+
 \subsubsection{SLOC (Source Lines Of Code)}
 
-The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physically lines of text, comments, and actual source lines.
+The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
+
+As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas.2020} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose.
 
 \subsubsection{Metrics}
 
@@ -35,33 +47,37 @@ For each program comprising an experiment, the following data was gathered eithe
 \item[Maximum Memory Usage] The largest amount of memory allocated for the running program throughout the course of its execution, in megabytes. This represents the largest size to which the program grew during the run.
 \item[Power-Plane 0 (CPU) Energy Usage] The energy consumed by the CPU cores during the execution of the program. Measured over the full lifespan of the program, not just the algorithm itself. Measured in Joules.
 \item[DRAM Energy Usage] The energy consumed by the DRAM during the full lifespan of the program. Measured in Joules.
-\item[Full Package Energy Usage] The energy consumed by the full (socketed) package, which includes the CPU cores' energy but not the DRAM energy. Measured in Joules.
-\item[Source Lines Of Code] The measured lines of code in the implementation of the program, using a tool\footnote{sloc: \texttt{https://github.com/flosse/sloc}} designed to measure this using consistent standards across different programming languages.
+\item[Full Package Energy Usage] The energy consumed by the full (socketed) package, which includes the CPU cores' energy but not the DRAM energy. Also measured in Joules.
+\item[Source Lines Of Code] The measured lines of code in the implementation of the program, using a tool\footnote{sloc: \texttt{https://github.com/flosse/sloc}} designed to measure these values using consistent standards across the different programming languages.
 \end{description}
 
-The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they deemed unnecessary in the context of having the package, CPU and DRAM values.
+The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
 \subsection{Languages Under Consideration}
 
-As mentioned above, the experiments were performed on three languages. The languages were chosen for their commonalities as well as their differences:
+As mentioned above, the experiments were performed on five languages. The languages were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
-\item Each language is compiled to machine code (none are interpreted or make use of virtual machines)
-\item Each is widely regarded within their respective communities as being viable for systems-level programming
-\item Each takes a somewhat different view on memory management
+\item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping.
+\item Each language is currently in widespread use across different disciplines of software development.
+\item The languages have differing aspects in their approach to memory management, as are detailed below.
 \end{itemize}
 
 \subsubsection{C}
 
-The C programming language is the oldest and most-established of the three languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO).
+The C programming language is the oldest and most-established of the languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO).
 
 \subsubsection{C++}
 
-C++ was developed initially as an extension of C, by Bjarne Stroustrup while working at AT\&T Bell Labs. It first appeared in 1985 and was initially standardized in 1998. Initially envisioned as ``C with Classes'', the language has been significantly expanded over the years to include many more features while still maintaining low-level memory accessibility. C++ attempts to offer more expressive, concise coding than C, with many of C's memory-management concerns dealt with automatically by class constructors and destructors.
+C++ was developed initially as an extension of C, by Bjarne Stroustrup while working at AT\&T Bell Labs. It first appeared in 1985 and was initially standardized in 1998. At first envisioned as ``C with Classes'', the language has been significantly expanded over the years to include many more features while still maintaining low-level memory accessibility. C++ attempts to offer more expressive, concise coding than C, with many of C's memory-management concerns dealt with automatically by class constructors and destructors.
 
 \subsubsection{Rust}
 
-Rust is the newest of the three languages, having first appeared in 2010 (as covered in detail in section \ref{sec:rust}). Rust brings a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership.
+Rust is the newest of the languages, having first appeared in 2010. Rust brings a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership.
+
+\subsubsection{Perl}
+
+\subsubsection{Python}
 
 \subsection{Selected Algorithms}
 
@@ -111,17 +127,17 @@ Installed Storage & 120 GB M.2 SSD\\
 \label{table:hardware_specs}
 \end{table}
 
-The CPU is dual-core, with hyperthreading cores, for a total of 4 computational cores. This did not come into play for the experiments, as none of the code was written as multi-threaded.
+The CPU is dual-core, with hyperthreading cores, for a total of 4 computational cores. This did not come into consideration for the experiments as none of the code was written to be multi-threaded.
 
 \subsubsection{Operating System and Configuration}
 
 The NUC was cleaned of the vendor-installed operating system. Linux was installed on it using the minimal server edition of Ubuntu Linux 22.04.1. All unnecessary packages and software services were either disabled or removed completely.
 
-The necessary development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files from a different machine). Core software development packages from Ubuntu were also installed at this time.
+The necessary development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). Core software development packages from Ubuntu were also installed at this time.
 
 \subsubsection{Compilers and Other Tools}
 
-The following table lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the LLVM details indicates that the remaining tools were used on the development machine only, not on the NUC. These tools were used in the testing and evaluation of the experiments code prior to running experiments on the NUC.
+The following table lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the Python details indicates that the remaining tools were used on the development machine only, not on the NUC. These tools were used in the testing and evaluation of the experiments code prior to running experiments on the NUC.
 
 \begin{table}[h!]
 \begin{center}
@@ -132,9 +148,10 @@ Tool & Version & Source\\
 GNU Make & 4.3 & Ubuntu 22.04\\
 GCC & 11.2.0 & Ubuntu 22.04\\
 LLVM & 15.0.1 & Linux Homebrew\\
-\hline
-\hline
+Perl & 5.34.0 & Ubuntu 22.04\\
 Python & 3.10.6 & Ubuntu 22.04\\
+\hline
+\hline
 Valgrind & 3.19.0 & Linux Homebrew\\
 \texttt{sloc} & 0.2.1 & Linux Homebrew\\
 \texttt{perf} & 5.15.53 & Ubuntu 22.04\\
@@ -145,4 +162,4 @@ Valgrind & 3.19.0 & Linux Homebrew\\
 \label{table:tools}
 \end{table}
 
-The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perl} tool was used to identify performance bottlenecks in the running programs. Lastly, the Python programming language was used to develop the tools which were then used to process and analyze the data gathered during the running of the experiments. It was also used to generate the randomized data that the experiments used to exercise the algorithms.
+The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. Lastly, the Python programming language was also used to develop the tools which process and analyze the data gathered during the running of the experiments, as well as generate the randomized data that the experiments used to exercise the algorithms.
