@@ -19,18 +19,21 @@ RUNCOUNT := 25
 MEMCHECK_FILE := memcheck.txt
 VALGRIND := valgrind
 
+LANGUAGES := C Cpp Rust Perl Python
+LANG_CLEAN := C-clean Cpp-clean Rust-clean
+
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
 HARNESS := ./harness/harness
 
 .PHONY: harness C Cpp Rust
-all: harness C Cpp Rust
+all: harness $(LANGUAGES)
 
 clean: clean-all
 
 realclean: clean clean-data
 
-clean-all: C-clean Cpp-clean Rust-clean harness-clean
+clean-all: harness-clean $(LANG_CLEAN)
 
 memcheck:
 	echo "# Running on host:" `hostname` > $(MEMCHECK_FILE)
@@ -94,6 +97,12 @@ Rust:
 Rust-clean:
 	$(MAKE) -C Rust clean
 
+Perl:
+	($MAKE) -C Perl all
+
+Python:
+	($MAKE) -C Python all
+
 harness:
 	$(MAKE) -C harness all
 
@@ -129,6 +138,20 @@ experiments: data $(HARNESS)
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
+	$(MAKE) -C Perl experiments \
+		HARNESS=../$(HARNESS) \
+		RUNCOUNT=$(RUNCOUNT) \
+		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
+	$(MAKE) -C Python experiments \
+		HARNESS=../$(HARNESS) \
+		RUNCOUNT=$(RUNCOUNT) \
+		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
+		SEQUENCES=../$(RANDOM_SEQUENCES) \
+		PATTERNS=../$(RANDOM_PATTERNS) \
+		ANSWERS=../$(RANDOM_ANSWERS)
 	@echo "# Experiments completed:" `date` >> $(EXPERIMENTS_FILE)
 
 test-experiments: testing-data C Rust
@@ -137,4 +160,8 @@ test-experiments: testing-data C Rust
 	$(MAKE) -C C++ test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
 		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
 	$(MAKE) -C Rust test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C Perl test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C Python test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
 		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)

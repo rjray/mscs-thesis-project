@@ -1,6 +1,16 @@
 # Shared elements between languages' Makefiles
 
 ALGORITHMS := kmp boyer_moore shift_or aho_corasick
+LONG_ALGORITHMS := kmp boyer_moore shift_or
+SHORT_ALGORITHMS := aho_corasick
+
+# Default the run-count values, in case they aren't explicitly passed in.
+ifeq ($(RUNCOUNT),)
+RUNCOUNT := 10
+endif
+ifeq ($(LONG_RUNCOUNT),)
+LONG_RUNCOUNT := 3
+endif
 
 # Macros for running the experiments. One for testing and one for real.
 define RUN_test_experiment
@@ -9,6 +19,11 @@ define RUN_test_experiment
 endef
 define RUN_experiment
 @$(HARNESS) -v -n $(RUNCOUNT) -f $(EXPERIMENTS_FILE) $(1) $(SEQUENCES) $(PATTERNS) $(ANSWERS)
+
+endef
+
+define RUN_long_experiment
+@$(HARNESS) -v -s -n $(LONG_RUNCOUNT) -f $(EXPERIMENTS_FILE) $(1) $(SEQUENCES) $(PATTERNS) $(ANSWERS)
 
 endef
 
