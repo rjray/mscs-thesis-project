@@ -80,14 +80,14 @@ sub calc_good_suffix {
 
 sub init_boyer_moore {
     my ($pattern, $m) = @_;
-    push @{$pattern}, 0;
+    my $pat = [ @{$pattern}, 0 ];
     my @good_suffix = ($m) x $m;
     my @bad_char = ($m) x ASIZE;
 
-    calc_good_suffix($pattern, $m, \@good_suffix);
-    calc_bad_char($pattern, $m, \@bad_char);
+    calc_good_suffix($pat, $m, \@good_suffix);
+    calc_bad_char($pat, $m, \@bad_char);
 
-    return [ $pattern, \@good_suffix, \@bad_char ];
+    return [ $pat, \@good_suffix, \@bad_char ];
 }
 
 sub boyer_moore {

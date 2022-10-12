@@ -42,9 +42,7 @@ sub run {
     }
 
     for my $pattern (0..$#{$patterns_data}) {
-        # Copy the pattern, because some of the algorithms have to slightly
-        # modify it.
-        my $pat = [ @{$patterns_data->[$pattern]} ];
+        my $pat = $patterns_data->[$pattern];
         my $pat_len = scalar @{$pat};
         my $pat_data = $init->($pat, $pat_len);
 

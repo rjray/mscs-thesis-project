@@ -32,12 +32,12 @@ sub make_next_table {
 
 sub init_kmp {
     my ($pattern, $m) = @_;
-    push @{$pattern}, 0;
+    my $pat = [ @{$pattern}, 0 ];
     my @next_table = (0) x ($m + 1);
 
-    make_next_table($pattern, $m, \@next_table);
+    make_next_table($pat, $m, \@next_table);
 
-    return [ $pattern, \@next_table ];
+    return [ $pat, \@next_table ];
 }
 
 sub kmp {
