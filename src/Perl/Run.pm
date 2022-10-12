@@ -12,7 +12,8 @@ use Setup;
 our @EXPORT = qw(run);
 
 sub run {
-    my ($code, $name, $sequences_file, $patterns_file, $answers_file) = @_;
+    my ($init, $code, $name, $sequences_file, $patterns_file, $answers_file) =
+        @_;
     my ($sequences_data, $patterns_data, $answers_data);
 
     if (! ($sequences_file && $patterns_file)) {
@@ -31,15 +32,28 @@ sub run {
     my $start_time = [ gettimeofday ];
     my $return_code = 0;
 
-    for my $sequence (0..$#{$sequences_data}) {
-        my $sequence_str = $sequences_data->[$sequence];
-        my $seq_len = length $sequence_str;
+    # Preprocess patterns and sequences, since all of the algorithms that use
+    # this module need the same style of data.
+    for my $pattern (@{$patterns_data}) {
+        $pattern = [ map { ord } split //, $pattern ];
+    }
+    for my $sequence (@{$sequences_data}) {
+        $sequence = [ map { ord } split //, $sequence ];
+    }
 
-        for my $pattern (0..$#{$patterns_data}) {
-            my $pattern_str = $patterns_data->[$pattern];
-            my $pat_len = length $pattern_str;
+    for my $pattern (0..$#{$patterns_data}) {
+        # Copy the pattern, because some of the algorithms have to slightly
+        # modify it.
+        my $pat = [ @{$patterns_data->[$pattern]} ];
+        my $pat_len = scalar @{$pat};
+        my $pat_data = $init->($pat, $pat_len);
+
+        for my $sequence (0..$#{$sequences_data}) {
+            my $seq = $sequences_data->[$sequence];
+            my $seq_len = scalar @{$seq};
+
             my $matches =
-                $code->($pattern_str, $pat_len, $sequence_str, $seq_len);
+                $code->($pat_data, $pat_len, $seq, $seq_len);
 
             if ($answers_data &&
                 ($matches != $answers_data->[$pattern][$sequence])) {

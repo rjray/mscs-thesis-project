@@ -2,12 +2,13 @@
 
 use strict;
 use warnings;
-use lib qw(.);
+use FindBin qw($Bin);
+use lib $Bin;
 
 use Run qw(run);
 
 # Initialize the jump-table that KMP uses:
-sub init_kmp {
+sub make_next_table {
     my ($pat, $m, $next_table) = @_;
 
     my $i = 0;
@@ -29,30 +30,36 @@ sub init_kmp {
     return;
 }
 
-sub kmp {
-    my ($pattern, $m, $sequence, $n) = @_;
-    my @pat = map { ord } split //, $pattern;
-    push @pat, 0;
-    my @seq = map { ord } split //, $sequence;
-    my $matches = 0;
+sub init_kmp {
+    my ($pattern, $m) = @_;
+    push @{$pattern}, 0;
     my @next_table = (0) x ($m + 1);
 
-    init_kmp(\@pat, $m, \@next_table);
+    make_next_table($pattern, $m, \@next_table);
+
+    return [ $pattern, \@next_table ];
+}
+
+sub kmp {
+    my ($pat_data, $m, $sequence, $n) = @_;
+    my ($pat, $next_table) = @{$pat_data};
+    my $matches = 0;
+
     my ($i, $j) = (0, 0);
 
     while ($j < $n) {
-        while ($i > -1 && $pat[$i] != $seq[$j]) {
-            $i = $next_table[$i];
+        while ($i > -1 && $pat->[$i] != $sequence->[$j]) {
+            $i = $next_table->[$i];
         }
         $i++;
         $j++;
         if ($i >= $m) {
             $matches++;
-            $i = $next_table[$i]
+            $i = $next_table->[$i]
         }
     }
 
     return $matches;
 }
 
-exit run(\&kmp, 'kmp', @ARGV);
+exit run(\&init_kmp, \&kmp, 'kmp', @ARGV);

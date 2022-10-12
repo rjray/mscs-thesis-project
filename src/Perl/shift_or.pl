@@ -2,7 +2,8 @@
 
 use strict;
 use warnings;
-use lib qw(.);
+use FindBin qw($Bin);
+use lib $Bin;
 use constant ASIZE => 128;
 use constant WORD => 64;
 
@@ -27,12 +28,8 @@ sub calc_s_positions {
     return $lim;
 }
 
-sub shift_or {
-    my ($pattern, $m, $sequence, $n) = @_;
-    my @pat = map { ord } split //, $pattern;
-    push @pat, 0;
-    my @seq = map { ord } split //, $sequence;
-    my $matches = 0;
+sub init_shift_or {
+    my ($pattern, $m) = @_;
 
     if ($m > WORD) {
         die 'shift_or: pattern size must be <= ' . WORD . "\n";
@@ -40,11 +37,19 @@ sub shift_or {
 
     my @s_positions = (~0) x ASIZE;
 
-    my $lim = calc_s_positions(\@pat, $m, \@s_positions);
+    my $lim = calc_s_positions($pattern, $m, \@s_positions);
+
+    return [ $pattern, $lim, \@s_positions ];
+}
+
+sub shift_or {
+    my ($pat_data, $m, $seq, $n) = @_;
+    my (undef, $lim, $s_positions) = @{$pat_data};
+    my $matches = 0;
 
     my $state = ~0;
     foreach my $j (0..($n - 1)) {
-        $state = ($state << 1) | $s_positions[$seq[$j]];
+        $state = ($state << 1) | $s_positions->[$seq->[$j]];
         if ($state < $lim) {
             $matches++;
         }
@@ -53,4 +58,4 @@ sub shift_or {
     return $matches;
 }
 
-exit run(\&shift_or, 'shift_or', @ARGV);
+exit run(\&init_shift_or, \&shift_or, 'shift_or', @ARGV);

@@ -2,7 +2,8 @@
 
 use strict;
 use warnings;
-use lib qw(.);
+use FindBin qw($Bin);
+use lib $Bin;
 use constant ASIZE => 128;
 
 use Run qw(run);
@@ -77,34 +78,39 @@ sub calc_good_suffix {
     return;
 }
 
-sub boyer_moore {
-    my ($pattern, $m, $sequence, $n) = @_;
-    my @pat = map { ord } split //, $pattern;
-    push @pat, 0;
-    my @seq = map { ord } split //, $sequence;
-    my $matches = 0;
-
+sub init_boyer_moore {
+    my ($pattern, $m) = @_;
+    push @{$pattern}, 0;
     my @good_suffix = ($m) x $m;
     my @bad_char = ($m) x ASIZE;
 
-    calc_good_suffix(\@pat, $m, \@good_suffix);
-    calc_bad_char(\@pat, $m, \@bad_char);
+    calc_good_suffix($pattern, $m, \@good_suffix);
+    calc_bad_char($pattern, $m, \@bad_char);
+
+    return [ $pattern, \@good_suffix, \@bad_char ];
+}
+
+sub boyer_moore {
+    my ($pat_data, $m, $seq, $n) = @_;
+    my ($pat, $good_suffix, $bad_char) = @{$pat_data};
+    my $matches = 0;
 
     my $j = 0;
     while ($j <= $n - $m) {
         my $i = $m - 1;
-        while ($i >= 0 && $pat[$i] == $seq[$i + $j]) {
+        while ($i >= 0 && $pat->[$i] == $seq->[$i + $j]) {
             $i--;
         }
         if ($i < 0) {
             $matches++;
-            $j += $good_suffix[0];
+            $j += $good_suffix->[0];
         } else {
-            $j += max($good_suffix[$i], $bad_char[$seq[$i + $j]] - $m + 1 + $i);
+            $j += max($good_suffix->[$i],
+                      $bad_char->[$seq->[$i + $j]] - $m + 1 + $i);
         }
     }
 
     return $matches;
 }
 
-exit run(\&boyer_moore, 'boyer_moore', @ARGV);
+exit run(\&init_boyer_moore, \&boyer_moore, 'boyer_moore', @ARGV);
