@@ -77,21 +77,34 @@ void calc_good_suffix(unsigned char *pat, int m, int good_suffix[]) {
   return;
 }
 
-/*
-  Perform the Boyer-Moore algorithm on the given pattern of length m, against
-  the sequence of length n.
-*/
-int boyer_moore(unsigned char *pattern, int m, unsigned char *sequence, int n) {
-  int i, j, *good_suffix, *bad_char;
-  int matches = 0;
+void **init_boyer_moore(unsigned char *pattern, int m) {
+  void **return_val = (void **)calloc(4, sizeof(void *));
 
   // Allocate space for the good-suffix/bad-char tables:
-  good_suffix = (int *)calloc(m, sizeof(int));
-  bad_char = (int *)calloc(ASIZE, sizeof(int));
+  int *good_suffix = (int *)calloc(m, sizeof(int));
+  int *bad_char = (int *)calloc(ASIZE, sizeof(int));
 
   /* Preprocessing */
   calc_good_suffix(pattern, m, good_suffix);
   calc_bad_char(pattern, m, bad_char);
+
+  return_val[0] = (void *)strdup((const char *)pattern);
+  return_val[1] = (void *)good_suffix;
+  return_val[2] = (void *)bad_char;
+
+  return return_val;
+}
+
+/*
+  Perform the Boyer-Moore algorithm on the given pattern of length m,
+  against the sequence of length n.
+*/
+int boyer_moore(void **pat_data, int m, unsigned char *sequence, int n) {
+  int i, j;
+  unsigned char *pattern = (unsigned char *)pat_data[0];
+  int *good_suffix = (int *)pat_data[1];
+  int *bad_char = (int *)pat_data[2];
+  int matches = 0;
 
   // Perform the searching:
   j = 0;
@@ -106,8 +119,6 @@ int boyer_moore(unsigned char *pattern, int m, unsigned char *sequence, int n) {
     }
   }
 
-  free(good_suffix);
-  free(bad_char);
   return matches;
 }
 
@@ -117,7 +128,8 @@ int boyer_moore(unsigned char *pattern, int m, unsigned char *sequence, int n) {
   values.
 */
 int main(int argc, char *argv[]) {
-  int return_code = run(&boyer_moore, "boyer_moore", argc, argv);
+  int return_code =
+      run(&init_boyer_moore, &boyer_moore, "boyer_moore", argc, argv);
 
   return return_code;
 }

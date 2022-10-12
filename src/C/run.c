@@ -34,7 +34,7 @@ double get_time() {
   The return value is 0 if the experiment correctly identified all pattern
   instances in all sequences, and the number of misses otherwise.
 */
-int run(runnable code, char *name, int argc, char *argv[]) {
+int run(initializer init, algorithm code, char *name, int argc, char *argv[]) {
   if (argc < 3 || argc > 4) {
     fprintf(stderr, "Usage: %s <sequences> <patterns> [ <answers> ]\n",
             argv[0]);
@@ -70,15 +70,17 @@ int run(runnable code, char *name, int argc, char *argv[]) {
   // the table of answers for that pattern. Report any mismatches.
   double start_time = get_time();
   int return_code = 0; // Used for noting if some number of matches fail
-  for (int sequence = 0; sequence < sequences_count; sequence++) {
-    char *sequence_str = sequences_data[sequence];
-    int seq_len = strlen(sequence_str);
+  for (int pattern = 0; pattern < patterns_count; pattern++) {
+    char *pattern_str = patterns_data[pattern];
+    int pat_len = strlen(pattern_str);
+    void **pat_data = (*init)((unsigned char *)pattern_str, pat_len);
 
-    for (int pattern = 0; pattern < patterns_count; pattern++) {
-      char *pattern_str = patterns_data[pattern];
-      int pat_len = strlen(pattern_str);
-      int matches = (*code)((unsigned char *)pattern_str, pat_len,
-                            (unsigned char *)sequence_str, seq_len);
+    for (int sequence = 0; sequence < sequences_count; sequence++) {
+      char *sequence_str = sequences_data[sequence];
+      int seq_len = strlen(sequence_str);
+
+      int matches =
+          (*code)(pat_data, pat_len, (unsigned char *)sequence_str, seq_len);
 
       if (answers_data && matches != answers_data[pattern][sequence]) {
         fprintf(stderr, "Pattern %d mismatch against sequence %d (%d != %d)\n",
@@ -87,6 +89,10 @@ int run(runnable code, char *name, int argc, char *argv[]) {
         return_code++;
       }
     }
+
+    for (int i = 0; pat_data[i] != (void *)NULL; i++)
+      free(pat_data[i]);
+    free(pat_data);
   }
   // Note the end time, before freeing memory.
   double end_time = get_time();
