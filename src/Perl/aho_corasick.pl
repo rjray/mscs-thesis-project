@@ -3,7 +3,8 @@
 use 5.010;
 use strict;
 use warnings;
-use lib qw(.);
+use FindBin qw($Bin);
+use lib $Bin;
 use constant ASIZE => 128;
 use constant FAIL => -1;
 
