@@ -76,20 +76,37 @@ void calc_good_suffix(std::string pat, int m, std::vector<int> &good_suffix) {
   return;
 }
 
+std::vector<PatternData> init_boyer_moore(std::string pattern, int m) {
+  std::vector<PatternData> return_val;
+  return_val.reserve(3);
+  // Set up a copy of pattern, with the sentinel character added:
+  std::string pat(pattern + "\0");
+  // Declare and initialize the good_suffix and bad_char vectors:
+  std::vector<int> good_suffix(m, 0), bad_char(ASIZE, 0);
+
+  calc_good_suffix(pat, m, good_suffix);
+  calc_bad_char(pat, m, bad_char);
+
+  return_val.push_back(pat);
+  return_val.push_back(good_suffix);
+  return_val.push_back(bad_char);
+
+  return return_val;
+}
+
 /*
-  Perform the Boyer-Moore algorithm on the given pattern of length m, against
-  the sequence of length n.
+  Perform the Boyer-Moore algorithm on the given pattern of length m,
+  against the sequence of length n.
 */
-int boyer_moore(std::string pattern, int m, std::string sequence, int n) {
+int boyer_moore(std::vector<PatternData> pat_data, int m, std::string sequence,
+                int n) {
   int i, j;
   int matches = 0;
-  std::vector<int> good_suffix, bad_char;
-  good_suffix.reserve(m);
-  bad_char.reserve(ASIZE);
 
-  /* Preprocessing */
-  calc_good_suffix(pattern + "\0", m, good_suffix);
-  calc_bad_char(pattern + "\0", m, bad_char);
+  // Unpack pat_data:
+  std::string pattern = std::get<std::string>(pat_data[0]);
+  std::vector<int> good_suffix = std::get<std::vector<int>>(pat_data[1]);
+  std::vector<int> bad_char = std::get<std::vector<int>>(pat_data[2]);
 
   // Perform the searching:
   j = 0;
@@ -113,7 +130,8 @@ int boyer_moore(std::string pattern, int m, std::string sequence, int n) {
   values.
 */
 int main(int argc, char *argv[]) {
-  int return_code = run(&boyer_moore, "boyer_moore", argc, argv);
+  int return_code =
+      run(&init_boyer_moore, &boyer_moore, "boyer_moore", argc, argv);
 
   return return_code;
 }

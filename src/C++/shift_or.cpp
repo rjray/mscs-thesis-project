@@ -6,6 +6,7 @@
 */
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -43,24 +44,41 @@ WORD_TYPE calc_s_positions(std::string pat, int m,
   return lim;
 }
 
+std::vector<PatternData> init_shift_or(std::string pattern, int m) {
+  std::vector<PatternData> return_val;
+  return_val.reserve(2);
+  // Declare and initialize the s_positions vector:
+  std::vector<WORD_TYPE> s_positions(ASIZE, ~0);
+
+  if (m > WORD) {
+    std::ostringstream error;
+    error << "shift_or: pattern size must be <= " << WORD;
+    throw std::runtime_error{error.str()};
+  }
+
+  /* Preprocessing */
+  WORD_TYPE lim = calc_s_positions(pattern, m, s_positions);
+
+  return_val.push_back(lim);
+  return_val.push_back(s_positions);
+
+  return return_val;
+}
+
 /*
   Perform the Shift-Or algorithm on the given pattern of length m, against
   the sequence of length n.
 */
-int shift_or(std::string pattern, int m, std::string sequence, int n) {
-  WORD_TYPE lim, state;
-  std::vector<WORD_TYPE> s_positions;
+int shift_or(std::vector<PatternData> pat_data, int m, std::string sequence,
+             int n) {
+  WORD_TYPE state;
   int matches = 0;
   int j;
-  s_positions.reserve(ASIZE);
 
-  if (m > WORD) {
-    std::cerr << "shift_or: pattern size must be <= " << WORD << "\n";
-    return 0;
-  }
-
-  /* Preprocessing */
-  lim = calc_s_positions(pattern, m, s_positions);
+  // Unpack pat_data:
+  WORD_TYPE lim = std::get<WORD_TYPE>(pat_data[0]);
+  std::vector<WORD_TYPE> s_positions =
+      std::get<std::vector<WORD_TYPE>>(pat_data[1]);
 
   /* Searching */
   for (state = ~0, j = 0; j < n; ++j) {
@@ -78,7 +96,7 @@ int shift_or(std::string pattern, int m, std::string sequence, int n) {
   values.
 */
 int main(int argc, char *argv[]) {
-  int return_code = run(&shift_or, "shift_or", argc, argv);
+  int return_code = run(&init_shift_or, &shift_or, "shift_or", argc, argv);
 
   return return_code;
 }

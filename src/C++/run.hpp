@@ -6,14 +6,12 @@
 #define _RUN_HPP
 
 #include <string>
+#include <variant>
 #include <vector>
 
-union PatternData {
-  std::string str;
-  std::vector<int> vec;
-  unsigned long ul;
-};
-
+typedef std::variant<std::string, std::vector<int>, unsigned long,
+                     std::vector<unsigned long>>
+    PatternData;
 typedef int (*algorithm)(std::vector<PatternData>, int, std::string, int);
 typedef std::vector<PatternData> (*initializer)(std::string, int);
 

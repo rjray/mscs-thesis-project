@@ -7,7 +7,7 @@ TARGETS := $(GCC_TARGETS) $(LLVM_TARGETS)
 # Default this to unset
 DEBUG=
 
-CPPFLAGS := -Wall
+CPPFLAGS := -Wall -std=c++2a
 # Determine additional CPPFLAGS based on DEBUG:
 ifeq ($(DEBUG),)
 CPPFLAGS += -O3

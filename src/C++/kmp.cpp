@@ -38,15 +38,13 @@ std::vector<PatternData> init_kmp(std::string pattern, int m) {
   std::vector<PatternData> return_val;
   return_val.reserve(2);
   // Set up the next_table array for the algorithm to use:
-  std::vector<int> next_table;
-  next_table.reserve(m + 1);
+  std::vector<int> next_table(m + 1, 0);
   // Set up a copy of pattern, with the sentinel character added:
   std::string pat(pattern + "\0");
-  std::cerr << pat << "\n";
   make_next_table(pat, m, next_table);
 
-  return_val[0].str = pat;
-  return_val[1].vec = next_table;
+  return_val.push_back(pat);
+  return_val.push_back(next_table);
 
   return return_val;
 }
@@ -57,19 +55,18 @@ std::vector<PatternData> init_kmp(std::string pattern, int m) {
 */
 int kmp(std::vector<PatternData> pat_data, int m, std::string sequence, int n) {
   int i, j;
-  // Unpack pat_data:
-  std::cerr << "Pre-declaration\n";
-  std::string pattern = pat_data[0].str;
-  std::cerr << "Post-declaration\n";
-  std::cerr << pattern << "\n";
-  std::vector<int> next_table = pat_data[1].vec;
   int matches = 0;
+
+  // Unpack pat_data:
+  std::string pattern = std::get<std::string>(pat_data[0]);
+  std::vector<int> next_table = std::get<std::vector<int>>(pat_data[1]);
 
   // Perform the searching:
   i = j = 0;
   while (j < n) {
     while (i > -1 && pattern[i] != sequence[j])
       i = next_table[i];
+
     i++;
     j++;
     if (i >= m) {

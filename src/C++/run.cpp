@@ -70,6 +70,7 @@ int run(initializer init, algorithm code, std::string name, int argc,
   for (int pattern = 0; pattern < patterns_count; pattern++) {
     std::string pattern_str = patterns_data[pattern];
     int pat_len = pattern_str.length();
+    // Pre-process the pattern before applying it to all sequences.
     std::vector<PatternData> pat_data = (*init)(pattern_str, pat_len);
 
     for (int sequence = 0; sequence < sequences_count; sequence++) {
