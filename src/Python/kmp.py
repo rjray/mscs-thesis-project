@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from copy import copy
 from run import run
 from sys import argv
 
 
-def init_kmp(pattern, m, next_table):
+def make_next_table(pattern, m, next_table):
     i = 0
     j = next_table[0] = -1
 
@@ -22,12 +23,20 @@ def init_kmp(pattern, m, next_table):
     return
 
 
-def kmp(pattern, m, sequence, n):
-    pat = pattern + "\0"
-    matches = 0
+def init_kmp(pattern, m):
+    pat = copy(pattern)
+    pat.append(0)
     next_table = [0 for _ in range(m + 1)]
 
-    init_kmp(pat, m, next_table)
+    make_next_table(pat, m, next_table)
+
+    return [pat, next_table]
+
+
+def kmp(pat_data, m, sequence, n):
+    pat, next_table = pat_data
+    matches = 0
+
     i, j = 0, 0
 
     while j < n:
@@ -44,4 +53,4 @@ def kmp(pattern, m, sequence, n):
 
 
 if __name__ == "__main__":
-    exit(run(kmp, "kmp", argv))
+    exit(run(init_kmp, kmp, "kmp", argv))

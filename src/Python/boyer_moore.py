@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from copy import copy
 from run import run
 from sys import argv
 
@@ -57,17 +58,22 @@ def calc_good_suffix(pat, m, good_suffix):
     return
 
 
-def boyer_moore(pattern, m, sequence, n):
-    pat = list(map(ord, pattern))
+def init_boyer_moore(pattern, m):
+    pat = copy(pattern)
     pat.append(0)
-    seq = list(map(ord, sequence))
-    matches = 0
 
     good_suffix = [m] * m
     bad_char = [m] * ASIZE
 
     calc_good_suffix(pat, m, good_suffix)
     calc_bad_char(pat, m, bad_char)
+
+    return [pat, good_suffix, bad_char]
+
+
+def boyer_moore(pat_data, m, seq, n):
+    pat, good_suffix, bad_char = pat_data
+    matches = 0
 
     j = 0
     while j <= n - m:
@@ -84,4 +90,4 @@ def boyer_moore(pattern, m, sequence, n):
 
 
 if __name__ == "__main__":
-    exit(run(boyer_moore, "boyer_moore", argv))
+    exit(run(init_boyer_moore, boyer_moore, "boyer_moore", argv))

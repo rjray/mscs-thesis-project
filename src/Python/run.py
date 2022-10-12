@@ -3,7 +3,7 @@ from sys import stderr
 from time import perf_counter
 
 
-def run(code, name, argv):
+def run(init, code, name, argv):
     if len(argv) < 3 or len(argv) > 4:
         raise Exception(f"Usage: {argv[0]} sequences patterns <answers>")
 
@@ -21,14 +21,21 @@ def run(code, name, argv):
     start_time = perf_counter()
     return_code = 0
 
-    for sequence in range(len(sequences_data)):
-        sequence_str = sequences_data[sequence]
-        seq_len = len(sequence_str)
+    # Preprocess patterns and sequences, since all of the algorithms that use
+    # this module need (or can use) the same style of data.
+    patterns_data = [list(map(ord, pattern)) for pattern in patterns_data]
+    sequences_data = [list(map(ord, sequence)) for sequence in sequences_data]
 
-        for pattern in range(len(patterns_data)):
-            pattern_str = patterns_data[pattern]
-            pat_len = len(pattern_str)
-            matches = code(pattern_str, pat_len, sequence_str, seq_len)
+    for pattern in range(len(patterns_data)):
+        pat = patterns_data[pattern]
+        pat_len = len(pat)
+        pat_data = init(pat, pat_len)
+
+        for sequence in range(len(sequences_data)):
+            seq = sequences_data[sequence]
+            seq_len = len(seq)
+
+            matches = code(pat_data, pat_len, seq, seq_len)
 
             if answers_data is not None:
                 if matches != answers_data[pattern][sequence]:

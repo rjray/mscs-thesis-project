@@ -25,16 +25,19 @@ def calc_s_positions(pat, m, s_positions):
     return lim
 
 
-def shift_or(pattern, m, sequence, n):
-    pat = list(map(ord, pattern))
-    seq = list(map(ord, sequence))
-    matches = 0
-
+def init_shift_or(pattern, m):
     if m > WORD:
         raise Exception(f"shift_or: pattern size my be <= {WORD}")
 
     s_positions = [~0 & MASK] * ASIZE
-    lim = calc_s_positions(pat, m, s_positions)
+    lim = calc_s_positions(pattern, m, s_positions)
+
+    return [pattern, lim, s_positions]
+
+
+def shift_or(pat_data, m, seq, n):
+    _, lim, s_positions = pat_data
+    matches = 0
 
     state = ~0 & MASK
     for j in range(n):
@@ -46,4 +49,4 @@ def shift_or(pattern, m, sequence, n):
 
 
 if __name__ == "__main__":
-    exit(run(shift_or, "shift_or", argv))
+    exit(run(init_shift_or, shift_or, "shift_or", argv))
