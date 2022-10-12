@@ -38,7 +38,8 @@ double get_time() {
   instances in all sequences, and the number of misses otherwise. An exception
   is thrown on non-recoverable errors.
 */
-int run(runnable code, std::string name, int argc, char *argv[]) {
+int run(initializer init, algorithm code, std::string name, int argc,
+        char *argv[]) {
   if (argc < 3 || argc > 4) {
     std::ostringstream error;
     error << "Usage: " << argv[0] << " <sequences> <patterns> [ <answers> ]";
@@ -66,14 +67,16 @@ int run(runnable code, std::string name, int argc, char *argv[]) {
   // the table of answers for that pattern. Report any mismatches.
   double start_time = get_time();
   int return_code = 0; // Used for noting if some number of matches fail
-  for (int sequence = 0; sequence < sequences_count; sequence++) {
-    std::string sequence_str = sequences_data[sequence];
-    int seq_len = sequence_str.length();
+  for (int pattern = 0; pattern < patterns_count; pattern++) {
+    std::string pattern_str = patterns_data[pattern];
+    int pat_len = pattern_str.length();
+    std::vector<PatternData> pat_data = (*init)(pattern_str, pat_len);
 
-    for (int pattern = 0; pattern < patterns_count; pattern++) {
-      std::string pattern_str = patterns_data[pattern];
-      int pat_len = pattern_str.length();
-      int matches = (*code)(pattern_str, pat_len, sequence_str, seq_len);
+    for (int sequence = 0; sequence < sequences_count; sequence++) {
+      std::string sequence_str = sequences_data[sequence];
+      int seq_len = sequence_str.length();
+
+      int matches = (*code)(pat_data, pat_len, sequence_str, seq_len);
 
       if (answers_data.size() && matches != answers_data[pattern][sequence]) {
         std::cerr << "Pattern " << pattern + 1 << " mismatch against sequence "

@@ -5,6 +5,7 @@
   of Exact String-Matching Algorithms," by Christian Charras and Thierry Lecroq.
 */
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,7 @@
 /*
   Initialize the jump-table that KMP uses.
 */
-void init_kmp(std::string pat, int m, std::vector<int> &next_table) {
+void make_next_table(std::string pat, int m, std::vector<int> &next_table) {
   int i, j;
 
   i = 0;
@@ -33,18 +34,36 @@ void init_kmp(std::string pat, int m, std::vector<int> &next_table) {
   return;
 }
 
+std::vector<PatternData> init_kmp(std::string pattern, int m) {
+  std::vector<PatternData> return_val;
+  return_val.reserve(2);
+  // Set up the next_table array for the algorithm to use:
+  std::vector<int> next_table;
+  next_table.reserve(m + 1);
+  // Set up a copy of pattern, with the sentinel character added:
+  std::string pat(pattern + "\0");
+  std::cerr << pat << "\n";
+  make_next_table(pat, m, next_table);
+
+  return_val[0].str = pat;
+  return_val[1].vec = next_table;
+
+  return return_val;
+}
+
 /*
   Perform the KMP algorithm on the given pattern of length m, against the
   sequence of length n.
 */
-int kmp(std::string pattern, int m, std::string sequence, int n) {
+int kmp(std::vector<PatternData> pat_data, int m, std::string sequence, int n) {
   int i, j;
+  // Unpack pat_data:
+  std::cerr << "Pre-declaration\n";
+  std::string pattern = pat_data[0].str;
+  std::cerr << "Post-declaration\n";
+  std::cerr << pattern << "\n";
+  std::vector<int> next_table = pat_data[1].vec;
   int matches = 0;
-  std::vector<int> next_table;
-
-  // Set up the next_table array for the algorithm to use:
-  next_table.reserve(m + 1);
-  init_kmp(pattern + "\0", m, next_table);
 
   // Perform the searching:
   i = j = 0;
@@ -68,7 +87,7 @@ int kmp(std::string pattern, int m, std::string sequence, int n) {
   values.
 */
 int main(int argc, char *argv[]) {
-  int return_code = run(&kmp, "kmp", argc, argv);
+  int return_code = run(&init_kmp, &kmp, "kmp", argc, argv);
 
   return return_code;
 }
