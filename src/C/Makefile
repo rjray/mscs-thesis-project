@@ -7,7 +7,7 @@ TARGETS := $(GCC_TARGETS) $(LLVM_TARGETS)
 # Default this to unset
 DEBUG=
 
-CFLAGS := -Wall
+CFLAGS := -Wall -std=c17 -D_GNU_SOURCE
 # Determine additional CFLAGS based on DEBUG:
 ifeq ($(DEBUG),)
 CFLAGS += -O3
