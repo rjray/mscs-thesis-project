@@ -26,6 +26,10 @@ LANG_CLEAN := C-clean Cpp-clean Rust-clean
 RANDOM_DATA_PY := ./util/random_data.py
 HARNESS := ./harness/harness
 
+# Used to opt-out of using the Intel toolchain. Default this to unset here so
+# that it can be passed down where needed.
+NO_INTEL=
+
 .PHONY: harness C Cpp Rust
 all: harness $(LANGUAGES)
 
@@ -38,12 +42,14 @@ clean-all: harness-clean $(LANG_CLEAN)
 memcheck:
 	echo "# Running on host:" `hostname` > $(MEMCHECK_FILE)
 	echo "# Memory check started:" `date` >> $(MEMCHECK_FILE)
-	make -C C memcheck VALGRIND=$(VALGRIND) \
+	make -C C memcheck NO_INTEL=$(NO_INTEL) \
+		VALGRIND=$(VALGRIND) \
 		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
-	make -C C++ memcheck VALGRIND=$(VALGRIND) \
+	make -C C++ memcheck NO_INTEL=$(NO_INTEL) \
+		VALGRIND=$(VALGRIND) \
 		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
@@ -53,7 +59,7 @@ memcheck:
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
-	echo "# Memory check completed:" `date` >> $(EXPERIMENTS_FILE)
+	echo "# Memory check completed:" `date` >> $(MEMCHECK_FILE)
 
 clean-data:
 	$(RM) $(RANDOM_FILES) $(TEST_FILES)
@@ -80,16 +86,16 @@ $(TEST_FILES) &: $(RANDOM_DATA_PY)
 		--count 100 --pattern-count 10
 
 C:
-	$(MAKE) -C C all
+	$(MAKE) -C C all NO_INTEL=$(NO_INTEL)
 
 C-clean:
-	$(MAKE) -C C clean
+	$(MAKE) -C C clean NO_INTEL=$(NO_INTEL)
 
 Cpp:
-	$(MAKE) -C C++ all
+	$(MAKE) -C C++ all NO_INTEL=$(NO_INTEL)
 
 Cpp-clean:
-	$(MAKE) -C C++ clean
+	$(MAKE) -C C++ clean NO_INTEL=$(NO_INTEL)
 
 Rust:
 	$(MAKE) -C Rust all
@@ -118,6 +124,7 @@ experiments: data $(HARNESS)
 	@$(HARNESS) -i | sed -e 's/^/# /' >> $(EXPERIMENTS_FILE)
 	@echo "# Experiments started:" `date` >> $(EXPERIMENTS_FILE)
 	$(MAKE) -C C experiments \
+		NO_INTEL=$(NO_INTEL) \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
@@ -125,6 +132,7 @@ experiments: data $(HARNESS)
 		PATTERNS=../$(RANDOM_PATTERNS) \
 		ANSWERS=../$(RANDOM_ANSWERS)
 	$(MAKE) -C C++ experiments \
+		NO_INTEL=$(NO_INTEL) \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
@@ -155,10 +163,12 @@ experiments: data $(HARNESS)
 	@echo "# Experiments completed:" `date` >> $(EXPERIMENTS_FILE)
 
 test-experiments: testing-data C Rust
-	$(MAKE) -C C test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
-		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
-	$(MAKE) -C C++ test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
-		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C C test-experiments NO_INTEL=$(NO_INTEL) \
+		SEQUENCES=../$(TEST_SEQUENCES) PATTERNS=../$(TEST_PATTERNS) \
+		ANSWERS=../$(TEST_ANSWERS)
+	$(MAKE) -C C++ test-experiments NO_INTEL=$(NO_INTEL) \
+		SEQUENCES=../$(TEST_SEQUENCES) PATTERNS=../$(TEST_PATTERNS) \
+		ANSWERS=../$(TEST_ANSWERS)
 	$(MAKE) -C Rust test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
 		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
 	$(MAKE) -C Perl test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
