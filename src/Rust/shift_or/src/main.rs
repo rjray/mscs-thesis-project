@@ -6,7 +6,7 @@
     Thierry Lecroq.
 */
 
-use common::run::run;
+use common::run::{run, PatternData, WordType};
 use std::cmp::Ordering;
 use std::env;
 use std::process::exit;
@@ -20,7 +20,6 @@ const ASIZE: usize = 128;
 // though the experimental data doesn't go nearly this high. This is a sort of
 // "insurance" against adding other experiments that might push this limit.
 const WORD: usize = 64;
-type WordType = u64;
 
 /*
     Preprocessing step: Calculate the positions of each character of the
@@ -48,33 +47,51 @@ fn calc_s_positions(
     lim
 }
 
+fn init_shift_or(pat: &[u8], m: usize) -> Vec<PatternData> {
+    let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);
+    let mut s_positions: Vec<WordType> = vec![!0; ASIZE];
+
+    // Verify that the pattern is not too long:
+    if m > WORD {
+        panic!("shift_or: Pattern size must be <= {}", WORD);
+    }
+
+    // Preprocessing. Set up s_positions and lim.
+    let lim: WordType = calc_s_positions(pat, m, &mut s_positions);
+
+    pattern_data.push(PatternData::PatternWord(lim));
+    pattern_data.push(PatternData::PatternWordVec(s_positions));
+
+    pattern_data
+}
+
 /*
     Perform the Shift-Or algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
-    // For indexing that would be comparable to C's, convert the String objects
-    // to arrays of bytes. This works because the UTF-8 data won't have any
-    // wide characters.
-    let pattern = pattern.as_bytes();
-    let sequence = sequence.as_bytes();
+fn shift_or(
+    pat_data: &[PatternData],
+    _m: usize, // m is not used in this algorithm, but is part of the interface
+    sequence: &[u8],
+    n: usize,
+) -> i32 {
     let mut matches: i32 = 0;
     let mut state: WordType = !0;
-    let mut s_positions: Vec<WordType> = vec![state; ASIZE];
 
-    // Verify that the pattern is not too long:
-    if m > WORD {
-        eprintln!("shift_or: Pattern size must be <= {}", WORD);
-        return -1;
-    }
-
-    // Preprocessing. Set up s_positions and lim.
-    let lim: WordType = calc_s_positions(pattern, m, &mut s_positions);
+    // Unpack pat_data:
+    let lim = match &pat_data[0] {
+        PatternData::PatternWord(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 0"),
+    };
+    let s_positions = match &pat_data[1] {
+        PatternData::PatternWordVec(arr) => arr,
+        _ => panic!("Incorrect value at pat_data slot 1"),
+    };
 
     // Perform the search:
     for j in 0..n {
         state = (state << 1) | s_positions[sequence[j] as usize];
-        if state < lim {
+        if state < *lim {
             matches += 1;
         }
     }
@@ -88,7 +105,7 @@ fn shift_or(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 = run(&shift_or, "shift_or", argv);
+    let mut code: i32 = run(&init_shift_or, &shift_or, "shift_or", argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),

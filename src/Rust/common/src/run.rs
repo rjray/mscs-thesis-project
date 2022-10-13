@@ -6,8 +6,24 @@
 use crate::setup::*;
 use std::time::Instant;
 
+// `WordType` is used by shift-or. It's defined here so it can be used in the
+// enum, below.
+pub type WordType = u64;
+
+// An enum to type the various sorts of values that can be returned from the
+// pre-processing of a pattern.
+pub enum PatternData {
+    PatternU8Vec(Vec<u8>),
+    PatternIntVec(Vec<i32>),
+    PatternWord(WordType),
+    PatternWordVec(Vec<WordType>),
+}
+
 // A type alias for the signature of the single-pattern matching algorithms.
-pub type Runnable = dyn Fn(&String, usize, &String, usize) -> i32;
+pub type Algorithm = dyn Fn(&[PatternData], usize, &[u8], usize) -> i32;
+// A type alias for the signature of the single-pattern initialization
+// functions.
+pub type Initializer = dyn Fn(&[u8], usize) -> Vec<PatternData>;
 
 /*
    This is the "runner" routine. It takes a pointer to the code that implements
@@ -20,7 +36,12 @@ pub type Runnable = dyn Fn(&String, usize, &String, usize) -> i32;
    and a block of output is written that identifies the language, the
    algorithm and the run-time.
 */
-pub fn run(code: &Runnable, name: &str, argv: Vec<String>) -> i32 {
+pub fn run(
+    init: &Initializer,
+    code: &Algorithm,
+    name: &str,
+    argv: Vec<String>,
+) -> i32 {
     let argc = argv.len();
     if !(3..=4).contains(&argc) {
         eprintln!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
@@ -55,13 +76,21 @@ pub fn run(code: &Runnable, name: &str, argv: Vec<String>) -> i32 {
     let start_time = Instant::now();
     let mut return_code: i32 = 0;
 
-    for (sequence, sequence_str) in sequences_data.iter().enumerate() {
-        let seq_len = sequence_str.len();
+    // Convert the patterns and sequences to `u8` (byte) arrays. Do this here
+    // so that it isn't repeated in the for-loops.
+    let patterns: Vec<&[u8]> =
+        patterns_data.iter().map(|p| p.as_bytes()).collect();
+    let sequences: Vec<&[u8]> =
+        sequences_data.iter().map(|s| s.as_bytes()).collect();
 
-        for pattern in 0..patterns_data.len() {
-            let pattern_str = &patterns_data[pattern];
-            let pat_len = pattern_str.len();
-            let matches = code(pattern_str, pat_len, sequence_str, seq_len);
+    for (pattern, pat_bytes) in patterns.iter().enumerate() {
+        let pat_len = pat_bytes.len();
+        let pat_data = init(pat_bytes, pat_len);
+
+        for (sequence, seq_bytes) in sequences.iter().enumerate() {
+            let seq_len = seq_bytes.len();
+
+            let matches = code(&pat_data, pat_len, seq_bytes, seq_len);
             // If there was an error in the actual algorithm, `matches` will be
             // <0.
             if matches < 0 {

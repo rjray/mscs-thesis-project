@@ -6,7 +6,7 @@
     Thierry Lecroq.
 */
 
-use common::run::run;
+use common::run::{run, PatternData};
 use std::cmp::{max, Ordering};
 use std::env;
 use std::process::exit;
@@ -94,21 +94,37 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     good_suffix
 }
 
+fn init_boyer_moore(pat: &[u8], m: usize) -> Vec<PatternData> {
+    let mut pattern_data: Vec<PatternData> = Vec::with_capacity(3);
+
+    // Because the C code takes advantage of the presence of a null byte at the
+    // end of strings, we have to force this in and re-convert the pattern to a
+    // &[u8].
+    let mut new_vec = pat.to_vec();
+    new_vec.push(0);
+    let new_pat = new_vec.as_slice();
+
+    // Get the bad-character and good-suffix shift tables:
+    let good_suffix: Vec<i32> = calc_good_suffix(new_pat, m);
+    let bad_char: Vec<i32> = calc_bad_char(new_pat, m);
+
+    pattern_data.push(PatternData::PatternU8Vec(new_pat.to_owned()));
+    pattern_data.push(PatternData::PatternIntVec(good_suffix));
+    pattern_data.push(PatternData::PatternIntVec(bad_char));
+
+    pattern_data
+}
+
 /*
     Perform the Boyer-Moore algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
-    // Because the C code takes advantage of the presence of a null byte at the
-    // end of strings, we have to force this in before converting the pattern
-    // to a [u8].
-    let mut pattern_p = String::from(pattern);
-    pattern_p.push('\0');
-    // For indexing that would be comparable to C's, convert the String objects
-    // to arrays of bytes. This works because the UTF-8 data won't have any
-    // wide characters.
-    let pattern = pattern_p.as_bytes();
-    let sequence = sequence.as_bytes();
+fn boyer_moore(
+    pat_data: &[PatternData],
+    m: usize,
+    sequence: &[u8],
+    n: usize,
+) -> i32 {
     let mut i: i32;
     let mut j: i32;
     // Convert m and n from usize to i32 to cut down on the number of casts
@@ -119,9 +135,19 @@ fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
     // Track the number of times the pattern is found in the sequence.
     let mut matches: i32 = 0;
 
-    // Get the bad-character and good-suffix shift tables:
-    let good_suffix: Vec<i32> = calc_good_suffix(pattern, m as usize);
-    let bad_char: Vec<i32> = calc_bad_char(pattern, m as usize);
+    // Unpack pat_data:
+    let pattern = match &pat_data[0] {
+        PatternData::PatternU8Vec(pat_as_vec) => pat_as_vec,
+        _ => panic!("Incorrect value at pat_data slot 0"),
+    };
+    let good_suffix = match &pat_data[1] {
+        PatternData::PatternIntVec(arr) => arr,
+        _ => panic!("Incorrect value at pat_data slot 1"),
+    };
+    let bad_char = match &pat_data[2] {
+        PatternData::PatternIntVec(arr) => arr,
+        _ => panic!("Incorrect value at pat_data slot 2"),
+    };
 
     // Perform the searching:
     j = 0;
@@ -150,7 +176,8 @@ fn boyer_moore(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 = run(&boyer_moore, "boyer_moore", argv);
+    let mut code: i32 =
+        run(&init_boyer_moore, &boyer_moore, "boyer_moore", argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),

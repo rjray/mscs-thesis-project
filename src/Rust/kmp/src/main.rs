@@ -6,7 +6,7 @@
     Thierry Lecroq.
 */
 
-use common::run::run;
+use common::run::{run, PatternData};
 use std::cmp::Ordering;
 use std::env;
 use std::process::exit;
@@ -17,7 +17,7 @@ use std::process::exit;
    for the table. Rust's ownership mechanism will take care of freeing this
    when it is no longer needed.
 */
-fn init_kmp(pat: &[u8], m: usize) -> Vec<i32> {
+fn build_next_table(pat: &[u8], m: usize) -> Vec<i32> {
     let mut next_table: Vec<i32> = vec![0; m + 1];
     let mut i: usize = 0;
     let mut j: i32 = -1;
@@ -39,27 +39,44 @@ fn init_kmp(pat: &[u8], m: usize) -> Vec<i32> {
     next_table
 }
 
+fn init_kmp(pat: &[u8], m: usize) -> Vec<PatternData> {
+    let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);
+
+    // Because the C code takes advantage of the presence of a null byte at the
+    // end of strings, we have to force this in and re-convert the pattern to a
+    // &[u8].
+    let mut new_vec = pat.to_vec();
+    new_vec.push(0);
+    let new_pat = new_vec.as_slice();
+
+    // Obtain the jump-table.
+    let next_table = build_next_table(new_pat, m);
+
+    pattern_data.push(PatternData::PatternU8Vec(new_pat.to_owned()));
+    pattern_data.push(PatternData::PatternIntVec(next_table));
+
+    pattern_data
+}
+
 /*
     Perform the KMP algorithm on the given pattern of length m, against the
     sequence of length n.
 */
-fn kmp(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
-    // Because the C code takes advantage of the presence of a null byte at the
-    // end of strings, we have to force this in before converting the pattern
-    // to a [u8].
-    let mut pattern_p = String::from(pattern);
-    pattern_p.push('\0');
-    // For indexing that would be comparable to C's, convert the String objects
-    // to arrays of bytes. This works because the UTF-8 data won't have any
-    // wide characters.
-    let pattern = pattern_p.as_bytes();
-    let sequence = sequence.as_bytes();
+fn kmp(pat_data: &[PatternData], m: usize, sequence: &[u8], n: usize) -> i32 {
     let mut i: i32 = 0;
     let mut j: usize = 0;
     // Track the number of times the pattern is found in the sequence.
     let mut matches: i32 = 0;
-    // Obtain the jump-table.
-    let next_table = init_kmp(pattern, m);
+
+    // Unpack pat_data:
+    let pattern = match &pat_data[0] {
+        PatternData::PatternU8Vec(pat_as_vec) => pat_as_vec,
+        _ => panic!("Incorrect value at pat_data slot 0"),
+    };
+    let next_table = match &pat_data[1] {
+        PatternData::PatternIntVec(table) => table,
+        _ => panic!("Incorrect value at pat_data slot 1"),
+    };
 
     // The core algorithm.
     while j < n {
@@ -83,7 +100,7 @@ fn kmp(pattern: &String, m: usize, sequence: &String, n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 = run(&kmp, "kmp", argv);
+    let mut code: i32 = run(&init_kmp, &kmp, "kmp", argv);
 
     match code.cmp(&0) {
         Ordering::Less => eprintln!("Program encountered internal error."),
