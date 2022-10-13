@@ -11,7 +11,9 @@
 #include "run.h"
 #include "setup.h"
 
-#if defined(__llvm__)
+#if defined(__INTEL_LLVM_COMPILER)
+#define LANG "c-intel"
+#elif defined(__llvm__)
 #define LANG "c-llvm"
 #elif defined(__GNUC__)
 #define LANG "c-gcc"
