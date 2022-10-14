@@ -39,6 +39,8 @@ realclean: clean clean-data
 
 clean-all: harness-clean $(LANG_CLEAN)
 
+reset: clean all
+
 memcheck:
 	echo "# Running on host:" `hostname` > $(MEMCHECK_FILE)
 	echo "# Memory check started:" `date` >> $(MEMCHECK_FILE)
