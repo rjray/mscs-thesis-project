@@ -16,7 +16,9 @@
 
 #include "setup.hpp"
 
-#if defined(__llvm__)
+#if defined(__INTEL_LLVM_COMPILER)
+#define LANG "cpp-intel"
+#elif defined(__llvm__)
 #define LANG "cpp-llvm"
 #elif defined(__GNUC__)
 #define LANG "cpp-gcc"
