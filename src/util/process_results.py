@@ -19,21 +19,32 @@ ALGORITHM_LABELS = {
     "shift_or": "Shift-Or",
     "aho_corasick": "Aho-Corasick",
 }
-LANGUAGES = ["c-gcc", "c-llvm", "cpp-gcc", "cpp-llvm", "rust"]
+LANGUAGES = [
+    "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust"
+]
+SCRIPT_LANGUAGES = ["perl", "python"]
 LANGUAGE_LABELS = {
     "c-gcc": "C (GCC)",
     "c-llvm": "C (LLVM)",
+    "c-intel": "C (Intel)",
     "cpp-gcc": "C++ (GCC)",
     "cpp-llvm": "C++ (LLVM)",
+    "cpp-intel": "C++ (Intel)",
     "rust": "Rust",
+    "perl": "Perl",
+    "python": "Python",
 }
 
-DEFAULT_DATA_FILE = "experiments_data.yml"
-DEFAULT_RUNTIMES_GRAPH = "runtimes.png"
-DEFAULT_MEMORY_GRAPH = "memory.png"
-DEFAULT_POWER_GRAPH = "power.png"
-DEFAULT_PPS_GRAPH = "power_per_sec.png"
-DEFAULT_TABLES_FILE = "latex-tables.tex"
+DEFAULT_FILES = {
+    "data": "experiments_data.yml",
+    "runtimes_graph": "runtimes.png",
+    "memory_graph": "memory.png",
+    "power_graph": "power.png",
+    "pps_graph": "power_per_sec.png",
+    "tables_file": "latex-tables.tex",
+    "script_runtimes_graph": "runtimes-scripts.png",
+    "script_power_graph": "power-scripts.png",
+}
 
 SIMPLE_GRAPH_PARAMS = {
     "runtime": [
@@ -54,42 +65,54 @@ def parse_command_line():
 
     # Set up the arguments
     parser.add_argument(
-        "input", nargs="?", default=DEFAULT_DATA_FILE,
+        "input", nargs="?", default=DEFAULT_FILES["data"],
         help="Input YAML data to process"
     )
     parser.add_argument(
         "-r",
         "--runtimes",
         type=str,
-        default=DEFAULT_RUNTIMES_GRAPH,
+        default=DEFAULT_FILES["runtimes_graph"],
         help="File to write the run-times graph to"
+    )
+    parser.add_argument(
+        "--script-runtimes",
+        type=str,
+        default=DEFAULT_FILES["script_runtimes_graph"],
+        help="File to write the scripts run-times graph to"
     )
     parser.add_argument(
         "-m",
         "--memory",
         type=str,
-        default=DEFAULT_MEMORY_GRAPH,
+        default=DEFAULT_FILES["memory_graph"],
         help="File to write the memory graph to"
     )
     parser.add_argument(
         "-p",
         "--power",
         type=str,
-        default=DEFAULT_POWER_GRAPH,
+        default=DEFAULT_FILES["power_graph"],
         help="File to write the power usage graph to"
+    )
+    parser.add_argument(
+        "--script-power",
+        type=str,
+        default=DEFAULT_FILES["script_power_graph"],
+        help="File to write the scripts power usage graph to"
     )
     parser.add_argument(
         "-P",
         "--power-per-sec",
         type=str,
-        default=DEFAULT_PPS_GRAPH,
+        default=DEFAULT_FILES["pps_graph"],
         help="File to write the power-per-second usage graph to"
     )
     parser.add_argument(
         "-t",
         "--tables",
         type=str,
-        default=DEFAULT_TABLES_FILE,
+        default=DEFAULT_FILES["tables_file"],
         help="File to write the LaTeX tables into"
     )
     parser.add_argument(
@@ -105,6 +128,16 @@ def parse_command_line():
         help="Suppress generation of tables"
     )
     parser.add_argument(
+        "--no-intel",
+        action="store_true",
+        help="Do not include Intel compiler results if present in data"
+    )
+    parser.add_argument(
+        "--no-scripts",
+        action="store_true",
+        help="Do not include any results from scripting languages"
+    )
+    parser.add_argument(
         "-d",
         "--dump",
         action="store_true",
@@ -117,8 +150,8 @@ def parse_command_line():
 # Validate the data. Data validation here means:
 #
 #   1. No iterations of any language/algorithm pair failed
-#   2. No successful iteration has a negative number for any of the power
-#      readings
+#   2. Any iteration that has a negative value for any of the numerical keys
+#      is suitably noted (and will be later removed by `build_structure`).
 def validate(data):
     good = True
 
@@ -234,7 +267,7 @@ def analyze_data(data, langs, algos):
 
 
 # Create a bar graph for run-times or memory usage by algorithm.
-def simple_graph(which, data, filename):
+def simple_graph(which, data, filename, *, languages=LANGUAGES):
     if which not in SIMPLE_GRAPH_PARAMS:
         print(f"  Unknown graph type: {which}")
         return
@@ -243,19 +276,19 @@ def simple_graph(which, data, filename):
 
     # Total width of each algorithm's bars
     width = 0.8
-    step = width / len(LANGUAGES)
-    steps = list(map(lambda x: x * step, range(len(LANGUAGES))))
+    step = width / len(languages)
+    steps = list(map(lambda x: x * step, range(len(languages))))
     x_len = len(ALGORITHMS)
     x = np.arange(x_len)
 
     bars = {}
-    for lang in LANGUAGES:
+    for lang in languages:
         bars[lang] = np.zeros(x_len, dtype=float)
         for idx, algo in enumerate(ALGORITHMS):
             bars[lang][idx] = data[lang][algo][key]["mean"]
 
     fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
-    for idx, lang in enumerate(LANGUAGES):
+    for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], bars[lang],
                step, label=LANGUAGE_LABELS[lang])
 
@@ -272,42 +305,42 @@ def simple_graph(which, data, filename):
 
 
 # Create a stacked bar graph for energy used by algorithm.
-def power_graph(data, filename, average=False):
+def power_graph(data, filename, average=False, *, languages=LANGUAGES):
     # Total width of each algorithm's bars
     width = 0.8
-    step = width / len(LANGUAGES)
-    steps = list(map(lambda x: x * step, range(len(LANGUAGES))))
+    step = width / len(languages)
+    steps = list(map(lambda x: x * step, range(len(languages))))
     x_len = len(ALGORITHMS)
     x = np.arange(x_len)
 
     runtimes = {}
-    for lang in LANGUAGES:
+    for lang in languages:
         runtimes[lang] = np.array(
             [data[lang][algo]["total_runtime"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
 
     pp0 = {}
-    for lang in LANGUAGES:
+    for lang in languages:
         pp0[lang] = np.array(
             [data[lang][algo]["pp0"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
 
     dram = {}
-    for lang in LANGUAGES:
+    for lang in languages:
         dram[lang] = np.array(
             [data[lang][algo]["dram"]["mean"] for algo in ALGORITHMS],
             dtype=float
         )
 
     if average:
-        for lang in LANGUAGES:
+        for lang in languages:
             pp0[lang] /= runtimes[lang]
             dram[lang] /= runtimes[lang]
 
     fig, ax = plt.subplots()
-    for idx, lang in enumerate(LANGUAGES):
+    for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], pp0[lang], step,
                label=f"{LANGUAGE_LABELS[lang]}")
         ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
@@ -453,14 +486,14 @@ def create_computed_table(
 
 
 # Create all the tables, using `data` and the `filename` given.
-def create_tables(data, filename):
+def create_tables(data, languages, filename):
     with open(filename, "w", encoding="utf-8") as f:
         # Create each table individually.
 
         # Create a run-time table for each algorithm:
         for algo in ALGORITHMS:
             create_computed_table(
-                f, data, LANGUAGES, algo, "runtime",
+                f, data, languages, algo, "runtime",
                 caption=f"{ALGORITHM_LABELS[algo]} run-times",
                 label=f"runtime:{algo}"
             )
@@ -468,7 +501,7 @@ def create_tables(data, filename):
         # Create a pp0/dram energy-usage table for each algorithm:
         for algo in ALGORITHMS:
             create_computed_table(
-                f, data, LANGUAGES, algo, ["pp0", "dram"],
+                f, data, languages, algo, ["pp0", "dram"],
                 caption=f"{ALGORITHM_LABELS[algo]} PP0/DRAM energy usage",
                 label=f"energy:{algo}"
             )
@@ -478,7 +511,7 @@ def create_tables(data, filename):
             caption = \
                 f"{ALGORITHM_LABELS[algo]} package energy usage over run-time"
             create_computed_table(
-                f, data, LANGUAGES, algo, "package",
+                f, data, languages, algo, "package",
                 caption=caption, label=f"energy_runtime:{algo}",
                 divisor="total_runtime"
             )
@@ -488,7 +521,7 @@ def create_tables(data, filename):
             caption = \
                 f"{ALGORITHM_LABELS[algo]} total memory usage"
             create_computed_table(
-                f, data, LANGUAGES, algo, "max_memory",
+                f, data, languages, algo, "max_memory",
                 caption=caption, label=f"memory:{algo}"
             )
 
@@ -498,6 +531,16 @@ def create_tables(data, filename):
 # Main loop. Read the data, validate it, turn it into useful structure.
 def main():
     args = parse_command_line()
+
+    target_languages = LANGUAGES
+    if args.no_intel:
+        target_languages = list(
+            filter(lambda x: not x.endswith("-intel"), target_languages)
+        )
+    if not args.no_scripts:
+        all_languages = target_languages + SCRIPT_LANGUAGES
+    else:
+        all_languages = target_languages
 
     print(f"Reading data from {args.input}...")
     data = []
@@ -523,27 +566,45 @@ def main():
     print("  Done.")
 
     if args.dump:
+        print("\nDump of data...")
         import pprint
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(analyzed)
 
     if not args.no_plots:
         print("\nCreating runtimes graph...")
-        simple_graph("runtime", analyzed, args.runtimes)
+        simple_graph(
+            "runtime", analyzed, args.runtimes, languages=target_languages
+        )
         print("  Done.")
+        if not args.no_scripts:
+            print("\nCreating script runtimes graph...")
+            simple_graph(
+                "runtime", analyzed, args.script_runtimes,
+                languages=SCRIPT_LANGUAGES
+            )
+            print("  Done.")
         print("\nCreating memory-usage graph...")
-        simple_graph("memory", analyzed, args.memory)
+        simple_graph("memory", analyzed, args.memory, languages=all_languages)
         print("  Done.")
         print("\nCreating power usage graph...")
-        power_graph(analyzed, args.power)
+        power_graph(analyzed, args.power, languages=target_languages)
         print("  Done.")
+        if not args.no_scripts:
+            print("\nCreating script power usage graph...")
+            power_graph(
+                analyzed, args.script_power, languages=SCRIPT_LANGUAGES
+            )
+            print("  Done.")
         print("\nCreating power-per-second usage graph...")
-        power_graph(analyzed, args.power_per_sec, True)
+        power_graph(
+            analyzed, args.power_per_sec, True, languages=all_languages
+        )
         print("  Done.")
 
     if not args.no_tables:
         print("\nCreating tables...")
-        create_tables(analyzed, args.tables)
+        create_tables(analyzed, all_languages, args.tables)
 
     print("\nDone.")
 
