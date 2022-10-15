@@ -7,7 +7,6 @@
 */
 
 use common::run::{run, PatternData};
-use std::cmp::Ordering;
 use std::env;
 use std::process::exit;
 
@@ -100,16 +99,5 @@ fn kmp(pat_data: &[PatternData], m: usize, sequence: &[u8], n: usize) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 = run(&init_kmp, &kmp, "kmp", argv);
-
-    match code.cmp(&0) {
-        Ordering::Less => eprintln!("Program encountered internal error."),
-        Ordering::Greater => {
-            eprintln!("Program encountered {} mismatches.", code);
-            code = 1;
-        }
-        Ordering::Equal => (),
-    };
-
-    exit(code);
+    exit(run(&init_kmp, &kmp, "kmp", argv));
 }

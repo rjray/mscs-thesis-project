@@ -7,7 +7,6 @@
 */
 
 use common::run::{run, PatternData, WordType};
-use std::cmp::Ordering;
 use std::env;
 use std::process::exit;
 
@@ -105,16 +104,5 @@ fn shift_or(
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 = run(&init_shift_or, &shift_or, "shift_or", argv);
-
-    match code.cmp(&0) {
-        Ordering::Less => eprintln!("Program encountered internal error."),
-        Ordering::Greater => {
-            eprintln!("Program encountered {} mismatches.", code);
-            code = 1;
-        }
-        Ordering::Equal => (),
-    };
-
-    exit(code);
+    exit(run(&init_shift_or, &shift_or, "shift_or", argv));
 }

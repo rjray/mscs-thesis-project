@@ -7,7 +7,7 @@
 */
 
 use common::run::{run, PatternData};
-use std::cmp::{max, Ordering};
+use std::cmp::max;
 use std::env;
 use std::process::exit;
 
@@ -176,17 +176,5 @@ fn boyer_moore(
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    let mut code: i32 =
-        run(&init_boyer_moore, &boyer_moore, "boyer_moore", argv);
-
-    match code.cmp(&0) {
-        Ordering::Less => eprintln!("Program encountered internal error."),
-        Ordering::Greater => {
-            eprintln!("Program encountered {} mismatches.", code);
-            code = 1;
-        }
-        Ordering::Equal => (),
-    };
-
-    exit(code);
+    exit(run(&init_boyer_moore, &boyer_moore, "boyer_moore", argv));
 }
