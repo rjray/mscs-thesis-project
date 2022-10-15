@@ -3,11 +3,11 @@
 
 When evaluating a programming language for use on a project, we as programmers are faced with an ever-growing array of choices. These choices range from long-lived, well-established languages such as C or Fortran, to the very latest offerings such as Julia or Swift. Selecting a language is a process that is generally rooted in a combination of factors: suitability to the target platform, performance, expressiveness, and (often most importantly) the programmer's familiarity and comfort with the language.
 
-This thesis will be a comparison of the relative strengths of the Rust programming language when compared to C and C++. To explore this, the problem of large-scale string matching will be examined with a focus on matching within DNA-like strings.
+This thesis will be a comparison of the relative strengths of five different programming languages when compared to each other. To explore this, the problem of large-scale string matching will be examined with a focus on matching within DNA-like strings.
 
 \subsection{String Matching}
 
-The topic of string matching has long been a popular area of research in computer science. Before the paper by Knuth, Morris and Pratt in 1977~\cite{knuth.morris.pratt.1977} there was already considerable work being done. In the same year, Boyer and Moore published an improvement over the Knuth/Morris/Pratt algorithm with enhancements such as starting the match from the tail of the pattern rather than the head, and allowing for greater right-ward jumps through the string being searched~\cite{boyer.moore.1977}.
+The topic of string matching has long been a popular area of research in computer science. Before the paper by Knuth, Morris and Pratt in 1977~\cite{knuth.morris.pratt.1977} there was already considerable work being done. In the same year, Boyer and Moore published an improvement over the Knuth-Morris-Pratt algorithm with enhancements such as starting the match from the tail of the pattern rather than the head, and allowing for greater right-ward jumps through the string being searched~\cite{boyer.moore.1977}.
 
 But string matching means extensive reading and manipulation of blocks of allocated memory, which can lead to program errors and vulnerabilities. A large percentage of security vulnerabilities discovered in programs are traced back to memory-related issues; in~\cite{cimpanu.2020}, Google software engineers are quoted as attributing roughly 70\% of serious security bugs in Chrome to memory management and safety bugs. The article goes on to report that analysis from Microsoft echoes this number. As such, a process to write programs that are more stable and secure must include careful consideration of memory-related challenges.
 

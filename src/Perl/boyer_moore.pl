@@ -79,7 +79,8 @@ sub calc_good_suffix {
 }
 
 sub init_boyer_moore {
-    my ($pattern, $m) = @_;
+    my ($pattern) = @_;
+    my $m = scalar @{$pattern};
     my $pat = [ @{$pattern}, 0 ];
     my @good_suffix = ($m) x $m;
     my @bad_char = ($m) x ASIZE;
@@ -91,9 +92,14 @@ sub init_boyer_moore {
 }
 
 sub boyer_moore {
-    my ($pat_data, $m, $seq, $n) = @_;
+    my ($pat_data, $seq) = @_;
     my ($pat, $good_suffix, $bad_char) = @{$pat_data};
     my $matches = 0;
+
+    # Get the sizes of the pattern and the sequence. Account for the sentinel
+    # character added to the pattern.
+    my $m = scalar @{$pat} - 1;
+    my $n = scalar @{$seq};
 
     my $j = 0;
     while ($j <= $n - $m) {

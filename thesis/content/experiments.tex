@@ -58,7 +58,7 @@ The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's 
 As mentioned above, the experiments were performed on five languages. The languages were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
-\item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping.
+\item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping, as well as being popular in bioinformatics computing.
 \item Each language is currently in widespread use across different disciplines of software development.
 \item The languages have differing aspects in their approach to memory management, as are detailed below.
 \end{itemize}
@@ -133,7 +133,7 @@ The CPU is dual-core, with hyperthreading cores, for a total of 4 computational 
 
 The NUC was cleaned of the vendor-installed operating system. Linux was installed on it using the minimal server edition of Ubuntu Linux 22.04.1. All unnecessary packages and software services were either disabled or removed completely.
 
-The necessary development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). Core software development packages from Ubuntu were also installed at this time.
+The necessary development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Rust language toolchain was installed and managed using the ``Rustup''\footnote{rustup: \texttt{https://rustup.rs/}} management software. Core software development packages from Ubuntu were also installed at this time.
 
 \subsubsection{Compilers and Other Tools}
 
@@ -143,11 +143,13 @@ The following table lists the primary software tools and packages that were used
 \begin{center}
 \begin{tabular}{|l|r|l|}
 \hline
-Tool & Version & Source\\
+\textbf{Tool} & \textbf{Version} & \textbf{Source}\\
 \hline
 GNU Make & 4.3 & Ubuntu 22.04\\
 GCC & 11.2.0 & Ubuntu 22.04\\
 LLVM & 15.0.1 & Linux Homebrew\\
+Intel\textregistered~oneAPI Compiler & 2022.2.0 & Intel website\\
+Rust & 1.64.0 & Rustup Manager\\
 Perl & 5.34.0 & Ubuntu 22.04\\
 Python & 3.10.6 & Ubuntu 22.04\\
 \hline
@@ -162,4 +164,6 @@ Valgrind & 3.19.0 & Linux Homebrew\\
 \label{table:tools}
 \end{table}
 
-The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. Lastly, the Python programming language was also used to develop the tools which process and analyze the data gathered during the running of the experiments, as well as generate the randomized data that the experiments used to exercise the algorithms.
+The tools used for the experiments themselves include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
+
+The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. Lastly, the Python programming language was used not only for experiments but also to develop the tools which process and analyze the data gathered during the running of the experiments, as well as generate the randomized data that the experiments used to exercise the algorithms.
