@@ -7,10 +7,9 @@
     previously done.)
 */
 
-use common::setup::*;
+use common::run_mp::{run_mp, PatternData};
 use std::env;
 use std::process::exit;
-use std::time::Instant;
 
 // Rather than implement a translation table for the four characters in the DNA
 // alphabet, for now just let the alphabet be the full ASCII range and only use
@@ -156,14 +155,13 @@ fn enter_pattern(
 /*
   Build the goto function and the (partial) output function.
 */
-#[inline(never)]
 fn build_goto(
-    patterns: &[String],
+    patterns: &[&[u8]],
     goto_fn: &mut Vec<Vec<i32>>,
     output_fn: &mut Vec<Set>,
 ) {
-    // Convert the vector of strings into arrays of `u8`.
-    let pats: Vec<&[u8]> = patterns.iter().map(|p| p.as_bytes()).collect();
+    // // Convert the vector of strings into arrays of `u8`.
+    // let pats: Vec<&[u8]> = patterns.iter().map(|p| p.as_bytes()).collect();
     // This value tracks the current high state number and is used in
     // successive calls to enter_pattern() to know what index new states are
     // created at.
@@ -174,7 +172,7 @@ fn build_goto(
     output_fn.push(Set::new());
 
     // Add each pattern in turn:
-    for (i, pattern) in pats.iter().enumerate() {
+    for (i, pattern) in patterns.iter().enumerate() {
         enter_pattern(&mut new_state, pattern, i, goto_fn, output_fn);
     }
 
@@ -189,7 +187,6 @@ fn build_goto(
 /*
   Build the failure function and complete the output function.
 */
-#[inline(never)]
 fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // Need a queue of state numbers:
     let mut queue = Queue::new();
@@ -237,24 +234,51 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     failure_fn
 }
 
+fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<PatternData<Set>> {
+    let mut pattern_data: Vec<PatternData<Set>> = Vec::with_capacity(4);
+
+    // Initialize the multi-patterns structure.
+    let mut goto_fn: Vec<Vec<i32>> = Vec::new();
+    let mut output_fn: Vec<Set> = Vec::new();
+    build_goto(patterns, &mut goto_fn, &mut output_fn);
+    let failure_fn = build_failure(&goto_fn, &mut output_fn);
+
+    pattern_data.push(PatternData::PatternCount(patterns.len()));
+    pattern_data.push(PatternData::PatternIntVecVec(goto_fn));
+    pattern_data.push(PatternData::PatternUsizeVec(failure_fn));
+    pattern_data.push(PatternData::PatternTypeVec(output_fn));
+
+    pattern_data
+}
+
 /*
     Perform the Aho-Corasick algorithm against the given sequence. No pattern
-    is passed in, as the machine of goto_fn/failure_fn/output_fn will handle
-    all the patterns in a single pass.
+    is passed in, as the machine of goto_fn/failure_fn/output_fn given in the
+    `pat_data` vector will handle all the patterns in a single pass.
 
     Instead of returning a single u32, this returns a Vec<u32> with size equal
     to `pattern_count`.
 */
-#[inline(never)]
-fn aho_corasick(
-    sequence: &String,
-    pattern_count: usize,
-    goto_fn: &[Vec<i32>],
-    failure_fn: &[usize],
-    output_fn: &[Set],
-) -> Vec<u32> {
-    let sequence = sequence.as_bytes();
-    let mut matches: Vec<u32> = vec![0; pattern_count];
+fn aho_corasick(pat_data: &[PatternData<Set>], sequence: &[u8]) -> Vec<u32> {
+    // Unpack pat_data:
+    let pattern_count = match &pat_data[0] {
+        PatternData::PatternCount(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 0"),
+    };
+    let goto_fn = match &pat_data[1] {
+        PatternData::PatternIntVecVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 1"),
+    };
+    let failure_fn = match &pat_data[2] {
+        PatternData::PatternUsizeVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 2"),
+    };
+    let output_fn = match &pat_data[3] {
+        PatternData::PatternTypeVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 3"),
+    };
+
+    let mut matches: Vec<u32> = vec![0; *pattern_count];
     let mut state: usize = 0;
 
     for s in sequence.iter() {
@@ -272,94 +296,14 @@ fn aho_corasick(
 }
 
 /*
-    This is a customization of the runner function used for the single-pattern
-    matching algorithms. This one sets up the structures needed for the A-C
-    algorithm, then iterates over the sequences (since iterating over the
-    patterns is not necessary).
-
-    The return value is 0 if the experiment correctly identified all pattern
-    instances in all sequences, and the number of misses otherwise.
-*/
-pub fn run(argv: Vec<String>) -> i32 {
-    let argc = argv.len();
-    if !(3..=4).contains(&argc) {
-        eprintln!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
-        return -1;
-    }
-
-    // Read the data files using the routines from common::setup. The answers
-    // data uses Option<> since it does not have to be provided.
-    let sequences_data: Vec<String> = read_sequences(&argv[1]);
-    let patterns_data: Vec<String> = read_patterns(&argv[2]);
-    let answers_data: Option<Vec<Vec<u32>>> = if argc == 4 {
-        Some(read_answers(&argv[3]))
-    } else {
-        None
-    };
-
-    // If answers were provided, check that the number of lines matches the
-    // number of patterns.
-    if let Some(ref answers) = answers_data {
-        if answers.len() != patterns_data.len() {
-            eprintln!("Count mismatch between patterns file and answers file");
-            return -1;
-        }
-    }
-
-    // Run the given code. For each sequence, try each pattern against it. The
-    // `code` function pointer will return the number of matches found, which
-    // will be compared to the table of answers for that pattern. Report any
-    // mismatches.
-    let start_time = Instant::now();
-    let mut return_code: i32 = 0;
-
-    // Initialize the multi-patterns structure.
-    let mut goto_fn: Vec<Vec<i32>> = Vec::new();
-    let mut output_fn: Vec<Set> = Vec::new();
-    build_goto(&patterns_data, &mut goto_fn, &mut output_fn);
-    let failure_fn = build_failure(&goto_fn, &mut output_fn);
-
-    for (sequence, sequence_str) in sequences_data.iter().enumerate() {
-        // Here, we don't iterate over the patterns. We just call the matching
-        // function and pass it the three "machine" elements set up in the
-        // initialization code, above.
-        let matches = aho_corasick(
-            sequence_str,
-            patterns_data.len(),
-            &goto_fn,
-            &failure_fn,
-            &output_fn,
-        );
-
-        if let Some(ref answers) = answers_data {
-            for pattern in 0..patterns_data.len() {
-                if matches[pattern] != answers[pattern][sequence] {
-                    eprintln!(
-                        "Pattern {} mismatch against sequence {} ({} != {})",
-                        pattern + 1,
-                        sequence + 1,
-                        matches[pattern],
-                        answers[pattern][sequence]
-                    );
-
-                    return_code += 1;
-                }
-            }
-        }
-    }
-
-    // Note the end time before doing anything else.
-    let elapsed = start_time.elapsed();
-    println!("language: rust\nalgorithm: aho_corasick");
-    println!("runtime: {:.8}", elapsed.as_secs_f64());
-
-    return_code
-}
-
-/*
     All that is done here is call the run() function with the argv values.
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    exit(run(argv));
+    exit(run_mp(
+        &init_aho_corasick,
+        &aho_corasick,
+        "aho_corasick",
+        argv,
+    ));
 }
