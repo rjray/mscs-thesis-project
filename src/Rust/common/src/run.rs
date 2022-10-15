@@ -26,9 +26,10 @@ pub type Algorithm = dyn Fn(&[PatternData], &[u8]) -> i32;
 pub type Initializer = dyn Fn(&[u8]) -> Vec<PatternData>;
 
 /*
-   This is the "runner" routine. It takes a pointer to the code that implements
-   the given algorithm, the text name of the algorithm for the output block,
-   and the vector of command-line arguments that were passed to the program.
+   This is the "runner" routine. It takes a pointer to the code that
+   initializes the given algorithm, a pointer to the code that executes the
+   algorithm, the text name of the algorithm for the output block, and the
+   vector of command-line arguments that were passed to the program.
 
    After reading the data files given on the command-line, the code starts the
    clock on execution and iterates over the patterns and sequences. Once all
