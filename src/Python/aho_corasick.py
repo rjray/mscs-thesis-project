@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 from collections import deque
-from setup import read_sequences, read_patterns, read_answers
-from sys import argv, stderr
-from time import perf_counter
+from run_multi import run_multi
+from sys import argv
 
 ASIZE = 128
 FAIL = -1
@@ -48,7 +47,7 @@ def build_goto(patterns, goto_fn, output_fn):
 
     # Add each pattern in turn:
     for idx, pattern in enumerate(patterns):
-        enter_pattern(list(map(ord, pattern)), idx, goto_fn, output_fn)
+        enter_pattern(pattern, idx, goto_fn, output_fn)
 
     # Set unused transitions in state 0 to point to state 0:
     for i in range(ASIZE):
@@ -94,17 +93,29 @@ def build_failure(goto_fn, output_fn):
     return failure_fn
 
 
+def init_aho_corasick(patterns_data):
+    goto_fn = []
+    output_fn = []
+    build_goto(patterns_data, goto_fn, output_fn)
+    failure_fn = build_failure(goto_fn, output_fn)
+    pat_count = len(patterns_data)
+
+    return [pat_count, goto_fn, failure_fn, output_fn]
+
+
 # Perform the Aho-Corasick algorithm against the given sequence. No pattern is
 # passed in, as the machine of goto_fn/failure_fn/output_fn will handle all the
 # patterns in a single pass.
 #
 # Instead of returning a single int, returns an array of ints as long as the
 # number of patterns (pattern_count).
-def aho_corasick(sequence, pattern_count, goto_fn, failure_fn, output_fn):
+def aho_corasick(pat_data, sequence):
+    pattern_count, goto_fn, failure_fn, output_fn = pat_data
+
     matches = [0] * pattern_count
     state = 0
 
-    for s in map(ord, sequence):
+    for s in sequence:
         while goto_fn[state][s] == FAIL:
             state = failure_fn[state]
 
@@ -115,60 +126,5 @@ def aho_corasick(sequence, pattern_count, goto_fn, failure_fn, output_fn):
     return matches
 
 
-# This is a customization of the runner function used for the single-pattern
-# matching algorithms. This one sets up the structures needed for the A-C
-# algorithm, then iterates over the sequences (since iterating over the
-# patterns is not necessary).
-#
-# The return value is 0 if the experiment correctly identified all pattern
-# instances in all sequences, and the number of misses otherwise.
-def run(args):
-    if len(args) < 3 or len(args) > 4:
-        raise Exception(f"Usage: {args[0]} sequences patterns <answers>")
-
-    sequences_data = read_sequences(args[1])
-    patterns_data = read_patterns(args[2])
-    if len(args) == 4:
-        answers_data = read_answers(args[3])
-        if len(answers_data) != len(patterns_data):
-            raise Exception(
-                "Count mismatch between patterns file and answers file"
-            )
-    else:
-        answers_data = None
-
-    start_time = perf_counter()
-    return_code = 0
-
-    goto_fn = []
-    output_fn = []
-    build_goto(patterns_data, goto_fn, output_fn)
-    failure_fn = build_failure(goto_fn, output_fn)
-    pat_count = len(patterns_data)
-
-    for sequence, sequence_str in enumerate(sequences_data):
-        matches = aho_corasick(
-            sequence_str, pat_count, goto_fn, failure_fn, output_fn
-        )
-
-        if answers_data:
-            for pattern in range(pat_count):
-                if matches[pattern] != answers_data[pattern][sequence]:
-                    print(
-                        f"Pattern {pattern + 1} mismatch against sequence",
-                        f"{sequence + 1} ({matches[pattern]} !=",
-                        f"{answers_data[pattern][sequence]})",
-                        file=stderr
-                    )
-                    return_code += 1
-
-    # Note the end-time before doing anything else:
-    elapsed = perf_counter() - start_time
-
-    print(f"language: python\nalgorithm: aho_corasick\nruntime: {elapsed:.6f}")
-
-    return return_code
-
-
 if __name__ == "__main__":
-    exit(run(argv))
+    exit(run_multi(init_aho_corasick, aho_corasick, "aho_corasick", argv))
