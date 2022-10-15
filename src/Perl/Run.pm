@@ -43,15 +43,13 @@ sub run {
 
     for my $pattern (0..$#{$patterns_data}) {
         my $pat = $patterns_data->[$pattern];
-        my $pat_len = scalar @{$pat};
-        my $pat_data = $init->($pat, $pat_len);
+        my $pat_data = $init->($pat);
 
         for my $sequence (0..$#{$sequences_data}) {
             my $seq = $sequences_data->[$sequence];
-            my $seq_len = scalar @{$seq};
 
             my $matches =
-                $code->($pat_data, $pat_len, $seq, $seq_len);
+                $code->($pat_data, $seq);
 
             if ($answers_data &&
                 ($matches != $answers_data->[$pattern][$sequence])) {
