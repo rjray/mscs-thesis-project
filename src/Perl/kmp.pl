@@ -31,8 +31,7 @@ sub make_next_table {
 }
 
 sub init_kmp {
-    my ($pattern) = @_;
-    my $m = scalar @{$pattern};
+    my ($pattern, $m) = @_;
     my $pat = [ @{$pattern}, 0 ];
     my @next_table = (0) x ($m + 1);
 
@@ -42,19 +41,14 @@ sub init_kmp {
 }
 
 sub kmp {
-    my ($pat_data, $seq) = @_;
+    my ($pat_data, $m, $sequence, $n) = @_;
     my ($pat, $next_table) = @{$pat_data};
     my $matches = 0;
 
     my ($i, $j) = (0, 0);
 
-    # Get the sizes of the pattern and the sequence. Account for the sentinel
-    # character added to the pattern.
-    my $m = scalar @{$pat} - 1;
-    my $n = scalar @{$seq};
-
     while ($j < $n) {
-        while ($i > -1 && $pat->[$i] != $seq->[$j]) {
+        while ($i > -1 && $pat->[$i] != $sequence->[$j]) {
             $i = $next_table->[$i];
         }
         $i++;

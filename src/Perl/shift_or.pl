@@ -29,8 +29,7 @@ sub calc_s_positions {
 }
 
 sub init_shift_or {
-    my ($pattern) = @_;
-    my $m = scalar @{$pattern};
+    my ($pattern, $m) = @_;
 
     if ($m > WORD) {
         die 'shift_or: pattern size must be <= ' . WORD . "\n";
@@ -44,12 +43,9 @@ sub init_shift_or {
 }
 
 sub shift_or {
-    my ($pat_data, $seq) = @_;
+    my ($pat_data, $m, $seq, $n) = @_;
     my (undef, $lim, $s_positions) = @{$pat_data};
     my $matches = 0;
-
-    # Get the size of the sequence. Pattern size is not needed here.
-    my $n = scalar @{$seq};
 
     my $state = ~0;
     foreach my $j (0..($n - 1)) {
