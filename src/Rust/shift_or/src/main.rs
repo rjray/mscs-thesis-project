@@ -46,9 +46,10 @@ fn calc_s_positions(
     lim
 }
 
-fn init_shift_or(pat: &[u8], m: usize) -> Vec<PatternData> {
+fn init_shift_or(pat: &[u8]) -> Vec<PatternData> {
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);
     let mut s_positions: Vec<WordType> = vec![!0; ASIZE];
+    let m = pat.len();
 
     // Verify that the pattern is not too long:
     if m > WORD {
@@ -68,12 +69,7 @@ fn init_shift_or(pat: &[u8], m: usize) -> Vec<PatternData> {
     Perform the Shift-Or algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn shift_or(
-    pat_data: &[PatternData],
-    _m: usize, // m is not used in this algorithm, but is part of the interface
-    sequence: &[u8],
-    n: usize,
-) -> i32 {
+fn shift_or(pat_data: &[PatternData], sequence: &[u8]) -> i32 {
     let mut matches: i32 = 0;
     let mut state: WordType = !0;
 
@@ -86,6 +82,9 @@ fn shift_or(
         PatternData::PatternWordVec(arr) => arr,
         _ => panic!("Incorrect value at pat_data slot 1"),
     };
+
+    // Sizes of the sequence.
+    let n = sequence.len();
 
     // Perform the search:
     for j in 0..n {

@@ -20,10 +20,10 @@ pub enum PatternData {
 }
 
 // A type alias for the signature of the single-pattern matching algorithms.
-pub type Algorithm = dyn Fn(&[PatternData], usize, &[u8], usize) -> i32;
+pub type Algorithm = dyn Fn(&[PatternData], &[u8]) -> i32;
 // A type alias for the signature of the single-pattern initialization
 // functions.
-pub type Initializer = dyn Fn(&[u8], usize) -> Vec<PatternData>;
+pub type Initializer = dyn Fn(&[u8]) -> Vec<PatternData>;
 
 /*
    This is the "runner" routine. It takes a pointer to the code that implements
@@ -84,13 +84,10 @@ pub fn run(
         sequences_data.iter().map(|s| s.as_bytes()).collect();
 
     for (pattern, pat_bytes) in patterns.iter().enumerate() {
-        let pat_len = pat_bytes.len();
-        let pat_data = init(pat_bytes, pat_len);
+        let pat_data = init(pat_bytes);
 
         for (sequence, seq_bytes) in sequences.iter().enumerate() {
-            let seq_len = seq_bytes.len();
-
-            let matches = code(&pat_data, pat_len, seq_bytes, seq_len);
+            let matches = code(&pat_data, seq_bytes);
             // If there was an error in the actual algorithm, `matches` will be
             // <0.
             if matches < 0 {

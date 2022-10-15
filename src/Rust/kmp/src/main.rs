@@ -38,7 +38,8 @@ fn build_next_table(pat: &[u8], m: usize) -> Vec<i32> {
     next_table
 }
 
-fn init_kmp(pat: &[u8], m: usize) -> Vec<PatternData> {
+fn init_kmp(pat: &[u8]) -> Vec<PatternData> {
+    let m = pat.len();
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);
 
     // Because the C code takes advantage of the presence of a null byte at the
@@ -61,7 +62,7 @@ fn init_kmp(pat: &[u8], m: usize) -> Vec<PatternData> {
     Perform the KMP algorithm on the given pattern of length m, against the
     sequence of length n.
 */
-fn kmp(pat_data: &[PatternData], m: usize, sequence: &[u8], n: usize) -> i32 {
+fn kmp(pat_data: &[PatternData], sequence: &[u8]) -> i32 {
     let mut i: i32 = 0;
     let mut j: usize = 0;
     // Track the number of times the pattern is found in the sequence.
@@ -76,6 +77,11 @@ fn kmp(pat_data: &[PatternData], m: usize, sequence: &[u8], n: usize) -> i32 {
         PatternData::PatternIntVec(table) => table,
         _ => panic!("Incorrect value at pat_data slot 1"),
     };
+
+    // Sizes of pattern and sequence. Account for the sentinel character added
+    // to the pattern.
+    let m = pattern.len() - 1;
+    let n = sequence.len();
 
     // The core algorithm.
     while j < n {

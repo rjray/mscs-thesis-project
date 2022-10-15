@@ -94,7 +94,8 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     good_suffix
 }
 
-fn init_boyer_moore(pat: &[u8], m: usize) -> Vec<PatternData> {
+fn init_boyer_moore(pat: &[u8]) -> Vec<PatternData> {
+    let m = pat.len();
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(3);
 
     // Because the C code takes advantage of the presence of a null byte at the
@@ -119,19 +120,9 @@ fn init_boyer_moore(pat: &[u8], m: usize) -> Vec<PatternData> {
     Perform the Boyer-Moore algorithm on the given pattern of length m, against
     the sequence of length n.
 */
-fn boyer_moore(
-    pat_data: &[PatternData],
-    m: usize,
-    sequence: &[u8],
-    n: usize,
-) -> i32 {
+fn boyer_moore(pat_data: &[PatternData], sequence: &[u8]) -> i32 {
     let mut i: i32;
     let mut j: i32;
-    // Convert m and n from usize to i32 to cut down on the number of casts
-    // that have to be done. The casts don't really contribute to the run-time
-    // of the code, but they affect the readability.
-    let m: i32 = m as i32;
-    let n: i32 = n as i32;
     // Track the number of times the pattern is found in the sequence.
     let mut matches: i32 = 0;
 
@@ -148,6 +139,12 @@ fn boyer_moore(
         PatternData::PatternIntVec(arr) => arr,
         _ => panic!("Incorrect value at pat_data slot 2"),
     };
+
+    // Sizes of pattern and sequence. Converted from usize to i32 to cut down
+    // on the number of casts that have to be done. The casts don't really
+    // contribute to the run-time of the code, but they affect the readability.
+    let m = pattern.len() as i32 - 1; // Account for the sentinel character
+    let n = sequence.len() as i32;
 
     // Perform the searching:
     j = 0;
