@@ -28,14 +28,12 @@ def run(init, code, name, argv):
 
     for pattern in range(len(patterns_data)):
         pat = patterns_data[pattern]
-        pat_len = len(pat)
-        pat_data = init(pat, pat_len)
+        pat_data = init(pat)
 
         for sequence in range(len(sequences_data)):
             seq = sequences_data[sequence]
-            seq_len = len(seq)
 
-            matches = code(pat_data, pat_len, seq, seq_len)
+            matches = code(pat_data, seq)
 
             if answers_data is not None:
                 if matches != answers_data[pattern][sequence]:

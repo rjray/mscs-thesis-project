@@ -58,7 +58,8 @@ def calc_good_suffix(pat, m, good_suffix):
     return
 
 
-def init_boyer_moore(pattern, m):
+def init_boyer_moore(pattern):
+    m = len(pattern)
     pat = copy(pattern)
     pat.append(0)
 
@@ -71,9 +72,13 @@ def init_boyer_moore(pattern, m):
     return [pat, good_suffix, bad_char]
 
 
-def boyer_moore(pat_data, m, seq, n):
+def boyer_moore(pat_data, seq):
     pat, good_suffix, bad_char = pat_data
     matches = 0
+
+    # Get sizes of pat and sequence. Account for the sentinel value in pat.
+    m = len(pat) - 1
+    n = len(seq)
 
     j = 0
     while j <= n - m:

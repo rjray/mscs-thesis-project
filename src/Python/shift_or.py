@@ -25,7 +25,8 @@ def calc_s_positions(pat, m, s_positions):
     return lim
 
 
-def init_shift_or(pattern, m):
+def init_shift_or(pattern):
+    m = len(pattern)
     if m > WORD:
         raise Exception(f"shift_or: pattern size my be <= {WORD}")
 
@@ -35,9 +36,12 @@ def init_shift_or(pattern, m):
     return [pattern, lim, s_positions]
 
 
-def shift_or(pat_data, m, seq, n):
+def shift_or(pat_data, seq):
     _, lim, s_positions = pat_data
     matches = 0
+
+    # Get size of sequence. Pattern size not needed here.
+    n = len(seq)
 
     state = ~0 & MASK
     for j in range(n):

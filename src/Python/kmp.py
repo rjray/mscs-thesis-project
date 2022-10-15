@@ -23,7 +23,8 @@ def make_next_table(pattern, m, next_table):
     return
 
 
-def init_kmp(pattern, m):
+def init_kmp(pattern):
+    m = len(pattern)
     pat = copy(pattern)
     pat.append(0)
     next_table = [0 for _ in range(m + 1)]
@@ -33,9 +34,13 @@ def init_kmp(pattern, m):
     return [pat, next_table]
 
 
-def kmp(pat_data, m, sequence, n):
+def kmp(pat_data, sequence):
     pat, next_table = pat_data
     matches = 0
+
+    # Get sizes of pat and sequence. Account for the sentinel value in pat.
+    m = len(pat) - 1
+    n = len(sequence)
 
     i, j = 0, 0
 
