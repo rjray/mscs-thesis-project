@@ -44,9 +44,10 @@ WORD_TYPE calc_s_positions(std::string pat, int m,
   return lim;
 }
 
-std::vector<PatternData> init_shift_or(std::string pattern, int m) {
+std::vector<PatternData> init_shift_or(std::string pattern) {
   std::vector<PatternData> return_val;
   return_val.reserve(2);
+  int m = pattern.length();
   // Declare and initialize the s_positions vector:
   std::vector<WORD_TYPE> s_positions(ASIZE, ~0);
 
@@ -69,8 +70,7 @@ std::vector<PatternData> init_shift_or(std::string pattern, int m) {
   Perform the Shift-Or algorithm on the given pattern of length m, against
   the sequence of length n.
 */
-int shift_or(std::vector<PatternData> pat_data, int m, std::string sequence,
-             int n) {
+int shift_or(std::vector<PatternData> pat_data, std::string sequence) {
   WORD_TYPE state;
   int matches = 0;
   int j;
@@ -79,6 +79,9 @@ int shift_or(std::vector<PatternData> pat_data, int m, std::string sequence,
   WORD_TYPE lim = std::get<WORD_TYPE>(pat_data[0]);
   std::vector<WORD_TYPE> s_positions =
       std::get<std::vector<WORD_TYPE>>(pat_data[1]);
+
+  // Get the size of the sequence. Pattern size is not needed here.
+  int n = sequence.length();
 
   /* Searching */
   for (state = ~0, j = 0; j < n; ++j) {

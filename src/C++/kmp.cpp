@@ -34,9 +34,10 @@ void make_next_table(std::string pat, int m, std::vector<int> &next_table) {
   return;
 }
 
-std::vector<PatternData> init_kmp(std::string pattern, int m) {
+std::vector<PatternData> init_kmp(std::string pattern) {
   std::vector<PatternData> return_val;
   return_val.reserve(2);
+  int m = pattern.length();
   // Set up the next_table array for the algorithm to use:
   std::vector<int> next_table(m + 1, 0);
   // Set up a copy of pattern, with the sentinel character added:
@@ -53,13 +54,17 @@ std::vector<PatternData> init_kmp(std::string pattern, int m) {
   Perform the KMP algorithm on the given pattern of length m, against the
   sequence of length n.
 */
-int kmp(std::vector<PatternData> pat_data, int m, std::string sequence, int n) {
+int kmp(std::vector<PatternData> pat_data, std::string sequence) {
   int i, j;
   int matches = 0;
 
   // Unpack pat_data:
   std::string pattern = std::get<std::string>(pat_data[0]);
   std::vector<int> next_table = std::get<std::vector<int>>(pat_data[1]);
+
+  // Get the size of the pattern and the sequence.
+  int m = pattern.length();
+  int n = sequence.length();
 
   // Perform the searching:
   i = j = 0;
