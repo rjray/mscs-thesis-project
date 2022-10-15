@@ -42,10 +42,12 @@ WORD_TYPE calc_s_positions(unsigned char *pat, int m, WORD_TYPE s_positions[]) {
   return lim;
 }
 
-void **init_shift_or(unsigned char *pattern, int m) {
+void **init_shift_or(unsigned char *pattern) {
   void **return_val = (void **)calloc(3, sizeof(void *));
   WORD_TYPE *lim = calloc(1, sizeof(WORD_TYPE));
   WORD_TYPE *s_positions = calloc(ASIZE, sizeof(WORD_TYPE));
+
+  int m = strlen((const char *)pattern);
 
   if (m > WORD) {
     fprintf(stderr, "shift_or: pattern size must be <= %d\n", WORD);
@@ -65,12 +67,15 @@ void **init_shift_or(unsigned char *pattern, int m) {
   Perform the Shift-Or algorithm on the given pattern of length m, against
   the sequence of length n.
 */
-int shift_or(void **pat_data, int m, unsigned char *sequence, int n) {
+int shift_or(void **pat_data, unsigned char *sequence) {
   WORD_TYPE *lim = (WORD_TYPE *)pat_data[0];
   WORD_TYPE *s_positions = (WORD_TYPE *)pat_data[1];
   WORD_TYPE state;
   int matches = 0;
   int j;
+
+  // Size of sequence. Pattern size not needed here.
+  int n = strlen((const char *)sequence);
 
   /* Searching */
   for (state = ~0, j = 0; j < n; ++j) {

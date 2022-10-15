@@ -38,9 +38,10 @@ void make_next_table(unsigned char *pat, int m, int next_table[]) {
   Initialize the pattern given. Return a two-element array of the processed
   pattern and the `next_table`.
 */
-void **init_kmp(unsigned char *pattern, int m) {
+void **init_kmp(unsigned char *pattern) {
   void **return_val = (void **)calloc(3, sizeof(void *));
   // Set up the next_table array for the algorithm to use:
+  int m = strlen((const char *)pattern);
   int *next_table = (int *)calloc(m + 1, sizeof(int));
   make_next_table(pattern, m, next_table);
 
@@ -54,11 +55,15 @@ void **init_kmp(unsigned char *pattern, int m) {
   Perform the KMP algorithm on the given pattern of length m, against the
   sequence of length n.
 */
-int kmp(void **pat_data, int m, unsigned char *sequence, int n) {
+int kmp(void **pat_data, unsigned char *sequence) {
   int i, j;
   unsigned char *pattern = (unsigned char *)pat_data[0];
   int *next_table = (int *)pat_data[1];
   int matches = 0;
+
+  // Sizes of pattern and sequence.
+  int m = strlen((const char *)pattern);
+  int n = strlen((const char *)sequence);
 
   // Perform the searching:
   i = j = 0;

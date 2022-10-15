@@ -74,15 +74,12 @@ int run(initializer init, algorithm code, char *name, int argc, char *argv[]) {
   int return_code = 0; // Used for noting if some number of matches fail
   for (int pattern = 0; pattern < patterns_count; pattern++) {
     char *pattern_str = patterns_data[pattern];
-    int pat_len = strlen(pattern_str);
-    void **pat_data = (*init)((unsigned char *)pattern_str, pat_len);
+    void **pat_data = (*init)((unsigned char *)pattern_str);
 
     for (int sequence = 0; sequence < sequences_count; sequence++) {
       char *sequence_str = sequences_data[sequence];
-      int seq_len = strlen(sequence_str);
 
-      int matches =
-          (*code)(pat_data, pat_len, (unsigned char *)sequence_str, seq_len);
+      int matches = (*code)(pat_data, (unsigned char *)sequence_str);
 
       if (answers_data && matches != answers_data[pattern][sequence]) {
         fprintf(stderr, "Pattern %d mismatch against sequence %d (%d != %d)\n",
