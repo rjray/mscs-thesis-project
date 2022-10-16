@@ -10,7 +10,7 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include "setup.h"
+#include "run.h"
 
 #if defined(__INTEL_LLVM_COMPILER)
 #define LANG "c-intel"
@@ -381,6 +381,28 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
   return;
 }
 
+void **init_aho_corasick(unsigned char **patterns_data, int patterns_count) {
+  void **return_val = (void **)calloc(5, sizeof(void *));
+  int *pat_count = (int *)calloc(1, sizeof(int));
+  *pat_count = patterns_count;
+
+  // Initialize the multi-pattern structure.
+  int **goto_fn;
+  int *failure_fn;
+  Set **output_fn;
+  int num_states;
+  build_goto((unsigned char **)patterns_data, patterns_count, &goto_fn,
+             &output_fn, &num_states);
+  build_failure(&failure_fn, goto_fn, output_fn, num_states);
+
+  return_val[0] = (void *)pat_count;
+  return_val[1] = (void *)goto_fn;
+  return_val[2] = (void *)failure_fn;
+  return_val[3] = (void *)output_fn;
+
+  return return_val;
+}
+
 /*
   Perform the Aho-Corasick algorithm against the given sequence. No pattern is
   passed in, as the machine of goto_fn/failure_fn/output_fn will handle all the
@@ -389,10 +411,17 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
   Instead of returning a single int, returns an array of ints as long as the
   number of patterns (pattern_count).
 */
-int *aho_corasick(unsigned char *sequence, int n, int pattern_count,
-                  int **goto_fn, int *failure_fn, Set **output_fn) {
+int *aho_corasick(void **pat_data, unsigned char *sequence) {
   int state = 0;
-  int *matches = (int *)calloc(pattern_count, sizeof(int));
+  int n = strlen((const char *)sequence);
+
+  // Unpack pat_data:
+  int *pattern_count = (int *)pat_data[0];
+  int **goto_fn = (int **)pat_data[1];
+  int *failure_fn = (int *)pat_data[2];
+  Set **output_fn = (Set **)pat_data[3];
+
+  int *matches = (int *)calloc(*pattern_count, sizeof(int));
   if (matches == NULL) {
     fprintf(stderr, "aho_corasick: matches calloc failed\n");
     exit(-1);
@@ -411,134 +440,11 @@ int *aho_corasick(unsigned char *sequence, int n, int pattern_count,
 }
 
 /*
-  Simple measure of the wall-clock down to the usec. Adapted from StackOverflow.
-*/
-double get_time() {
-  struct timeval t;
-  gettimeofday(&t, NULL);
-  return t.tv_sec + t.tv_usec * 1e-6;
-}
-
-/*
-  This is a customization of the runner function used for the single-pattern
-  matching algorithms. This one sets up the structures needed for the A-C
-  algorithm, then iterates over the sequences (since iterating over the patterns
-  is not necessary).
-
-  The return value is 0 if the experiment correctly identified all pattern
-  instances in all sequences, and the number of misses otherwise.
-*/
-int run(int argc, char *argv[]) {
-  if (argc < 3 || argc > 4) {
-    fprintf(stderr, "Usage: %s <sequences> <patterns> [ <answers> ]\n",
-            argv[0]);
-    exit(-1);
-  }
-
-  // These will be alloc'd by the routines that read the files.
-  char **sequences_data, **patterns_data;
-  int **answers_data = NULL;
-
-  // Read the three data files. Any of these that return 0 means an error. Any
-  // error has already been reported to stderr. The filenames are in the order:
-  // sequences patterns answers.
-  int sequences_count = read_sequences(argv[1], &sequences_data);
-  if (sequences_count == 0)
-    exit(-1);
-  int patterns_count = read_patterns(argv[2], &patterns_data);
-  if (patterns_count == 0)
-    exit(-1);
-  if (argc == 4) {
-    int answers_count = read_answers(argv[3], &answers_data);
-    if (answers_count == 0)
-      exit(-1);
-    if (answers_count != patterns_count) {
-      fprintf(stderr,
-              "Count mismatch between patterns file and answers file\n");
-      exit(-1);
-    }
-  }
-
-  // Run it. First, prepare the data structures for the combined pattern that
-  // will be used for matching. Then, for each sequence, try the combined
-  // pattern against it. The aho_corasick() function will return an array of
-  // integers for the count of matches of each pattern within the given
-  // sequence. Report any mismatches (if we have answers data available).
-  double start_time = get_time();
-  int return_code = 0; // Used for noting if some number of matches fail
-
-  // Initialize the multi-pattern structure.
-  int **goto_fn;
-  int *failure_fn;
-  Set **output_fn;
-  int num_states;
-  build_goto((unsigned char **)patterns_data, patterns_count, &goto_fn,
-             &output_fn, &num_states);
-  build_failure(&failure_fn, goto_fn, output_fn, num_states);
-
-  for (int sequence = 0; sequence < sequences_count; sequence++) {
-    char *sequence_str = sequences_data[sequence];
-    int seq_len = strlen(sequence_str);
-
-    // Here, we don't iterate over the patterns. We just call the matching
-    // function and pass it the three "machine" elements set up in the
-    // initialization code, above.
-    int *matches = aho_corasick((unsigned char *)sequence_str, seq_len,
-                                patterns_count, goto_fn, failure_fn, output_fn);
-
-    if (answers_data) {
-      for (int pattern = 0; pattern < patterns_count; pattern++)
-        if (matches[pattern] != answers_data[pattern][sequence]) {
-          fprintf(stderr,
-                  "Pattern %d mismatch against sequence %d (%d != %d)\n",
-                  pattern + 1, sequence + 1, matches[pattern],
-                  answers_data[pattern][sequence]);
-          return_code++;
-        }
-    }
-
-    free(matches);
-  }
-
-  // Note the end time, before freeing memory.
-  double end_time = get_time();
-  fprintf(stdout, "language: %s\nalgorithm: aho_corasick\n", LANG);
-  fprintf(stdout, "runtime: %.6g\n", end_time - start_time);
-
-  // Free all the memory that was allocated by the routines in setup.c:
-  for (int i = 0; i < patterns_count; i++)
-    free(patterns_data[i]);
-  free(patterns_data);
-
-  if (answers_data) {
-    for (int i = 0; i < patterns_count; i++)
-      free(answers_data[i]);
-    free(answers_data);
-  }
-
-  for (int i = 0; i < sequences_count; i++)
-    free(sequences_data[i]);
-  free(sequences_data);
-
-  // Free all memory allocated by the A-C initialization:
-  for (int i = 0; i < num_states; i++) {
-    // Pointers in goto_fn just point to int[]:
-    free(goto_fn[i]);
-    // But pointers in output_fn point to Set*, which needs to be destroyed:
-    delete_set(output_fn[i]);
-  }
-  free(goto_fn);
-  free(failure_fn);
-  free(output_fn);
-
-  return return_code;
-}
-
-/*
   All that is done here is call the run() function with the argc/argv values.
 */
 int main(int argc, char *argv[]) {
-  int return_code = run(argc, argv);
+  int return_code =
+      run_multi(&init_aho_corasick, &aho_corasick, "aho_corasick", argc, argv);
 
   return return_code;
 }

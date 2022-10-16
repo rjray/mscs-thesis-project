@@ -76,11 +76,11 @@ shift_or-gcc.o: shift_or.c run.h
 shift_or-c-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
 	$(GCC) $(CFLAGS) -o shift_or-c-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
 
-aho_corasick-gcc.o: aho_corasick.c setup.h
+aho_corasick-gcc.o: aho_corasick.c run.h
 	$(GCC) $(CFLAGS) -c -o aho_corasick-gcc.o aho_corasick.c
 
-aho_corasick-c-gcc: aho_corasick-gcc.o setup-gcc.o
-	$(GCC) $(CFLAGS) -o aho_corasick-c-gcc aho_corasick-gcc.o setup-gcc.o
+aho_corasick-c-gcc: aho_corasick-gcc.o run-gcc.o setup-gcc.o
+	$(GCC) $(CFLAGS) -o aho_corasick-c-gcc aho_corasick-gcc.o run-gcc.o setup-gcc.o
 
 # Rules for building with LLVM:
 run-llvm.o: run.c run.h setup.h
@@ -107,11 +107,11 @@ shift_or-llvm.o: shift_or.c run.h
 shift_or-c-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
 	$(CLANG) $(CFLAGS) -o shift_or-c-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
 
-aho_corasick-llvm.o: aho_corasick.c setup.h
+aho_corasick-llvm.o: aho_corasick.c run.h
 	$(CLANG) $(CFLAGS) -c -o aho_corasick-llvm.o aho_corasick.c
 
-aho_corasick-c-llvm: aho_corasick-llvm.o setup-llvm.o
-	$(CLANG) $(CFLAGS) -o aho_corasick-c-llvm aho_corasick-llvm.o setup-llvm.o
+aho_corasick-c-llvm: aho_corasick-llvm.o run-llvm.o setup-llvm.o
+	$(CLANG) $(CFLAGS) -o aho_corasick-c-llvm aho_corasick-llvm.o run-llvm.o setup-llvm.o
 
 # Rules for building with Intel:
 run-intel.o: run.c run.h setup.h
@@ -138,11 +138,11 @@ shift_or-intel.o: shift_or.c run.h
 shift_or-c-intel: shift_or-intel.o run-intel.o setup-intel.o
 	$(ICX) $(CFLAGS) -o shift_or-c-intel shift_or-intel.o run-intel.o setup-intel.o
 
-aho_corasick-intel.o: aho_corasick.c setup.h
+aho_corasick-intel.o: aho_corasick.c run.h
 	$(ICX) $(CFLAGS) -c -o aho_corasick-intel.o aho_corasick.c
 
-aho_corasick-c-intel: aho_corasick-intel.o setup-intel.o
-	$(ICX) $(CFLAGS) -o aho_corasick-c-intel aho_corasick-intel.o setup-intel.o
+aho_corasick-c-intel: aho_corasick-intel.o run-intel.o setup-intel.o
+	$(ICX) $(CFLAGS) -o aho_corasick-c-intel aho_corasick-intel.o run-intel.o setup-intel.o
 
 test-experiments-gcc:
 ifeq ($(SEQUENCES),)

@@ -76,11 +76,11 @@ shift_or-gcc.o: shift_or.cpp run.hpp
 shift_or-cpp-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
 	$(GCC) $(CPPFLAGS) -o shift_or-cpp-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
 
-aho_corasick-gcc.o: aho_corasick.cpp setup.hpp
+aho_corasick-gcc.o: aho_corasick.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o aho_corasick-gcc.o aho_corasick.cpp
 
-aho_corasick-cpp-gcc: aho_corasick-gcc.o setup-gcc.o
-	$(GCC) $(CPPFLAGS) -o aho_corasick-cpp-gcc aho_corasick-gcc.o setup-gcc.o
+aho_corasick-cpp-gcc: aho_corasick-gcc.o run-gcc.o setup-gcc.o
+	$(GCC) $(CPPFLAGS) -o aho_corasick-cpp-gcc aho_corasick-gcc.o run-gcc.o setup-gcc.o
 
 # Rules for building with LLVM:
 run-llvm.o: run.cpp run.hpp setup.hpp
@@ -107,11 +107,11 @@ shift_or-llvm.o: shift_or.cpp run.hpp
 shift_or-cpp-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
 	$(CLANG) $(CPPFLAGS) -o shift_or-cpp-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
 
-aho_corasick-llvm.o: aho_corasick.cpp setup.hpp
+aho_corasick-llvm.o: aho_corasick.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o aho_corasick-llvm.o aho_corasick.cpp
 
-aho_corasick-cpp-llvm: aho_corasick-llvm.o setup-llvm.o
-	$(CLANG) $(CPPFLAGS) -o aho_corasick-cpp-llvm aho_corasick-llvm.o setup-llvm.o
+aho_corasick-cpp-llvm: aho_corasick-llvm.o run-llvm.o setup-llvm.o
+	$(CLANG) $(CPPFLAGS) -o aho_corasick-cpp-llvm aho_corasick-llvm.o run-llvm.o setup-llvm.o
 
 # Rules for building with Intel:
 run-intel.o: run.cpp run.hpp setup.hpp
@@ -138,11 +138,11 @@ shift_or-intel.o: shift_or.cpp run.hpp
 shift_or-cpp-intel: shift_or-intel.o run-intel.o setup-intel.o
 	$(ICX) $(CPPFLAGS) -o shift_or-cpp-intel shift_or-intel.o run-intel.o setup-intel.o
 
-aho_corasick-intel.o: aho_corasick.cpp setup.hpp
+aho_corasick-intel.o: aho_corasick.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o aho_corasick-intel.o aho_corasick.cpp
 
-aho_corasick-cpp-intel: aho_corasick-intel.o setup-intel.o
-	$(ICX) $(CPPFLAGS) -o aho_corasick-cpp-intel aho_corasick-intel.o setup-intel.o
+aho_corasick-cpp-intel: aho_corasick-intel.o run-intel.o setup-intel.o
+	$(ICX) $(CPPFLAGS) -o aho_corasick-cpp-intel aho_corasick-intel.o run-intel.o setup-intel.o
 
 test-experiments-gcc:
 ifeq ($(SEQUENCES),)
