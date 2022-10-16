@@ -118,3 +118,104 @@ pub fn run(
 
     return_code
 }
+
+/*
+    Handling multi-pattern matching algorithms.
+*/
+
+// An enum to type the various sorts of values that can be returned from the
+// pre-processing of a set of patterns.
+pub enum MultiPatternData<T> {
+    PatternCount(usize),
+    PatternIntVecVec(Vec<Vec<i32>>),
+    PatternUsizeVec(Vec<usize>),
+    PatternTypeVec(Vec<T>),
+}
+
+// A type alias for the signature of the multi-pattern matching algorithms.
+pub type MPAlgorithm<T> = dyn Fn(&[MultiPatternData<T>], &[u8]) -> Vec<u32>;
+// A type alias for the signature of the single-pattern initialization
+// functions.
+pub type MPInitializer<T> = dyn Fn(&[&[u8]]) -> Vec<MultiPatternData<T>>;
+
+/*
+   This is the "runner" routine for multi-pattern algorithms. The signature is
+   identical to `run`, above, except for the generic type specification that is
+   passed through to the MPInitializer and MPAlgorithm types.
+*/
+pub fn run_multi<T>(
+    init: &MPInitializer<T>,
+    code: &MPAlgorithm<T>,
+    name: &str,
+    argv: Vec<String>,
+) -> i32 {
+    let argc = argv.len();
+    if !(3..=4).contains(&argc) {
+        panic!("Usage: {} <sequences> <patterns> [ <answers> ]", &argv[0]);
+    }
+
+    // Read the data files using the routines from common::setup. The answers
+    // data uses Option<> since it does not have to be provided.
+    let sequences_data: Vec<String> = read_sequences(&argv[1]);
+    let patterns_data: Vec<String> = read_patterns(&argv[2]);
+    let answers_data: Option<Vec<Vec<u32>>> = if argc == 4 {
+        Some(read_answers(&argv[3]))
+    } else {
+        None
+    };
+
+    // If answers were provided, check that the number of lines matches the
+    // number of patterns.
+    if let Some(ref answers) = answers_data {
+        if answers.len() != patterns_data.len() {
+            panic!("Count mismatch between patterns file and answers file");
+        }
+    }
+
+    // Run the given code. For each sequence, try each pattern against it. The
+    // `code` function pointer will return the number of matches found, which
+    // will be compared to the table of answers for that pattern. Report any
+    // mismatches.
+    let start_time = Instant::now();
+    let mut return_code: i32 = 0;
+
+    // Convert the patterns and sequences to `u8` (byte) arrays. Do this here
+    // so that it isn't repeated in the for-loops.
+    let patterns: Vec<&[u8]> =
+        patterns_data.iter().map(|p| p.as_bytes()).collect();
+    let sequences: Vec<&[u8]> =
+        sequences_data.iter().map(|s| s.as_bytes()).collect();
+
+    // Initialize the multi-patterns structure.
+    let pat_data = init(&patterns);
+
+    for (sequence, sequence_str) in sequences.iter().enumerate() {
+        // Here, we don't iterate over the patterns. We just call the matching
+        // function and pass it the pattern-data structure set up in the init
+        // call above.
+        let matches = code(&pat_data, sequence_str);
+
+        if let Some(ref answers) = answers_data {
+            for pattern in 0..patterns_data.len() {
+                if matches[pattern] != answers[pattern][sequence] {
+                    eprintln!(
+                        "Pattern {} mismatch against sequence {} ({} != {})",
+                        pattern + 1,
+                        sequence + 1,
+                        matches[pattern],
+                        answers[pattern][sequence]
+                    );
+
+                    return_code += 1;
+                }
+            }
+        }
+    }
+
+    // Note the end time before doing anything else.
+    let elapsed = start_time.elapsed();
+    println!("language: rust\nalgorithm: {}", &name);
+    println!("runtime: {:.8}", elapsed.as_secs_f64());
+
+    return_code
+}

@@ -7,7 +7,7 @@
     previously done.)
 */
 
-use common::run_mp::{run_mp, PatternData};
+use common::run::{run_multi, MultiPatternData};
 use std::env;
 use std::process::exit;
 
@@ -234,8 +234,8 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     failure_fn
 }
 
-fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<PatternData<Set>> {
-    let mut pattern_data: Vec<PatternData<Set>> = Vec::with_capacity(4);
+fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<MultiPatternData<Set>> {
+    let mut pattern_data: Vec<MultiPatternData<Set>> = Vec::with_capacity(4);
 
     // Initialize the multi-patterns structure.
     let mut goto_fn: Vec<Vec<i32>> = Vec::new();
@@ -243,10 +243,10 @@ fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<PatternData<Set>> {
     build_goto(patterns, &mut goto_fn, &mut output_fn);
     let failure_fn = build_failure(&goto_fn, &mut output_fn);
 
-    pattern_data.push(PatternData::PatternCount(patterns.len()));
-    pattern_data.push(PatternData::PatternIntVecVec(goto_fn));
-    pattern_data.push(PatternData::PatternUsizeVec(failure_fn));
-    pattern_data.push(PatternData::PatternTypeVec(output_fn));
+    pattern_data.push(MultiPatternData::PatternCount(patterns.len()));
+    pattern_data.push(MultiPatternData::PatternIntVecVec(goto_fn));
+    pattern_data.push(MultiPatternData::PatternUsizeVec(failure_fn));
+    pattern_data.push(MultiPatternData::PatternTypeVec(output_fn));
 
     pattern_data
 }
@@ -259,22 +259,25 @@ fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<PatternData<Set>> {
     Instead of returning a single u32, this returns a Vec<u32> with size equal
     to `pattern_count`.
 */
-fn aho_corasick(pat_data: &[PatternData<Set>], sequence: &[u8]) -> Vec<u32> {
+fn aho_corasick(
+    pat_data: &[MultiPatternData<Set>],
+    sequence: &[u8],
+) -> Vec<u32> {
     // Unpack pat_data:
     let pattern_count = match &pat_data[0] {
-        PatternData::PatternCount(val) => val,
+        MultiPatternData::PatternCount(val) => val,
         _ => panic!("Incorrect value at pat_data slot 0"),
     };
     let goto_fn = match &pat_data[1] {
-        PatternData::PatternIntVecVec(val) => val,
+        MultiPatternData::PatternIntVecVec(val) => val,
         _ => panic!("Incorrect value at pat_data slot 1"),
     };
     let failure_fn = match &pat_data[2] {
-        PatternData::PatternUsizeVec(val) => val,
+        MultiPatternData::PatternUsizeVec(val) => val,
         _ => panic!("Incorrect value at pat_data slot 2"),
     };
     let output_fn = match &pat_data[3] {
-        PatternData::PatternTypeVec(val) => val,
+        MultiPatternData::PatternTypeVec(val) => val,
         _ => panic!("Incorrect value at pat_data slot 3"),
     };
 
@@ -300,7 +303,7 @@ fn aho_corasick(pat_data: &[PatternData<Set>], sequence: &[u8]) -> Vec<u32> {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    exit(run_mp(
+    exit(run_multi(
         &init_aho_corasick,
         &aho_corasick,
         "aho_corasick",
