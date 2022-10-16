@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import deque
-from run_multi import run_multi
+from run import run_multi
 from sys import argv
 
 ASIZE = 128

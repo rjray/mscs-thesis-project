@@ -10,7 +10,7 @@ use constant FAIL => -1;
 
 use Time::HiRes qw(gettimeofday tv_interval);
 
-use RunMulti qw(run_multi);
+use Run qw(run_multi);
 
 my @ALPHA_OFFSETS = qw(65 67 71 84);
 
