@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <queue>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -40,35 +41,6 @@
 */
 #define OFFSETS_COUNT 4
 static std::vector<int> ALPHA_OFFSETS = {65, 67, 71, 84};
-
-/*
-  Need a simple integer queue to use for building the failure function.
-*/
-
-// The initial queue size, and how much it grows by:
-#define QUEUE_SIZE 16
-
-class Queue {
-public:
-  std::vector<int> elements;
-  unsigned int head;
-
-  Queue() {
-    elements.reserve(QUEUE_SIZE);
-    head = 0;
-  }
-
-  bool is_empty() { return head == elements.size(); }
-
-  void enqueue(const int value) { elements.push_back(value); }
-
-  int dequeue() {
-    if (is_empty())
-      throw std::runtime_error{"dequeue: Queue underflow"};
-
-    return elements[head++];
-  }
-};
 
 /*
   Enter the given pattern into the given goto-function, creating new states as
@@ -154,7 +126,7 @@ void build_goto(std::vector<std::string> pats, int num_pats,
 std::vector<int> build_failure(std::vector<std::vector<int>> goto_fn,
                                std::vector<std::set<int>> output_fn) {
   // Need a simple queue of state numbers.
-  Queue queue = Queue();
+  std::queue<int> queue;
 
   // Allocate the failure function storage. This also needs to be as long as
   // goto_fn is, for safety.
@@ -168,22 +140,23 @@ std::vector<int> build_failure(std::vector<std::vector<int>> goto_fn,
     if (state == 0)
       continue;
 
-    queue.enqueue(state);
+    queue.push(state);
     failure_fn[state] = 0;
   }
 
   // This uses some single-letter variable names that match the published
   // algorithm. Their mnemonic isn't clear, or else I'd use more meaningful
   // names.
-  while (!queue.is_empty()) {
-    int r = queue.dequeue();
+  while (!queue.empty()) {
+    int r = queue.front();
+    queue.pop();
     for (int i = 0; i < OFFSETS_COUNT; i++) {
       int a = ALPHA_OFFSETS[i];
       int s = goto_fn[r][a];
       if (s == FAIL)
         continue;
 
-      queue.enqueue(s);
+      queue.push(s);
       int state = failure_fn[r];
       while (goto_fn[state][a] == FAIL)
         state = failure_fn[state];
