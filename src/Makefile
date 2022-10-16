@@ -51,7 +51,7 @@ VALGRIND := valgrind
 
 # The languages under inspection, and clean-targets for those that have them.
 LANGUAGES := C Cpp Rust Perl Python
-LANG_CLEAN := C-clean Cpp-clean Rust-clean
+LANG_CLEAN := $(addsuffix -clean,$(LANGUAGES))
 
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
@@ -160,8 +160,14 @@ Rust-clean:
 Perl:
 	$(MAKE) -C Perl all
 
+Perl-clean:
+	$(MAKE) -C Perl clean
+
 Python:
 	$(MAKE) -C Python all
+
+Python-clean:
+	$(MAKE) -C Python clean
 
 harness:
 	$(MAKE) -C harness all
