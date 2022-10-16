@@ -158,10 +158,10 @@ Rust-clean:
 	$(MAKE) -C Rust clean
 
 Perl:
-	($MAKE) -C Perl all
+	$(MAKE) -C Perl all
 
 Python:
-	($MAKE) -C Python all
+	$(MAKE) -C Python all
 
 harness:
 	$(MAKE) -C harness all
