@@ -12,7 +12,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sys/time.h>
 #include <vector>
 
 #include "run.hpp"
