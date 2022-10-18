@@ -1,8 +1,12 @@
-\documentclass{article}
+\documentclass[acmlarge, nonacm]{acmart}
 
 \input{setup}
 
+\acmBooktitle{This will not be seen}
+
 \title{Rust and String Matching: An Evaluation Against C and C++}
+\author{Randy J. Ray}
+\renewcommand{\shortauthors}{Ray}
 
 \begin{document}
 
@@ -35,7 +39,7 @@
 
 \input{content/conclusions}
 
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{thesis}
-\bibliographystyle{ieeetr}
 
 \end{document}
