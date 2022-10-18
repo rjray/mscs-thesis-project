@@ -7,7 +7,7 @@ use lib qw(.);
 use Exporter qw(import);
 use Time::HiRes qw(gettimeofday tv_interval);
 
-use Setup;
+use Input;
 
 our @EXPORT_OK = qw(run run_multi);
 

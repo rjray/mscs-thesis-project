@@ -1,4 +1,4 @@
-package Setup;
+package Input;
 
 use strict;
 use warnings;
