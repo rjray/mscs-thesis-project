@@ -8,8 +8,8 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include "input.h"
 #include "run.h"
-#include "setup.h"
 
 #if defined(__INTEL_LLVM_COMPILER)
 #define LANG "c-intel"
@@ -100,7 +100,7 @@ int run(initializer init, algorithm code, char *name, int argc, char *argv[]) {
   fprintf(stdout, "language: %s\nalgorithm: %s\n", LANG, name);
   fprintf(stdout, "runtime: %.8g\n", end_time - start_time);
 
-  // Free all the memory that was allocated by the routines in setup.c:
+  // Free all the memory that was allocated by the routines in input.c:
   for (int i = 0; i < patterns_count; i++)
     free(patterns_data[i]);
   free(patterns_data);
@@ -190,7 +190,7 @@ int run_multi(mp_initializer init, mp_algorithm code, char *name, int argc,
   fprintf(stdout, "language: %s\nalgorithm: %s\n", LANG, name);
   fprintf(stdout, "runtime: %.8g\n", end_time - start_time);
 
-  // Free all the memory that was allocated by the routines in setup.c:
+  // Free all the memory that was allocated by the routines in input.c:
   for (int i = 0; i < patterns_count; i++)
     free(patterns_data[i]);
   free(patterns_data);

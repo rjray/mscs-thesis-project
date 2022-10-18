@@ -1,5 +1,5 @@
 /*
-  "Setup" code used by all the C programs to read the various data files and
+  Input code used by all the C programs to read the various data files and
   return viable data structures.
 */
 
@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "input.h"
 
 /*
   Read two numbers from a line of the file pointed to by `input`. Store them in
