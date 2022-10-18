@@ -47,7 +47,7 @@ experiments: $(EXPERIMENTS)
 
 clean:
 	$(RM) *.o
-	$(RM) $(GCC_TARGETS) $(LLVM_TARGETS)
+	$(RM) $(TARGETS)
 
 reset: clean all
 
