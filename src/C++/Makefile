@@ -52,97 +52,97 @@ clean:
 reset: clean all
 
 # Rules for building with GCC:
-run-gcc.o: run.cpp run.hpp setup.hpp
+run-gcc.o: run.cpp run.hpp input.hpp
 	$(GCC) $(CPPFLAGS) -c -o run-gcc.o run.cpp
 
-setup-gcc.o: setup.cpp setup.hpp
-	$(GCC) $(CPPFLAGS) -c -o setup-gcc.o setup.cpp
+input-gcc.o: input.cpp input.hpp
+	$(GCC) $(CPPFLAGS) -c -o input-gcc.o input.cpp
 
 kmp-gcc.o: kmp.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o kmp-gcc.o kmp.cpp
 
-kmp-cpp-gcc: kmp-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CPPFLAGS) -o kmp-cpp-gcc kmp-gcc.o run-gcc.o setup-gcc.o
+kmp-cpp-gcc: kmp-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CPPFLAGS) -o kmp-cpp-gcc kmp-gcc.o run-gcc.o input-gcc.o
 
 boyer_moore-gcc.o: boyer_moore.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o boyer_moore-gcc.o boyer_moore.cpp
 
-boyer_moore-cpp-gcc: boyer_moore-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CPPFLAGS) -o boyer_moore-cpp-gcc boyer_moore-gcc.o run-gcc.o setup-gcc.o
+boyer_moore-cpp-gcc: boyer_moore-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CPPFLAGS) -o boyer_moore-cpp-gcc boyer_moore-gcc.o run-gcc.o input-gcc.o
 
 shift_or-gcc.o: shift_or.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o shift_or-gcc.o shift_or.cpp
 
-shift_or-cpp-gcc: shift_or-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CPPFLAGS) -o shift_or-cpp-gcc shift_or-gcc.o run-gcc.o setup-gcc.o
+shift_or-cpp-gcc: shift_or-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CPPFLAGS) -o shift_or-cpp-gcc shift_or-gcc.o run-gcc.o input-gcc.o
 
 aho_corasick-gcc.o: aho_corasick.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o aho_corasick-gcc.o aho_corasick.cpp
 
-aho_corasick-cpp-gcc: aho_corasick-gcc.o run-gcc.o setup-gcc.o
-	$(GCC) $(CPPFLAGS) -o aho_corasick-cpp-gcc aho_corasick-gcc.o run-gcc.o setup-gcc.o
+aho_corasick-cpp-gcc: aho_corasick-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CPPFLAGS) -o aho_corasick-cpp-gcc aho_corasick-gcc.o run-gcc.o input-gcc.o
 
 # Rules for building with LLVM:
-run-llvm.o: run.cpp run.hpp setup.hpp
+run-llvm.o: run.cpp run.hpp input.hpp
 	$(CLANG) $(CPPFLAGS) -c -o run-llvm.o run.cpp
 
-setup-llvm.o: setup.cpp setup.hpp
-	$(CLANG) $(CPPFLAGS) -c -o setup-llvm.o setup.cpp
+input-llvm.o: input.cpp input.hpp
+	$(CLANG) $(CPPFLAGS) -c -o input-llvm.o input.cpp
 
 kmp-llvm.o: kmp.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o kmp-llvm.o kmp.cpp
 
-kmp-cpp-llvm: kmp-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CPPFLAGS) -o kmp-cpp-llvm kmp-llvm.o run-llvm.o setup-llvm.o
+kmp-cpp-llvm: kmp-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CPPFLAGS) -o kmp-cpp-llvm kmp-llvm.o run-llvm.o input-llvm.o
 
 boyer_moore-llvm.o: boyer_moore.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o boyer_moore-llvm.o boyer_moore.cpp
 
-boyer_moore-cpp-llvm: boyer_moore-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CPPFLAGS) -o boyer_moore-cpp-llvm boyer_moore-llvm.o run-llvm.o setup-llvm.o
+boyer_moore-cpp-llvm: boyer_moore-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CPPFLAGS) -o boyer_moore-cpp-llvm boyer_moore-llvm.o run-llvm.o input-llvm.o
 
 shift_or-llvm.o: shift_or.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o shift_or-llvm.o shift_or.cpp
 
-shift_or-cpp-llvm: shift_or-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CPPFLAGS) -o shift_or-cpp-llvm shift_or-llvm.o run-llvm.o setup-llvm.o
+shift_or-cpp-llvm: shift_or-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CPPFLAGS) -o shift_or-cpp-llvm shift_or-llvm.o run-llvm.o input-llvm.o
 
 aho_corasick-llvm.o: aho_corasick.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o aho_corasick-llvm.o aho_corasick.cpp
 
-aho_corasick-cpp-llvm: aho_corasick-llvm.o run-llvm.o setup-llvm.o
-	$(CLANG) $(CPPFLAGS) -o aho_corasick-cpp-llvm aho_corasick-llvm.o run-llvm.o setup-llvm.o
+aho_corasick-cpp-llvm: aho_corasick-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CPPFLAGS) -o aho_corasick-cpp-llvm aho_corasick-llvm.o run-llvm.o input-llvm.o
 
 # Rules for building with Intel:
-run-intel.o: run.cpp run.hpp setup.hpp
+run-intel.o: run.cpp run.hpp input.hpp
 	$(ICX) $(CPPFLAGS) -c -o run-intel.o run.cpp
 
-setup-intel.o: setup.cpp setup.hpp
-	$(ICX) $(CPPFLAGS) -c -o setup-intel.o setup.cpp
+input-intel.o: input.cpp input.hpp
+	$(ICX) $(CPPFLAGS) -c -o input-intel.o input.cpp
 
 kmp-intel.o: kmp.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o kmp-intel.o kmp.cpp
 
-kmp-cpp-intel: kmp-intel.o run-intel.o setup-intel.o
-	$(ICX) $(CPPFLAGS) -o kmp-cpp-intel kmp-intel.o run-intel.o setup-intel.o
+kmp-cpp-intel: kmp-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o kmp-cpp-intel kmp-intel.o run-intel.o input-intel.o
 
 boyer_moore-intel.o: boyer_moore.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o boyer_moore-intel.o boyer_moore.cpp
 
-boyer_moore-cpp-intel: boyer_moore-intel.o run-intel.o setup-intel.o
-	$(ICX) $(CPPFLAGS) -o boyer_moore-cpp-intel boyer_moore-intel.o run-intel.o setup-intel.o
+boyer_moore-cpp-intel: boyer_moore-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o boyer_moore-cpp-intel boyer_moore-intel.o run-intel.o input-intel.o
 
 shift_or-intel.o: shift_or.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o shift_or-intel.o shift_or.cpp
 
-shift_or-cpp-intel: shift_or-intel.o run-intel.o setup-intel.o
-	$(ICX) $(CPPFLAGS) -o shift_or-cpp-intel shift_or-intel.o run-intel.o setup-intel.o
+shift_or-cpp-intel: shift_or-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o shift_or-cpp-intel shift_or-intel.o run-intel.o input-intel.o
 
 aho_corasick-intel.o: aho_corasick.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o aho_corasick-intel.o aho_corasick.cpp
 
-aho_corasick-cpp-intel: aho_corasick-intel.o run-intel.o setup-intel.o
-	$(ICX) $(CPPFLAGS) -o aho_corasick-cpp-intel aho_corasick-intel.o run-intel.o setup-intel.o
+aho_corasick-cpp-intel: aho_corasick-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o aho_corasick-cpp-intel aho_corasick-intel.o run-intel.o input-intel.o
 
 test-experiments-gcc:
 ifeq ($(SEQUENCES),)

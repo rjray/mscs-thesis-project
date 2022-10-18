@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include "input.hpp"
+
 /*
   Read two numbers from a line of the file pointed to by `input`. Store them in
   a vector of int and return it.

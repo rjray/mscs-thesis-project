@@ -11,8 +11,8 @@
 #include <sys/time.h>
 #include <vector>
 
+#include "input.hpp"
 #include "run.hpp"
-#include "setup.hpp"
 
 #if defined(__INTEL_LLVM_COMPILER)
 #define LANG "cpp-intel"
