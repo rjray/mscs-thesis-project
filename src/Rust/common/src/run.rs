@@ -3,7 +3,7 @@
     running an experiment.
 */
 
-use crate::setup::*;
+use crate::input::*;
 use std::time::Instant;
 
 // `WordType` is used by shift-or. It's defined here so it can be used in the

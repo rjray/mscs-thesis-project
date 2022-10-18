@@ -1,5 +1,5 @@
 /*
-    This is the "setup" code used by all the Rust programs to read the various
+    This is the input code used by all the Rust programs to read the various
     data files and return the information in viable data structures.
 */
 
