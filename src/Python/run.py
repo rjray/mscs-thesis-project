@@ -1,4 +1,4 @@
-from setup import read_sequences, read_patterns, read_answers
+from input import read_sequences, read_patterns, read_answers
 from sys import stderr
 from time import perf_counter
 
