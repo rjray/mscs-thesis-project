@@ -1,0 +1,11 @@
+\begin{tikzpicture}
+    \tikzset{
+        column 1/.style={
+            nodes={text width=4em}
+        }
+    }
+    \matrix (kmp_next) [table,text width=1em] {
+        $j$ & 0 & 1 & 2 & 3 & 4 & 5 \\
+        $next(j)$ & -1 & 0 & 0 & 0 & -1 & 1 \\
+    };
+\end{tikzpicture}

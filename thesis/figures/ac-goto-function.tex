@@ -1,0 +1,26 @@
+\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+    \node[state,initial] (s_0)                 {0};
+    \node[state]         (s_1)  [right of=s_0] {1};
+    \node[state]         (s_2)  [right of=s_1] {2};
+    \node[state]         (s_3)  [right of=s_2] {3};
+    \node[state]         (s_4)  [right of=s_3] {4};
+    \node[state]         (s_8)  [below of=s_2] {8};
+    \node[state]         (s_9)  [right of=s_8] {9};
+    \node[state]         (s_10) [right of=s_9] {10};
+    \node[state]         (s_6)  [below of=s_8] {6};
+    \node[state]         (s_5)  [left of=s_6]  {5};
+    \node[state]         (s_7)  [right of=s_6] {7};
+
+    \path[->]
+        (s_0) edge [loop above] node {G,T} ()
+        (s_0) edge              node {A}   (s_1)
+        (s_0) edge              node {C}   (s_5)
+        (s_1) edge              node {C}   (s_2)
+        (s_1) edge              node {A}   (s_8)
+        (s_2) edge              node {T}   (s_3)
+        (s_3) edge              node {G}   (s_4)
+        (s_5) edge              node {T}   (s_6)
+        (s_6) edge              node {G}   (s_7)
+        (s_8) edge              node {G}   (s_9)
+        (s_9) edge              node {T}   (s_10);
+\end{tikzpicture}
