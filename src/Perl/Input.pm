@@ -60,7 +60,7 @@ sub read_answers {
         }
 
         @data = map { [ split /,/ ] } @data;
-        for my $idx (0..$#data) {
+        foreach my $idx (0..$#data) {
             if (@{$data[$idx]} != $num_count) {
                 $idx++;
                 die "Data line $idx has incorrect number of entries";

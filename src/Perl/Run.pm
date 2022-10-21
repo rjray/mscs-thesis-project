@@ -41,15 +41,12 @@ sub run {
         $sequence = [ map { ord } split //, $sequence ];
     }
 
-    for my $pattern (0..$#{$patterns_data}) {
-        my $pat = $patterns_data->[$pattern];
-        my $pat_data = $init->($pat);
+    foreach my $pattern (0..$#{$patterns_data}) {
+        my $pat_data = $init->($patterns_data->[$pattern]);
 
-        for my $sequence (0..$#{$sequences_data}) {
-            my $seq = $sequences_data->[$sequence];
-
+        foreach my $sequence (0..$#{$sequences_data}) {
             my $matches =
-                $code->($pat_data, $seq);
+                $code->($pat_data, $sequences_data->[$sequence]);
 
             if ($answers_data &&
                 ($matches != $answers_data->[$pattern][$sequence])) {
@@ -111,8 +108,7 @@ sub run_multi {
     my $pat_data = $init->($patterns_data);
 
     foreach my $sequence (0..$#{$sequences_data}) {
-        my $sequence_str = $sequences_data->[$sequence];
-        my $matches = $code->($pat_data, $sequence_str);
+        my $matches = $code->($pat_data, $sequences_data->[$sequence]);
 
         if ($answers_data) {
             for my $pattern (0..$#{$patterns_data}) {

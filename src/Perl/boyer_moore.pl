@@ -6,34 +6,31 @@ use FindBin qw($Bin);
 use lib $Bin;
 use constant ASIZE => 128;
 
+use List::Util qw(max);
+
 use Run qw(run);
 
-# Surprisingly not in any of the core Perl modules:
-sub max {
-    my ($a, $b) = @_;
-
-    return ($b > $a) ? $b : $a;
-}
-
 sub calc_bad_char {
-    my ($pat, $m, $bad_char) = @_;
+    my ($pat, $m) = @_;
+    my @bad_char = ($m) x ASIZE;
 
     foreach my $i (0..($m - 2)) {
-        $bad_char->[$pat->[$i]] = $m - 1 - $i;
+        $bad_char[$pat->[$i]] = $m - 1 - $i;
     }
 
-    return;
+    return \@bad_char;
 }
 
 sub calc_suffixes {
-    my ($pat, $m, $suffix_list) = @_;
-    $suffix_list->[$m - 1] = $m;
+    my ($pat, $m) = @_;
+    my @suffix_list = (0) x $m;
+    $suffix_list[$m - 1] = $m;
 
     my $f = 0;
     my $g = $m - 1;
-    foreach my $i (reverse 0..($m - 2)) {
-        if ($i > $g && $suffix_list->[$i + $m - 1 - $f] < $i - $g) {
-            $suffix_list->[$i] = $suffix_list->[$i + $m - 1 - $f];
+    for (my $i = $m - 2; $i >= 0; $i--) {
+        if ($i > $g && $suffix_list[$i + $m - 1 - $f] < $i - $g) {
+            $suffix_list[$i] = $suffix_list[$i + $m - 1 - $f];
         } else {
             if ($i < $g) {
                 $g = $i;
@@ -42,26 +39,26 @@ sub calc_suffixes {
             while ($g >= 0 && $pat->[$g] == $pat->[$g + $m - 1 - $f]) {
                 $g--;
             }
-            $suffix_list->[$i] = $f - $g;
+            $suffix_list[$i] = $f - $g;
         }
     }
 
-    return;
+    return @suffix_list;
 }
 
 sub calc_good_suffix {
-    my ($pat, $m, $good_suffix) = @_;
-    my @suffixes = (0) x $m;
+    my ($pat, $m) = @_;
+    my @good_suffix = ($m) x $m;
 
-    calc_suffixes($pat, $m, \@suffixes);
+    my @suffixes = calc_suffixes($pat, $m);
 
     my $j = 0;
     my $i = $m - 1;
     while ($i >= -1) {
         if ($i == -1 || $suffixes[$i] == $i + 1) {
             while ($j < $m - 1 - $i) {
-                if ($good_suffix->[$j] == $m) {
-                    $good_suffix->[$j] = $m - 1 - $i;
+                if ($good_suffix[$j] == $m) {
+                    $good_suffix[$j] = $m - 1 - $i;
                 }
 
                 $j++;
@@ -72,23 +69,18 @@ sub calc_good_suffix {
     }
 
     foreach my $i (0..($m - 2)) {
-        $good_suffix->[$m - 1 - $suffixes[$i]] = $m - 1 - $i;
+        $good_suffix[$m - 1 - $suffixes[$i]] = $m - 1 - $i;
     }
 
-    return;
+    return \@good_suffix;
 }
 
 sub init_boyer_moore {
     my ($pattern) = @_;
     my $m = scalar @{$pattern};
     my $pat = [ @{$pattern}, 0 ];
-    my @good_suffix = ($m) x $m;
-    my @bad_char = ($m) x ASIZE;
 
-    calc_good_suffix($pat, $m, \@good_suffix);
-    calc_bad_char($pat, $m, \@bad_char);
-
-    return [ $pat, \@good_suffix, \@bad_char ];
+    return [ $pat, calc_good_suffix($pat, $m), calc_bad_char($pat, $m) ];
 }
 
 sub boyer_moore {

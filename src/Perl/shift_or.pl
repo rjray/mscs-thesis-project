@@ -10,22 +10,22 @@ use constant WORD => 64;
 use Run qw(run);
 
 sub calc_s_positions {
-    my ($pat, $m, $s_positions) = @_;
+    my ($pat, $m) = @_;
     my ($i, $j, $lim);
+    my @s_positions = (~0) x ASIZE;
 
     $i = 0;
     $lim = 0;
     $j = 1;
-    while ($i < $m) {
-        $s_positions->[$pat->[$i]] &= ~$j;
+    foreach my $i (0..($m - 1)) {
+        $s_positions[$pat->[$i]] &= ~$j;
         $lim |= $j;
 
-        $i++;
         $j <<= 1;
     }
     $lim = ~($lim >> 1);
 
-    return $lim;
+    return $lim, \@s_positions;
 }
 
 sub init_shift_or {
@@ -36,16 +36,12 @@ sub init_shift_or {
         die 'shift_or: pattern size must be <= ' . WORD . "\n";
     }
 
-    my @s_positions = (~0) x ASIZE;
-
-    my $lim = calc_s_positions($pattern, $m, \@s_positions);
-
-    return [ $pattern, $lim, \@s_positions ];
+    return [ calc_s_positions($pattern, $m) ];
 }
 
 sub shift_or {
     my ($pat_data, $seq) = @_;
-    my (undef, $lim, $s_positions) = @{$pat_data};
+    my ($lim, $s_positions) = @{$pat_data};
     my $matches = 0;
 
     # Get the size of the sequence. Pattern size is not needed here.

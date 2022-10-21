@@ -9,43 +9,41 @@ use Run qw(run);
 
 # Initialize the jump-table that KMP uses:
 sub make_next_table {
-    my ($pat, $m, $next_table) = @_;
+    my ($pat, $m) = @_;
+    my @next_table = (0) x ($m + 1);
 
     my $i = 0;
-    my $j = $next_table->[0] = -1;
+    my $j = $next_table[0] = -1;
 
     while ($i < $m) {
         while ($j > -1 && $pat->[$i] != $pat->[$j]) {
-            $j = $next_table->[$j];
+            $j = $next_table[$j];
         }
         $i++;
         $j++;
         if ($pat->[$i] == $pat->[$j]) {
-            $next_table->[$i] = $next_table->[$j];
+            $next_table[$i] = $next_table[$j];
         } else {
-            $next_table->[$i] = $j;
+            $next_table[$i] = $j;
         }
     }
 
-    return;
+    return \@next_table;
 }
 
 sub init_kmp {
     my ($pattern) = @_;
     my $m = scalar @{$pattern};
     my $pat = [ @{$pattern}, 0 ];
-    my @next_table = (0) x ($m + 1);
 
-    make_next_table($pat, $m, \@next_table);
-
-    return [ $pat, \@next_table ];
+    return [ $pat, make_next_table($pat, $m) ];
 }
 
 sub kmp {
     my ($pat_data, $seq) = @_;
     my ($pat, $next_table) = @{$pat_data};
-    my $matches = 0;
 
+    my $matches = 0;
     my ($i, $j) = (0, 0);
 
     # Get the sizes of the pattern and the sequence. Account for the sentinel

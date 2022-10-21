@@ -8,6 +8,7 @@ use lib $Bin;
 use constant ASIZE => 128;
 use constant FAIL => -1;
 
+use List::Util qw(uniq);
 use Time::HiRes qw(gettimeofday tv_interval);
 
 use Run qw(run_multi);
@@ -42,11 +43,11 @@ sub enter_pattern {
         $new_state++;
         $goto_fn->[$state][$pat->[$p]] = $new_state;
         add_goto_state($goto_fn);
-        push @{$output_fn}, {};
+        push @{$output_fn}, [];
         $state = $new_state;
     }
 
-    $output_fn->[$state]{$idx} = 1;
+    push @{$output_fn->[$state]}, $idx;
 
     return;
 }
@@ -60,7 +61,7 @@ sub build_goto {
 
     # Add each pattern in turn:
     my $idx = 0;
-    for my $pat (@{$patterns}) {
+    foreach my $pat (@{$patterns}) {
         enter_pattern($pat, $idx++, $goto_fn, $output_fn);
     }
 
@@ -111,10 +112,8 @@ sub build_failure {
                 $state = $failure_fn[$state];
             }
             $failure_fn[$s] = $goto_fn->[$state][$a];
-            $output_fn->[$s] = {
-                %{$output_fn->[$s]},
-                %{$output_fn->[$failure_fn[$s]]}
-            };
+            $output_fn->[$s] =
+                [ uniq @{$output_fn->[$s]}, @{$output_fn->[$failure_fn[$s]]}];
         }
     }
 
@@ -145,13 +144,13 @@ sub aho_corasick {
     my @matches = (0) x $pattern_count;
     my $state = 0;
 
-    for my $s (@{$sequence}) {
+    foreach my $s (@{$sequence}) {
         while ($goto_fn->[$state][$s] == FAIL) {
             $state = $failure_fn->[$state];
         }
 
         $state = $goto_fn->[$state][$s];
-        for my $idx (keys %{$output_fn->[$state]}) {
+        foreach my $idx (@{$output_fn->[$state]}) {
             $matches[$idx]++;
         }
     }
