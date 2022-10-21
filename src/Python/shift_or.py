@@ -8,7 +8,8 @@ WORD = 64
 MASK = 2 ** WORD - 1
 
 
-def calc_s_positions(pat, m, s_positions):
+def calc_s_positions(pat, m):
+    s_positions = [~0 & MASK] * ASIZE
     i = 0
     j = 1
     lim = 0
@@ -22,7 +23,7 @@ def calc_s_positions(pat, m, s_positions):
 
     lim = ~(lim >> 1) & MASK
 
-    return lim
+    return lim, s_positions
 
 
 def init_shift_or(pattern):
@@ -30,14 +31,11 @@ def init_shift_or(pattern):
     if m > WORD:
         raise Exception(f"shift_or: pattern size my be <= {WORD}")
 
-    s_positions = [~0 & MASK] * ASIZE
-    lim = calc_s_positions(pattern, m, s_positions)
-
-    return [pattern, lim, s_positions]
+    return calc_s_positions(pattern, m)
 
 
 def shift_or(pat_data, seq):
-    _, lim, s_positions = pat_data
+    lim, s_positions = pat_data
     matches = 0
 
     # Get size of sequence. Pattern size not needed here.

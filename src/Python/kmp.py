@@ -5,8 +5,9 @@ from run import run
 from sys import argv
 
 
-def make_next_table(pattern, m, next_table):
+def make_next_table(pattern, m):
     i = 0
+    next_table = [0 for _ in range(m + 1)]
     j = next_table[0] = -1
 
     while i < m:
@@ -20,18 +21,15 @@ def make_next_table(pattern, m, next_table):
         else:
             next_table[i] = j
 
-    return
+    return next_table
 
 
 def init_kmp(pattern):
     m = len(pattern)
     pat = copy(pattern)
     pat.append(0)
-    next_table = [0 for _ in range(m + 1)]
 
-    make_next_table(pat, m, next_table)
-
-    return [pat, next_table]
+    return [pat, make_next_table(pat, m)]
 
 
 def kmp(pat_data, sequence):

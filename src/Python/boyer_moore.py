@@ -7,14 +7,18 @@ from sys import argv
 ASIZE = 128
 
 
-def calc_bad_char(pat, m, bad_char):
+def calc_bad_char(pat, m):
+    bad_char = [m] * ASIZE
+
     for i in range(m - 1):
         bad_char[pat[i]] = m - 1 - i
 
-    return
+    return bad_char
 
 
-def calc_suffixes(pat, m, suffix_list):
+def calc_suffixes(pat, m):
+    suffix_list = [0] * m
+
     suffix_list[m - 1] = m
 
     f = 0
@@ -32,13 +36,12 @@ def calc_suffixes(pat, m, suffix_list):
 
             suffix_list[i] = f - g
 
-    return
+    return suffix_list
 
 
-def calc_good_suffix(pat, m, good_suffix):
-    suffixes = [0] * m
-
-    calc_suffixes(pat, m, suffixes)
+def calc_good_suffix(pat, m):
+    suffixes = calc_suffixes(pat, m)
+    good_suffix = [m] * m
 
     j = 0
     i = m - 1
@@ -55,7 +58,7 @@ def calc_good_suffix(pat, m, good_suffix):
     for i in range(m - 1):
         good_suffix[m - 1 - suffixes[i]] = m - 1 - i
 
-    return
+    return good_suffix
 
 
 def init_boyer_moore(pattern):
@@ -63,13 +66,7 @@ def init_boyer_moore(pattern):
     pat = copy(pattern)
     pat.append(0)
 
-    good_suffix = [m] * m
-    bad_char = [m] * ASIZE
-
-    calc_good_suffix(pat, m, good_suffix)
-    calc_bad_char(pat, m, bad_char)
-
-    return [pat, good_suffix, bad_char]
+    return [pat, calc_good_suffix(pat, m), calc_bad_char(pat, m)]
 
 
 def boyer_moore(pat_data, seq):

@@ -26,13 +26,10 @@ def run(init, code, name, argv):
     patterns_data = [list(map(ord, pattern)) for pattern in patterns_data]
     sequences_data = [list(map(ord, sequence)) for sequence in sequences_data]
 
-    for pattern in range(len(patterns_data)):
-        pat = patterns_data[pattern]
+    for pattern, pat in enumerate(patterns_data):
         pat_data = init(pat)
 
-        for sequence in range(len(sequences_data)):
-            seq = sequences_data[sequence]
-
+        for sequence, seq in enumerate(sequences_data):
             matches = code(pat_data, seq)
 
             if answers_data is not None:
@@ -79,9 +76,7 @@ def run_multi(init, code, name, argv):
 
     pat_data = init(patterns_data)
 
-    for sequence in range(len(sequences_data)):
-        seq = sequences_data[sequence]
-
+    for sequence, seq in enumerate(sequences_data):
         matches = code(pat_data, seq)
 
         if answers_data:
