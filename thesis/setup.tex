@@ -10,4 +10,22 @@
   xrightmargin=12pt
 }
 
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata,positioning,matrix}
+\tikzset{
+	->, % makes the edges directed
+	>=stealth, % makes the arrow heads bold
+	node distance=1.5cm, % specifies the minimum distance between two nodes. Change if necessary.
+	initial text=$ $, % sets the text that appears on the start arrow
+	table/.style={
+		matrix of nodes,
+        nodes={
+            align=center
+        },
+        minimum height=1.5em,
+        text depth=0.5ex,
+        text height=2ex
+	}
+}
+
 \newcommand{\mytitle}[0]{Evaluating Languages for Bioinformatics: Energy, Expressiveness and Performance}

@@ -55,7 +55,7 @@ The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's 
 
 \subsection{Languages Under Consideration}
 
-As mentioned above, the experiments were performed on five languages. The languages were chosen for their commonalities as well as their differences:
+The experiments were performed on five languages. The languages were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
 \item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping, as well as being popular in bioinformatics computing.
@@ -87,33 +87,9 @@ With languages such as C and C++, \textit{data ownership} is handled largely thr
 
 In contrast, Rust integrates the concept of ownership directly into the language itself. Compile-time checks enforce ownership and report violations. When the owner of a value is ``dropped'' (Rust terminology for freeing) the owned value is dropped as well. While the variables themselves are on the stack, the content is allocated on the heap. Variables own their values, and the complex datatypes (structs, tuples, arrays, and vectors) own their elements.
 
-\subsection{Selected Algorithms}
-
-Here, the various algorithms that were chosen will be covered in detail.
-
-\subsubsection{Knuth, Morris, and Pratt}
-
-The Knuth-Morris-Pratt~\cite{knuth.morris.pratt.1977} (Knuth-Morris-Pratt) algorithm is one of the foundational algorithms in the area of string matching and text searching. It is still used in the present day, with implementations as recent as the Rust-Bio project~\cite{rust.bio.2015}. This was chosen primarily for historical significance, but also for ease of implementation.
-
-Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time linear to the sum of the pattern length and the target length.
-
-The algorithm is built on the concept of a ``next'' table that instructs the inner loop of the matching algorithm on how much by which to shift the pattern over the stream of target. The computation of this table is shown to require O($m$) steps, and the process of matching the pattern to the target takes at most an additional $2n$ steps. This is due to the fact that, at each step of the matching process, only one of the text pointer or the pattern are moved (each of which can only move $n$ times at most).
-
-The C implementation of Knuth-Morris-Pratt was adapted from \cite[Chapter 7]{handbook.2004}, and from it the other implementations were derived. Of note is the discovery that the code in \cite{handbook.2004} takes advantage of C's use of a ``null'' byte at the end of a string to stand in for the sentinel character that the algorithm appends to the pattern string. While this optimization was also applicable to C++ (where strings are represented by instances of the \texttt{std::string} class), each of the three remaining languages needed to manually add the sentinel character to the pattern string prior to computing the ``next'' table.
-
-\subsubsection{Boyer and Moore}
-
-In the same year that Knuth, Morris and Pratt published their paper, Boyer and Moore published as well~\cite{boyer.moore.1977}. Their contributions to performance improvement were based on searching from the end of the pattern in lieu of the beginning, and computing two tables to use in optimizing the jumps through the sequence string when mismatches were discovered.
-
-\subsubsection{Shift-Or}
-
-\subsubsection{Aho and Corasick}
-
-\subsubsection{Other Algorithms Considered}
-
 \subsection{General Implementation of the Algorithms}
 
-Each of the algorithms is implemented according to consistent structure, to better facilitate the direct comparison of the source code across languages. This structure consisted of three basic elements:
+Each of the algorithms is implemented according to consistent structure, to better facilitate the direct comparison of the source code across languages. This structure consists of three basic elements:
 
 \begin{itemize}
 \item An ``input'' module that encapsulates the loading of sequence, pattern, and answer data
@@ -145,7 +121,205 @@ The algorithm entry point routine is the means by which the each algorithm was a
 
 In addition to these two functions, each algorithm module defines all needed support code for the initialization and entry point. In some cases (such as the C and Rust implementations of the Aho-Corasick algorithm) this included minimal implementations of data structures such as sets and simple queues.
 
-Each algorithm module also provides the language-specific equivalent of a ``main'' function, that function which is treated as the program entry-point by the operating system. Each ``main'' function consists of a single call to the runner function provided by the runner module. The call passes the two algorithm-specific functions as pointers (again, in a language-specific manner) to the runner, followed by the name of the algorithm and a (language-specific) representation of the command-line arguments.
+Each algorithm module also provides the language-specific equivalent of a ``main'' function, that function which is treated as the program entry-point by the operating system. Each ``main'' function consists of a single call to the runner function provided by the runner module. The call passes the two algorithm-specific functions as pointers (again, in a language-specific manner) to the runner, followed by the name of the algorithm and a representation of the command-line arguments.
+
+\subsection{Selected Algorithms}
+
+The different algorithms that were chosen are listed here in the order of their implementation. Each of the algorithms was implemented first in C, as a baseline. These C implementations were then used as templates for the other languages' implementations. In addition to helping to keep the implementations approximately similar and equal, this provided insight into the difference that the features and expressiveness of the different languages made in the development process itself.
+
+\subsubsection{Knuth, Morris, and Pratt}
+
+The Knuth-Morris-Pratt~\cite{knuth.morris.pratt.1977} algorithm is one of the foundational algorithms in the area of string matching and text searching. It is still used in the present day, with implementations as recent as the Rust-Bio project~\cite{rust.bio.2015}. This was chosen primarily for historical significance, but also for ease of implementation.
+
+Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time linear to the sum of the pattern length and the target length.
+
+Generally when matching, the pattern is aligned with positions in the target string. Shifting is done when a character mismatch is found between an index in the target and the corresponding index in the pattern. Where a naive implementation might shift the pattern by one place after each failed match, resulting in a time complexity approaching O($mn$), the Knuth-Morris-Pratt approach is built on the concept of an auxiliary table (referred to as the ``next'' table) that instructs the matching algorithm on how much to shift the pattern over the target stream. Based on repetition within the pattern itself, the table may call for a shift of the pattern by more than one character for a given mismatch.
+
+The computation of this table is shown in the paper to require O($m$) steps, and the process of matching the pattern to the target takes at most an additional $2n$ steps. This is due to the fact that, at each step of the matching process, only one of the text pointer or the pattern pointer are moved (each of which can only move $n$ times at most). This results in a worst-case run-time bounded by O($m+n$).
+
+As an example, consider a search for the pattern ``CTAGC'' in a sequence that starts with ``CGCCTAGCG''. The first step is to compute the ``next'' table according to the algorithm, shown in figure~\ref{fig:kmp_next}.
+
+\begin{figure}[ht]
+\centering
+\input{figures/kmp-next}
+\caption{Knuth-Morris-Pratt next-table}
+\label{fig:kmp_next}
+\end{figure}
+
+With the table in hand, the process moves to matching. The matching algorithm goes through the following steps:
+
+\begin{enumerate}
+\item $i$ and $j$ both initialize to 0
+\item $p_0 = s_0$, so $next$ is not consulted
+\item $i$ and $j$ increment, both to 1 and 1
+\item $p_1 \neq s_1$, so $i = next[1]$ and becomes 0
+\item $p_0 \neq s_1$, so $i = next[0]$ and becomes -1
+\item $i$ and $j$ increment, to 0 and 2 respectively
+\item $p_0 = s_2$, so $next$ is not consulted
+\item $i$ and $j$ increment
+\item $p_1 \neq s_3$, so $i = next[1]$ and becomes 0
+\item $p_0 = s_3$, so $next$ is not consulted
+\item $i$ and $j$ increment
+\item $p_i$ continues to match $s_j$ as both variables increment. When $i = 5$, the algorithm detects a match.
+\end{enumerate}
+
+The C implementation of Knuth-Morris-Pratt was adapted from~\cite[Chapter 7]{handbook.2004}. Of note is the discovery that the sample code takes advantage of C's use of a ``null'' byte at the end of a string to stand in for the sentinel character that the algorithm appends to the pattern string. While this optimization was also applicable to C++ (where strings are represented by instances of the \texttt{std::string} class), each of the three remaining languages were required to manually add the sentinel character to the pattern string prior to computing the ``next'' table.
+
+This being the first of the algorithms implemented, it is also where the means of passing generic data from the initialization routines to the algorithm routines was developed. The differences in these methods, particularly between the compiled languages, spoke strongly to their relative expressiveness.
+
+In the C implementation it was necessary to use a memory pointer of the type, \texttt{void **}. This defines a dynamic list of dynamic pointers, but provides no information about each individual pointer. It is left to the code to properly type-cast the values from this block of memory. If the program is incorrect (such as getting the order of elements backwards) the resulting typed pointers will likely trigger memory faults when dereferenced. This was also the most-flexible of the compiled solutions and required no difference in implementation between the different algorithms.
+
+In C++ it was initially attempted to reuse the \texttt{void **} approach that had been used in C. This proved to be extremely difficult under the stricter compiler, and the decision was made to use the \texttt{std::variant} class instead, which represents a type-safe union in the language. While the same variant type definition could have been used for both the single-pattern and multi-pattern algorithms, it was decided to distinguish them for the sake of readability. The type definitions were made in the file \texttt{run.hpp}, the header-file for the runner module of C++. Unpacking a vector of the variant types brought further type-safety in the form of a generically-typed function \texttt{get<>} in the standard library that was used to extract the values to new objects of the correct type.
+
+Rust had the language features that seemed the most clear and expressive in implementation: enumeration and pattern-matching. In Rust, an enumeration type (\texttt{enum}) can optionally assign data types to the elements of the enumeration. When an enumeration element is instantiated it is provided an instance of that data when applicable. This lead to a system for the Rust programs in which the initialization function for an algorithm created and returned a vector of the enumeration type. The algorithm routines that received these types would extract them from the vector using a pattern-matching\footnote{In the computer language sense, which is distinct from pattern-matching in strings} construct that ensured the types of each individual element of the vector received from the initialization function. The program would raise a run-time exception if the given vector element was not of the expected type. In contrast, Rust required the least-expressive approach to appending the sentinel value onto the pattern string for the sake of creating the ``next'' table.
+
+Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void **} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar would have caused a run-time exception in either program.
+
+\subsubsection{Boyer and Moore}
+
+In the same year that Knuth, Morris and Pratt published their paper, Boyer and Moore published as well~\cite{boyer.moore.1977}. This algorithm is also an exact matching approach, that is based on the research of Knuth, et al. The Boyer-Moore performance improvements are based on searching from the end of the pattern rather than the beginning, and computing two tables to use in optimizing the jumps through the sequence string when mismatches are discovered. This algorithm was chosen as an example of refinement and improvement of another sample algorithm.
+
+Boyer and Moore postulated that, ``more information is gained by matching the pattern from the right than from the left.'' For example: If the target character that corresponds to the current location of the last character from the pattern is not only a mismatch but also does not appear in the pattern at all, the pattern may then be shifted right by its full length. They refer to this algorithm as being ``usually sublinear,'' meaning that when finding the location of the pattern within the target the number of compared characters is usually less than $i+m-1$ (where $m$ is the pattern length and $i$ is the position within the target where the match of the pattern begins).
+
+The first of the two tables is the simplest to compute. It is the size of the alphabet of the pattern and sequence\footnote{In these implementations, to avoid constantly translating the four characters into values between 0 and 3, the alphabet-size was set to 128 for convenience.}, and it tracks the number of positions by which the pattern can be moved down the sequence without additional checking for matches. Boyer and Moore define each entry in this table as being $m$ (the pattern's length) when the character does not appear in the pattern at all, and $m - i$ otherwise (where $i$ is the right-most index within the pattern where the character does occur). Using the same example pattern and sequence as in the previous section, the first table (referred to as $delta_1$ in the paper and $bad\_char$ in the implementations) is shown in figure~\ref{fig:bm_bad_char}. Only the entries for the four characters that appear in patterns are shown.
+
+\begin{figure}[ht]
+\centering
+\input{figures/bm-bad-char}
+\caption{Boyer-Moore $delta_1$ table}
+\label{fig:bm_bad_char}
+\end{figure}
+
+The second table (referred to as $delta_2$ in the paper and $good\_suffix$ in the implementations) is more complex to calculate, as it first requires calculation of suffixes within the pattern. In the paper, it is described as the distance that the pattern can be slid down in order to align the discovered sub-match (in the target) with the last $m - j$ characters of the pattern (where $j$ is the index within $delta_2$), plus the additional distance that the pointer within the target must be moved so as to restart the matching process at the right end of the pattern. This table is shown in figure~\ref{fig:bm_good_suffix}.
+
+\begin{figure}[ht]
+\centering
+\input{figures/bm-good-suffix}
+\caption{Boyer-Moore $delta_2$ table}
+\label{fig:bm_good_suffix}
+\end{figure}
+
+When using the two tables to select the amount to shift, it is possible that the $delta_1$ table's value may be negative. Because of this a $max$ operator is applied to the two potential values and the largest possible shift is chosen. With both tables computed, the matching process begins with the pattern aligned to the starting character of the target string. The algorithm then goes through the following steps (where $m$ is the pattern length and $n$ is the sequence length):
+
+\begin{enumerate}
+\item $j$ (the pointer within the sequence) initializes to 0
+\item $i$ (the pointer within the pattern) is set to $m - 1$ (4)
+\item $p_4 \neq s_4$, so the tables are consulted
+\item $delta_2(4)$ is 1, and $(delta_1(T) - m + 1 + i)$ = 3
+\item $j$ advances by 3
+\item $i$ is set to $m - 1$ (4)
+\item $p_4 = s_7$, so $i$ is decremented
+\item $p_i$ continues to match $s_{i+j}$ until $i$ becomes -1
+\item A match is recorded and $j$ advances by $delta_2(0)$, to 7
+\end{enumerate}
+
+While the Knuth-Morris-Pratt algorithm had made 11 character comparisons to find the match, Boyer-Moore makes only 6, 5 of which were required to verify the match.
+
+The C version of the basic algorithm was drawn from~\cite[Chapter 14]{handbook.2004}. Like Knuth-Morris-Pratt, it requires a character at the end of the pattern for calculating the suffixes table. The C and C++ implementations use the ``null'' string-terminating byte for this while the others add it explicitly.
+
+Starting with Rust in this case, one aspect became very clear in this algorithm's implementation: the need to regularly cast various numerical (particularly integer) types to other types. Because of the larger amount of array-indexing in this algorithm, the number of times an \texttt{i32} (signed 32-bit integer) or \texttt{u32} (unsigned) had to be cast to or from a \texttt{usize} type (an unsigned type used for lengths and indexing) was significant. While this does lead to fewer bugs in the code, at the same time it detracted from the conciseness of the Rust version.
+
+Perl and Python were comparable in their conciseness and logical expression of the algorithm. Python showed an advantage in the form of its native support for iterators as a type and functions such as \texttt{range} that return these iterators. Operations like looping backwards through a series of integers was clearer in the Python code than in the corresponding Perl.
+
+The C and C++ implementations are best compared to each other, as this is another case where the C++ Standard Library classes lead to clearer code. Though there was less difference in code-length, various mechanisms of C++ in areas such as argument-passing meant less overhead and less ambiguity about pointers sent and received.
+
+\subsubsection{Bitap}
+
+The Bitap algorithm (sometimes known as ``Shift-Or'', or ``Shift-Add'') was initially developed by B\'{a}lint D\"{o}m\"{o}lki in 1964. In 1989 it was re-invented by Ricardo Baeza-Yates and Gaston H. Gonnet, and published in~\cite{baeza.yates.gonnet.1992} in 1992. Here, it has been chosen for the distinctive approach when compared to the other algorithms.
+
+In terms of time complexity, the algorithm is on the same level as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the same input data.
+
+The structure of the algorithm is based on encoding the pattern in a vector of bitmaps. The vector has length equal to the alphabet size, and each element of the vector is a bit-field of width $W$, where $W$ is the size in bits of an unsigned integer. $W$ also limits the length of the pattern in this implementation, though it is possible to implement the algorithm for longer patterns.
+
+The vector is initialized in the preprocessing phase first to an all-1's value in each space, and then modified through a single pass over the pattern. For each character in the pattern, the vector space corresponding to that character has the bit that corresponds to the position in the pattern flipped to 0. The resulting vector fully encodes the pattern. Using the example pattern from the previous two algorithms, imagine that the elements of the vector ($S$) are exactly as wide as the pattern (5 bits) and that there are only the four elements corresponding to the restricted alphabet of the pattern. This is shown in figure~\ref{fig:bitap_s_positions}.
+
+\begin{figure}[ht]
+\centering
+\input{figures/bitap-s-positions}
+\caption{Bitap shift positions vector}
+\label{fig:bitap_s_positions}
+\end{figure}
+
+During the process of computing the $S$ vector, a ``limit'' value is also calculated: it starts out as 0, and has a number of bits set equal to the full with of the pattern. At the end of the loop that calculates $S$, the value of $limit$ is shifted to the right by one bit, then subject to a bit-complement operation. The result is a value that can be compared with, when determining if a match has been found.
+
+The process of searching for a match begins with a $state$ value of $W$ bit-width, set to all 1's. The target string is read one character at a time. For each iteration of this loop, $state$ is shifted to the left one bit (introducing a 0) and then \texttt{or}'d with the $S$ value of the character under the index. If, after this operation (the ``shift-or''), the value of $state$ is less than the value of $limit$ then a match has been found and will be reported.
+
+\begin{figure}[ht]
+\centering
+\input{figures/bitap-matching}
+\caption{Bitap matching process}
+\label{fig:bitap_matching}
+\end{figure}
+
+In figure~\ref{fig:bitap_matching}, the $state$ column shows the value of that variable at each iteration, while the ``result'' column shows the value of $state$ after the \texttt{or}-operation. On the row where $j = 7$, we see that the high bit of $state$ is a 0 for the first time. This signals a match, and the matching index is $j - m + 1$, or 3.
+
+The C version of Bitap was taken from~\cite[Chapter 5]{handbook.2004}, where it is referred to as Shift-Or. The design of the algorithm given there is clearly drawn from the Shift-Or algorithm given in~\cite{baeza.yates.gonnet.1992}. The C++ version followed the C very closely with the only changes being the use of standard classes for strings and vectors. Likewise, the Rust version of this algorithm proved very simple and bore a fair resemblance to the C and C++.
+
+The Perl and Python implementations were also very similar to the compiled versions, with the same exception that each language has arrays as first-class data types. The Python version, however, did have one notable difference: due to Python's integers being of arbitrary size, it was not enough to take the bit-complement of 0 to get a ``full'' bit-field. In Python this resulted in a value of -1, rather than the expected $2^W - 1$. To force Python to treat these values as unsigned 64-bit, it was necessary to declare a ``mask'' value equal to $2^W - 1$ and apply this to the result of every logical bit-operation performed. This incurred a performance penalty on the Python implementation, making this the only algorithm to be outperformed by its Perl counterpart.
+
+\subsubsection{Aho and Corasick}
+
+Alfred V. Aho and Margaret J. Corasick published their algorithm for searching multiple patterns at once in 1975~\cite{aho.corasick.1975}. In their algorithm, a finite number of patterns are merged into a single deterministic finite automata (DFA) which can then be applied over any number of target strings. The DFA is capable of finding all locations of all patterns in the set, with overlapping, in a single pass through the target string. This makes the algorithm considerably faster than the others for the simple reason that Aho-Corasick scans each target string once, regardless of the number of patterns. By contrast, each of the previous algorithms would scan the target once per pattern. The choice of this algorithm was driven by an interest in comparing a multi-pattern algorithm to the single-pattern options, and an interest in using a DFA for the matching process.
+
+Aho and Corasick designed the pattern matching machine as a collection of three functions:
+
+\begin{itemize}
+\item A ``goto'' function $g$, which maps transitions from one state to the next based on the character being examined
+\item A ``failure'' function $f$, which maps a state into another state whenever $g$ reports that there is no transition for the current state and current character
+\item An ``output'' function $output$, which maps states to sets of patterns matched at the specific state
+\end{itemize}
+
+Construction of these three functions is accomplished through two supporting algorithms. The first fully constructs $g$ and partially computes $output$. The second fully constructs $f$ and completes the computation of $output$. The first algorithm takes only the set of patterns (referred to there as $K$) as input, while the second algorithm takes the resulting $g$ and $output$ from the first as input.
+
+For an example, let $K$ be the list $\left\lbrace ACTG,~CTG,~AAGT \right\rbrace$. Constructing $g$ by the algorithm given in the paper yields the DFA given by the figures~\ref{fig:ac_goto_function} through~\ref{fig:ac_output_function}.
+
+\begin{figure}[ht]
+\centering
+\input{figures/ac-goto-function}
+\caption{Aho-Corasick goto function}
+\label{fig:ac_goto_function}
+\end{figure}
+
+Starting with figure~\ref{fig:ac_goto_function}, the goto function $g$ provides the finite-state machine that lays out the transitions between states based on the character under consideration. Any state that does not have a transition for a given character is assumed to ``fail'' on that character, which is where the failure function $f$ comes into use. While it is given in the algorithm that there are no failure transitions for state 0, this is made explicit in the figure by including a self-referencing transition for ``G'' and ``T''.
+
+\begin{figure}[ht]
+\centering
+\input{figures/ac-failure-function}
+\caption{Aho-Corasick failure function}
+\label{fig:ac_failure_function}
+\end{figure}
+
+In figure~\ref{fig:ac_failure_function}, the failure function $f$ shows how the processing of the DFA may jump around to implement a form of back-tracking. State 2 will move to state 5 on a failure transition, reflecting that the character previous to the state (``C'') could instead be the start of matching the ``CTG'' pattern. Because there are no failing transitions in state 0, that state is not represented in the figure.
+
+\begin{figure}[ht]
+\centering
+\input{figures/ac-output-function}
+\caption{Aho-Corasick output function}
+\label{fig:ac_output_function}
+\end{figure}
+
+In figure~\ref{fig:ac_output_function}, the $output$ function is represented as an indexed array of sets. Most states (including state 0) have the empty set as output. The non-empty sets represent the found patterns by their index in the original list. State 10 has only a value of 2, representing the pattern ``AAGT''. Of note is state 4, whose set includes both the index 0 and the index 1. This reflects the fact that the three characters of pattern 1 overlap the last three characters of pattern 0.
+
+To illustrate the process of this algorithm, consider the target string that begins with the sequence ``AACTG...''. Figure~\ref{fig:ac_progression} shows the progression of states as the pointer advances through the first five characters.
+
+\begin{figure}[ht]
+\centering
+\input{figures/ac-progression}
+\caption{Example of Aho-Corasick state progression}
+\label{fig:ac_progression}
+\end{figure}
+
+Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and moves the DFA to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
+
+For the implementation of this algorithm, no existing code was consulted. Rather, the initial C version was developed directly from the algorithm specification in the paper itself. The C version required the most supporting code, as the algorithm calls for both queue and set data structures. Additionally, the construction of the $g$ and $output$ functions required dynamic re-sizing of lists. This was avoided by generously estimating the size needed for those lists and pre-allocating that amount. Constructing $f$ did not have this problem as the size of $g$ was known at that point. Both queue and set data structures were implemented with just the minimally-required functionality for each. For the queue, this was the operations \textit{create}, \textit{delete}, \textit{expand} (grow), \textit{enqueue}, \textit{dequeue}, and a test for whether the queue is empty. For the set, these were \textit{create}, \textit{delete}, \textit{expand} (grow), \textit{insert}, \textit{test-for-membership}, and an implementation of a \textit{union} operation. These implementations added significantly to the number of dynamic memory allocations and corresponding releases.
+
+When implementing in C++, the C++ Standard Library was able to provide existing classes for both set and queue implementations, greatly reducing the amount of supporting code in this version. Though C++ vector types can dynamically grow, intermediate experiments found that relying on this for the $g$ and $output$ function construction introduced a slight performance penalty. As such, it was decided to replicate the C approach of estimating their size and pre-allocating. Using C++ features, this also allowed for immediate initialization of the vectors where the C arrays required explicit loops to initialize. In the end, the difference between the two languages' implementations was a factor of almost 2x for the C code over the C++ code.
+
+The Perl and Python implementations were both significantly shorter in length than the C or C++, due to the native support for resizable lists. For the queue data structure, the Python code used the \texttt{collections.deque} class that is part of the Python core. Perl used an ordinary list, as the language provides a built-in keyword for removing from the head of a list. Both languages grew the $g$ and $output$ functions dynamically rather than pre-allocating them.
+
+The Rust implementation went through several iterations before reaching its final form. The first version closely followed the C++ version: the use of resizable vectors through the native \texttt{Vec<>} type, and implementations of set and queue from the standard Rust library. This initial version severely under-performed in comparison to the other two compiled solutions. With help from the Rust community, it was determined that the two collection classes were incurring large amounts of overhead. To address this, they were replaced with simple implementations adapted from the C code. As with the Perl and Python versions, the \texttt{Vec<>} type was allowed to handle the dynamic natures of the $g$ and $output$ functions. As with C++, some intermediate experiments were performed that pre-allocated these vectors based on estimates of needed space. But here also it was found that at best the performance remained the same, and in some runs was noticeably worse.
+
+\subsubsection{Other Algorithms Considered}
 
 \subsection{Optimizations}
 
