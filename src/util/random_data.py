@@ -112,9 +112,8 @@ def parse_command_line():
     )
     parser.add_argument(
         "-k",
-        type=int,
-        action="append",
-        help="Value of k for approximate matching"
+        type=str,
+        help="Value(s) of k for approximate matching, comma-separated"
     )
 
     return vars(parser.parse_args())
@@ -255,7 +254,8 @@ def main():
     patterns = write_patterns(sequences=sequences, **args)
     if args["k"] is not None:
         print()
-        for k in args["k"]:
+        ks = map(int, args["k"].split(","))
+        for k in ks:
             print(f"Generating approximate matches for k={k}...", end="")
             write_approximate_answers(k, patterns, sequences, args["amfile"])
             print(" done.")
