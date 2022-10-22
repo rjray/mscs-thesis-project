@@ -193,7 +193,7 @@ init_aho_corasick(std::vector<std::string> patterns_data) {
   number of patterns (pattern_count).
 */
 std::vector<int> aho_corasick(std::vector<MultiPatternData> &pat_data,
-                              std::string sequence) {
+                              std::string &sequence) {
   // Unpack pat_data
   int pattern_count = std::get<int>(pat_data[0]);
   std::vector<std::vector<int>> goto_fn =

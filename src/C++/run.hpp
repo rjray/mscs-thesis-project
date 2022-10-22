@@ -22,7 +22,7 @@ typedef std::variant<int, std::vector<int>, std::vector<std::vector<int>>,
                      std::vector<std::set<int>>>
     MultiPatternData;
 typedef std::vector<int> (*mp_algorithm)(std::vector<MultiPatternData> &,
-                                         std::string);
+                                         std::string &);
 typedef std::vector<MultiPatternData> (*mp_initializer)(
     std::vector<std::string>);
 extern int run_multi(mp_initializer init, mp_algorithm algo, std::string name,
