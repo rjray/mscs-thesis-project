@@ -192,7 +192,7 @@ init_aho_corasick(std::vector<std::string> patterns_data) {
   Instead of returning a single int, returns an array of ints as long as the
   number of patterns (pattern_count).
 */
-std::vector<int> aho_corasick(std::vector<MultiPatternData> pat_data,
+std::vector<int> aho_corasick(std::vector<MultiPatternData> &pat_data,
                               std::string sequence) {
   // Unpack pat_data
   int pattern_count = std::get<int>(pat_data[0]);

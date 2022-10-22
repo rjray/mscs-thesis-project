@@ -21,7 +21,7 @@ extern int run(initializer init, algorithm algo, std::string name, int argc,
 typedef std::variant<int, std::vector<int>, std::vector<std::vector<int>>,
                      std::vector<std::set<int>>>
     MultiPatternData;
-typedef std::vector<int> (*mp_algorithm)(std::vector<MultiPatternData>,
+typedef std::vector<int> (*mp_algorithm)(std::vector<MultiPatternData> &,
                                          std::string);
 typedef std::vector<MultiPatternData> (*mp_initializer)(
     std::vector<std::string>);
