@@ -15,8 +15,10 @@ from sys import stdout
 DEFAULT_SEQUENCES_FILE = "sequences.txt"
 DEFAULT_PATTERNS_FILE = "patterns.txt"
 DEFAULT_ANSWERS_FILE = "answers.txt"
+DEFAULT_APPROX_ANSWERS_FILE = "answers-k-%d.txt"
 
 ALPHABET = ["A", "C", "G", "T"]
+ALPHABET_SET = set(ALPHABET)
 
 
 def parse_command_line():
@@ -51,6 +53,14 @@ def parse_command_line():
         type=str,
         default=DEFAULT_ANSWERS_FILE,
         dest="afile",
+        help="Name of file to write answers data to",
+    )
+    parser.add_argument(
+        "-A",
+        "--approx-answers",
+        type=str,
+        default=DEFAULT_APPROX_ANSWERS_FILE,
+        dest="amfile",
         help="Name of file to write answers data to",
     )
     parser.add_argument(
@@ -99,6 +109,12 @@ def parse_command_line():
         default=0,
         dest="pvariance",
         help="Variance for pattern length",
+    )
+    parser.add_argument(
+        "-k",
+        type=int,
+        action="append",
+        help="Value of k for approximate matching"
     )
 
     return vars(parser.parse_args())
@@ -191,8 +207,38 @@ def write_patterns(sequences, afile, pfile, pcount, plength, pvariance, **_):
     avg_pct = mean(all_pct)
     lo_pct = min(all_pct)
     hi_pct = max(all_pct)
-    print(f"\nAverage matching: {(avg_pct * 100):.2f}% ", end="")
+    print(f"\nDone. Average matching: {(avg_pct * 100):.2f}% ", end="")
     print(f"(low={(lo_pct * 100):.2f}%, high={(hi_pct * 100):.2f}%)")
+
+    return patterns
+
+
+def write_approximate_answers(k, patterns, sequences, amfile):
+    # The file to write the approximate-matching answers to, based on k:
+    file = amfile % k
+    with open(file, "w", newline="\n") as f:
+        f.write(f"{len(patterns)} {len(sequences)} {k}\n")
+
+        # Loop over patterns
+        for pattern in patterns:
+            # Create the regular expression for this pattern
+            regexp = pattern[0]
+            for char in pattern[1:]:
+                regexp += "[%s]{0,%d}%s" % (
+                    "".join(ALPHABET_SET - set(char)), k, char
+                )
+            regexp = f"(?={regexp})"
+
+            matches = []
+            # Loop over sequences
+            for sequence in sequences:
+                matches.append(
+                    [m.start() for m in re.finditer(regexp, sequence)]
+                )
+
+            f.write(",".join(map(lambda x: str(len(x)), matches)) + "\n")
+
+    return
 
 
 def main():
@@ -206,7 +252,13 @@ def main():
         random.seed(args["seed"])
 
     sequences = write_sequences(**args)
-    write_patterns(sequences=sequences, **args)
+    patterns = write_patterns(sequences=sequences, **args)
+    if args["k"] is not None:
+        print()
+        for k in args["k"]:
+            print(f"Generating approximate matches for k={k}...", end="")
+            write_approximate_answers(k, patterns, sequences, args["amfile"])
+            print(" done.")
 
     print("\nDone.")
 
