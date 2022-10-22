@@ -16,8 +16,9 @@ ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
 ALGORITHM_LABELS = {
     "kmp": "Knuth-Morris-Pratt",
     "boyer_moore": "Boyer-Moore",
-    "shift_or": "Shift-Or",
+    "shift_or": "Bitap",
     "aho_corasick": "Aho-Corasick",
+    "combined": "Combined Data",
 }
 LANGUAGES = [
     "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust"
@@ -38,12 +39,11 @@ LANGUAGE_LABELS = {
 DEFAULT_FILES = {
     "data": "experiments_data.yml",
     "runtimes_graph": "runtimes.png",
-    "memory_graph": "memory.png",
     "power_graph": "power.png",
     "pps_graph": "power_per_sec.png",
-    "tables_file": "latex-tables.tex",
     "script_runtimes_graph": "runtimes-scripts.png",
     "script_power_graph": "power-scripts.png",
+    "tables_file": "latex-tables.tex",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -69,7 +69,6 @@ def parse_command_line():
         help="Input YAML data to process"
     )
     parser.add_argument(
-        "-r",
         "--runtimes",
         type=str,
         default=DEFAULT_FILES["runtimes_graph"],
@@ -82,14 +81,6 @@ def parse_command_line():
         help="File to write the scripts run-times graph to"
     )
     parser.add_argument(
-        "-m",
-        "--memory",
-        type=str,
-        default=DEFAULT_FILES["memory_graph"],
-        help="File to write the memory graph to"
-    )
-    parser.add_argument(
-        "-p",
         "--power",
         type=str,
         default=DEFAULT_FILES["power_graph"],
@@ -102,7 +93,6 @@ def parse_command_line():
         help="File to write the scripts power usage graph to"
     )
     parser.add_argument(
-        "-P",
         "--power-per-sec",
         type=str,
         default=DEFAULT_FILES["pps_graph"],
@@ -228,7 +218,7 @@ def analyze_data(data, langs, algos):
 
     for lang in langs:
         if lang not in new_data:
-            new_data[lang] = {}
+            new_data[lang] = {"combined": {}}
 
         for algo in algos:
             if algo not in new_data[lang]:
@@ -262,12 +252,15 @@ def analyze_data(data, langs, algos):
                     # It can only be smaller
                     cell["notes"] = f"Based on {size} (of {max_size}) samples"
                 new_data[lang][algo][key] = cell
+                # Add to the running combined value:
+                new_data[lang]["combined"][key] = \
+                    new_data[lang]["combined"].get(key, 0.0) + cell["mean"]
 
     return new_data
 
 
 # Create a bar graph for run-times or memory usage by algorithm.
-def simple_graph(which, data, filename, *, languages=LANGUAGES):
+def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
     if which not in SIMPLE_GRAPH_PARAMS:
         print(f"  Unknown graph type: {which}")
         return
@@ -277,6 +270,7 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES):
     # Total width of each algorithm's bars
     width = 0.8
     step = width / len(languages)
+    step_off = (len(languages) - 1) / 2
     steps = list(map(lambda x: x * step, range(len(languages))))
     x_len = len(ALGORITHMS)
     x = np.arange(x_len)
@@ -287,12 +281,18 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES):
         for idx, algo in enumerate(ALGORITHMS):
             bars[lang][idx] = data[lang][algo][key]["mean"]
 
-    fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=300.0)
+    if large:
+        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
+    else:
+        fig, ax = plt.subplots()
+
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], bars[lang],
                step, label=LANGUAGE_LABELS[lang])
 
-    ax.set_xticks(x + step * 2, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS))
+    ax.set_xticks(
+        x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS)
+    )
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc=legend)
@@ -305,10 +305,13 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES):
 
 
 # Create a stacked bar graph for energy used by algorithm.
-def power_graph(data, filename, average=False, *, languages=LANGUAGES):
+def power_graph(
+    data, filename, average=False, *, languages=LANGUAGES, large=False
+):
     # Total width of each algorithm's bars
     width = 0.8
     step = width / len(languages)
+    step_off = (len(languages) - 1) / 2
     steps = list(map(lambda x: x * step, range(len(languages))))
     x_len = len(ALGORITHMS)
     x = np.arange(x_len)
@@ -339,19 +342,25 @@ def power_graph(data, filename, average=False, *, languages=LANGUAGES):
             pp0[lang] /= runtimes[lang]
             dram[lang] /= runtimes[lang]
 
-    fig, ax = plt.subplots()
+    if large:
+        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
+    else:
+        fig, ax = plt.subplots()
+
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], pp0[lang], step,
                label=f"{LANGUAGE_LABELS[lang]}")
         ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
 
-    ax.set_xticks(x + step * 2, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS))
+    ax.set_xticks(
+        x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS)
+    )
     if average:
-        ax.set_ylabel("Avg Joules per Second")
-        ax.set_title("Total Energy Use (CPU + DRAM) by Algorithm (per second)")
+        ax.set_ylabel("Joules/Second")
+        ax.set_title("Energy Use (CPU + DRAM) by Algorithm (per second)")
     else:
         ax.set_ylabel("Joules")
-        ax.set_title("Total Energy Use (CPU + DRAM) by Algorithm")
+        ax.set_title("Energy Use (CPU + DRAM) by Algorithm")
     if average:
         ax.legend(loc="lower right")
     else:
@@ -584,9 +593,6 @@ def main():
                 languages=SCRIPT_LANGUAGES
             )
             print("  Done.")
-        print("\nCreating memory-usage graph...")
-        simple_graph("memory", analyzed, args.memory, languages=all_languages)
-        print("  Done.")
         print("\nCreating power usage graph...")
         power_graph(analyzed, args.power, languages=target_languages)
         print("  Done.")
@@ -598,7 +604,8 @@ def main():
             print("  Done.")
         print("\nCreating power-per-second usage graph...")
         power_graph(
-            analyzed, args.power_per_sec, True, languages=all_languages
+            analyzed, args.power_per_sec, True, languages=all_languages,
+            large=True
         )
         print("  Done.")
 
