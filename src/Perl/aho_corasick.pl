@@ -34,9 +34,6 @@ sub enter_pattern {
     while ($goto_fn->[$state][$pat->[$j]] != FAIL) {
         $state = $goto_fn->[$state][$pat->[$j]];
         $j++;
-        if ($j == $len) {
-            break;
-        }
     }
 
     foreach my $p ($j..($len - 1)) {

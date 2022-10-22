@@ -121,16 +121,10 @@ fn enter_pattern(
     let mut state: usize = 0;
 
     // Find the first leaf corresponding to a character in `pat`. From there is
-    // where a new state (if needed) will be added. Note that the original
-    // algorithm did not account for pattern `pat` being a substring of an
-    // existing pattern in the goto function. The break-test is added to avoid
-    // the counter `j` going past the end of `pat`.
+    // where a new state (if needed) will be added.
     while goto_fn[state][pat[j] as usize] != FAIL {
         state = goto_fn[state][pat[j] as usize] as usize;
         j += 1;
-        if j == len {
-            break;
-        }
     }
 
     // At this point, `state` points to the leaf in the automaton. Create new

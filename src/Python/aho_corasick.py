@@ -25,8 +25,6 @@ def enter_pattern(pat, idx, goto_fn, output_fn):
     while goto_fn[state][pat[j]] != FAIL:
         state = goto_fn[state][pat[j]]
         j += 1
-        if j == length:
-            break
 
     for p in range(j, length):
         new_state += 1
