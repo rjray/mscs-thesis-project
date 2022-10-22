@@ -123,18 +123,18 @@ testing-data: testing-random-data
 random-data: $(RANDOM_FILES)
 
 $(RANDOM_FILES) &: $(RANDOM_DATA_PY)
-	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(RANDOM_SEQUENCES) \
+	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --sequences $(RANDOM_SEQUENCES) \
 		--patterns $(RANDOM_PATTERNS) --answers $(RANDOM_ANSWERS) \
-		--length 1024 --line-variance 16 --pattern-length 9 \
-		--pattern-variance 1 --count 100000 --pattern-count 100
+		--sequence-length 1024 --sequence-variance 16 --pattern-length 9 \
+		--pattern-variance 1 --sequence-count 100000 --pattern-count 100
 
 testing-random-data: $(TEST_FILES)
 
 $(TEST_FILES) &: $(RANDOM_DATA_PY)
-	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --file $(TEST_SEQUENCES) \
-		--patterns $(TEST_PATTERNS) --answers $(TEST_ANSWERS) --length 120 \
-		--line-variance 4 --pattern-length 4 --pattern-variance 1 \
-		--count 100 --pattern-count 10
+	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --sequences $(TEST_SEQUENCES) \
+		--patterns $(TEST_PATTERNS) --answers $(TEST_ANSWERS) \
+		--sequence-length 120 --sequence-variance 4 --pattern-length 4 \
+		--pattern-variance 1 --sequence-count 100 --pattern-count 10
 
 # Rules for the descent into subdirectories to propagate the all and clean
 # targets.

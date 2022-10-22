@@ -8,6 +8,7 @@ import argparse
 from math import ceil
 import random
 import re
+from statistics import mean
 from sys import stdout
 
 
@@ -30,9 +31,10 @@ def parse_command_line():
     )
     parser.add_argument(
         "-f",
-        "--file",
+        "--sequences",
         type=str,
         default=DEFAULT_SEQUENCES_FILE,
+        dest="file",
         help="Name of file to write sequence data to",
     )
     parser.add_argument(
@@ -53,9 +55,10 @@ def parse_command_line():
     )
     parser.add_argument(
         "-c",
-        "--count",
+        "--sequence-count",
         type=int,
         default=100000,
+        dest="count",
         help="Number of sequences to generate",
     )
     parser.add_argument(
@@ -68,9 +71,10 @@ def parse_command_line():
     )
     parser.add_argument(
         "-l",
-        "--length",
+        "--sequence-length",
         type=int,
         default=1024,
+        dest="length",
         help="Length of each sequence",
     )
     parser.add_argument(
@@ -83,7 +87,7 @@ def parse_command_line():
     )
     parser.add_argument(
         "-v",
-        "--line-variance",
+        "--sequence-variance",
         type=int,
         default=0,
         help="Variance for sequence length",
@@ -113,16 +117,16 @@ def create_sequence(length, variance):
     return "".join(seq)
 
 
-def write_sequences(*, file, count, length, line_variance, **_):
+def write_sequences(*, file, count, length, sequence_variance, **_):
     print(f"\nCreating {count} sequences of length ", end="")
-    print(f"{length} ± {line_variance}...", end="")
+    print(f"{length} ± {sequence_variance}...", end="")
     stdout.flush()
     sequences = []
 
     with open(file, "w", newline="\n") as f:
-        f.write(f"{count} {length + line_variance}\n")
+        f.write(f"{count} {length + sequence_variance}\n")
         for _ in range(count):
-            sequence = create_sequence(length, line_variance)
+            sequence = create_sequence(length, sequence_variance)
             f.write(sequence + "\n")
             sequences.append(sequence)
 
@@ -154,10 +158,10 @@ def write_patterns(sequences, afile, pfile, pcount, plength, pvariance, **_):
     print(f"\nGenerating {pcount} patterns of length ", end="")
     print(f"{plength} ± {pvariance}...\n")
     patterns = []
-    avg_pct = 0.0
+    all_pct = []
     # Current (hard-coded) threshold is 0.10% matching.
-    threshold = ceil(len(sequences) / 1000)
     count = len(sequences)
+    threshold = ceil(count / 1000)
 
     with open(pfile, "w", newline="\n") as pf:
         pf.write(f"{pcount} {plength + pvariance}\n")
@@ -182,10 +186,13 @@ def write_patterns(sequences, afile, pfile, pcount, plength, pvariance, **_):
                 af.write(",".join(map(lambda x: str(len(x)), matches)) + "\n")
                 pct = matched / count
                 print(f"{(pct * 100):.2f}% matching ({matched}).")
-                avg_pct += pct
+                all_pct.append(pct)
 
-    avg_pct /= pcount
-    print(f"\nAverage matching: {(avg_pct * 100):.2f}%.")
+    avg_pct = mean(all_pct)
+    lo_pct = min(all_pct)
+    hi_pct = max(all_pct)
+    print(f"\nAverage matching: {(avg_pct * 100):.2f}% ", end="")
+    print(f"(low={(lo_pct * 100):.2f}%, high={(hi_pct * 100):.2f}%)")
 
 
 def main():
