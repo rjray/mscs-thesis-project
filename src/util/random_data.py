@@ -257,6 +257,7 @@ def main():
         ks = map(int, args["k"].split(","))
         for k in ks:
             print(f"Generating approximate matches for k={k}...", end="")
+            stdout.flush()
             write_approximate_answers(k, patterns, sequences, args["amfile"])
             print(" done.")
 
