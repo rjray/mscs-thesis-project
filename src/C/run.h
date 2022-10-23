@@ -15,4 +15,9 @@ typedef void **(*mp_initializer)(unsigned char **, int);
 extern int run_multi(mp_initializer init, mp_algorithm algo, char *name,
                      int argc, char *argv[]);
 
+typedef int (*am_algorithm)(void **, unsigned char *);
+typedef void **(*am_initializer)(unsigned char *, int);
+extern int run_approx(am_initializer init, am_algorithm algo, char *name,
+                      int argc, char *argv[]);
+
 #endif // !_RUN_H

@@ -11,10 +11,10 @@
 #include "input.h"
 
 /*
-  Read two numbers from a line of the file pointed to by `input`. Store them in
-  the pointers `first` and `second`.
+  Read the numbers from the first line of the file pointed to by `input`. Store
+  them in the provided int[] pointer.
 */
-void read_two_ints(FILE *input, int *first, int *second) {
+void read_header(FILE *input, int numbers[]) {
   char line[80] = {0};
   char *s;
 
@@ -22,10 +22,13 @@ void read_two_ints(FILE *input, int *first, int *second) {
     fprintf(stderr, "Error reading file's header line, stopped\n");
     exit(-1);
   }
+
   s = strtok(line, " ");
-  *first = (int)strtol(s, NULL, 10);
-  s = strtok(NULL, " ");
-  *second = (int)strtol(s, NULL, 10);
+  int idx = 0;
+  while (s != NULL) {
+    numbers[idx++] = (int)strtol(s, NULL, 10);
+    s = strtok(NULL, " ");
+  }
 
   return;
 }
@@ -48,8 +51,9 @@ int read_sequences(const char *fname, char ***data) {
     return 0;
   }
 
-  int num_lines, max_length;
-  read_two_ints(input, &num_lines, &max_length);
+  int numbers[2] = {0};
+  read_header(input, numbers);
+  int num_lines = numbers[0], max_length = numbers[1];
 
   // Allocate the list of pointers in `table`:
   char **table = (char **)calloc(num_lines, sizeof(char *));
@@ -112,7 +116,7 @@ int read_patterns(const char *fname, char ***data) {
   each data-line (one for each sequence read). As with the others, the return
   value indicates the number of data-lines read and parsed.
 */
-int read_answers(const char *fname, int ***data) {
+int read_answers(const char *fname, int ***data, int *k) {
   FILE *input = fopen(fname, "r");
   if (input == NULL) {
     int err = errno;
@@ -120,8 +124,14 @@ int read_answers(const char *fname, int ***data) {
     return 0;
   }
 
-  int num_lines, num_ints;
-  read_two_ints(input, &num_lines, &num_ints);
+  int numbers[3] = {0};
+  read_header(input, numbers);
+  int num_lines = numbers[0], num_ints = numbers[1];
+
+  // If the k pointer is not null, there is an expected third value that will
+  // be the value of k for approximate matching.
+  if (k != NULL)
+    *k = numbers[2];
 
   // Allocate the list of pointers in `table`:
   int **table = (int **)calloc(num_lines, sizeof(int *));
@@ -129,11 +139,10 @@ int read_answers(const char *fname, int ***data) {
     fprintf(stderr, "Error allocating answer pointer table\n");
     return 0;
   }
-  // For line_length, we're assuming that most/all numbers in the line are
-  // single-digit. To guard against being wrong, add 100 to the length for
-  // safety and to account for the \n and \0. `num_ints` is multiplied by 2 to
-  // account for the commas.
-  int line_length = num_ints * 2 + 100;
+  // For line_length, we can no longer assume that all the numbers are single
+  // digits. For up to k=5, a multiplication factor of 3 and extra padding of
+  // 1500 seems to be safe.
+  int line_length = num_ints * 3 + 1500;
 
   int count = 0;
   char *line = (char *)calloc(line_length, sizeof(char));
