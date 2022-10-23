@@ -82,6 +82,12 @@ aho_corasick-gcc.o: aho_corasick.c run.h
 aho_corasick-c-gcc: aho_corasick-gcc.o run-gcc.o input-gcc.o
 	$(GCC) $(CFLAGS) -o aho_corasick-c-gcc aho_corasick-gcc.o run-gcc.o input-gcc.o
 
+dfa_gap-gcc.o: dfa_gap.c run.h
+	$(GCC) $(CFLAGS) -c -o dfa_gap-gcc.o dfa_gap.c
+
+dfa_gap-c-gcc: dfa_gap-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CFLAGS) -o dfa_gap-c-gcc dfa_gap-gcc.o run-gcc.o input-gcc.o
+
 # Rules for building with LLVM:
 run-llvm.o: run.c run.h input.h
 	$(CLANG) $(CFLAGS) -c -o run-llvm.o run.c
@@ -112,6 +118,12 @@ aho_corasick-llvm.o: aho_corasick.c run.h
 
 aho_corasick-c-llvm: aho_corasick-llvm.o run-llvm.o input-llvm.o
 	$(CLANG) $(CFLAGS) -o aho_corasick-c-llvm aho_corasick-llvm.o run-llvm.o input-llvm.o
+
+dfa_gap-llvm.o: dfa_gap.c run.h
+	$(GCC) $(CFLAGS) -c -o dfa_gap-llvm.o dfa_gap.c
+
+dfa_gap-c-llvm: dfa_gap-llvm.o run-llvm.o input-llvm.o
+	$(GCC) $(CFLAGS) -o dfa_gap-c-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
 
 # Rules for building with Intel:
 run-intel.o: run.c run.h input.h
@@ -144,6 +156,13 @@ aho_corasick-intel.o: aho_corasick.c run.h
 aho_corasick-c-intel: aho_corasick-intel.o run-intel.o input-intel.o
 	$(ICX) $(CFLAGS) -o aho_corasick-c-intel aho_corasick-intel.o run-intel.o input-intel.o
 
+dfa_gap-intel.o: dfa_gap.c run.h
+	$(GCC) $(CFLAGS) -c -o dfa_gap-intel.o dfa_gap.c
+
+dfa_gap-c-intel: dfa_gap-intel.o run-intel.o input-intel.o
+	$(GCC) $(CFLAGS) -o dfa_gap-c-intel dfa_gap-intel.o run-intel.o input-intel.o
+
+# Rules for running the experiments, broken down by toolchain.
 test-experiments-gcc:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
