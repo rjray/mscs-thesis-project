@@ -352,7 +352,7 @@ Data generation was handled by a Python script written to allow almost all param
 
 Sequence generation was a straightforward process of determining a length from the provided base length and variance values then using the standard random number generator provided by Python was used to draw $n$ letters from the set of allowed characters.
 
-To ensure that algorithms would be as thoroughly exercised as possible, each candidate pattern was tested before acceptance and required to match a minimum threshold (0.10\%) of the sequences. Generation of the patterns was done by first selecting the length from the specified range, then extracting a sequence of that length from a random location in a candidate sequence. Candidate sequences were chosen by selecting every $i^{th}$ sequence from the full list, with $i$ being the number of sequences requested divided by the number of patterns requested.
+To ensure that algorithms would be as thoroughly exercised as possible, each candidate pattern was tested before acceptance and required to match a minimum threshold (0.10\%) of the sequences. Generation of the patterns was done by first selecting the length from the specified range, then extracting a sequence of that length from a random location in a candidate sequence. Candidate sequences were chosen by selecting every $i^{th}$ sequence from the full list (starting with the first sequence), with $i$ being the number of sequences requested divided by the number of patterns requested.
 
 \subsubsection{Shape of the Data Used}
 
