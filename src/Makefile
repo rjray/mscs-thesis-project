@@ -31,11 +31,21 @@ DATA_SEED ?= 215377800
 RANDOM_SEQUENCES := random-sequences.txt
 RANDOM_PATTERNS := random-patterns.txt
 RANDOM_ANSWERS := random-answers.txt
+RANDOM_APPROX_ANSWERS := random-answers-%d.txt
 RANDOM_FILES := $(RANDOM_SEQUENCES) $(RANDOM_PATTERNS) $(RANDOM_ANSWERS)
 TEST_SEQUENCES := test-random-sequences.txt
 TEST_PATTERNS := test-random-patterns.txt
 TEST_ANSWERS := test-random-answers.txt
+TEST_APPROX_ANSWERS := test-random-answers-%d.txt
 TEST_FILES := $(TEST_SEQUENCES) $(TEST_PATTERNS) $(TEST_ANSWERS)
+
+# Value(s) of k for approximate matching:
+K := 1 2 3 4 5
+# Convert it to a comma-joined single string:
+comma := ,
+empty :=
+space := $(empty) $(empty)
+KS := $(subst $(space),$(comma),$(K))
 
 EXPERIMENTS_FILE := experiments_data.yml
 
@@ -112,7 +122,7 @@ memcheck:
 # Rules relevant to the creation/cleaning of the data files:
 
 clean-data:
-	$(RM) $(RANDOM_FILES) $(TEST_FILES)
+	$(RM) $(RANDOM_FILES) $(TEST_FILES) *-answers-*.txt
 
 data: random-data
 
@@ -125,6 +135,7 @@ random-data: $(RANDOM_FILES)
 $(RANDOM_FILES) &: $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --sequences $(RANDOM_SEQUENCES) \
 		--patterns $(RANDOM_PATTERNS) --answers $(RANDOM_ANSWERS) \
+		--approx-answers $(RANDOM_APPROX_ANSWERS) -k $(KS) \
 		--sequence-length 1024 --sequence-variance 16 --pattern-length 9 \
 		--pattern-variance 1 --sequence-count 100000 --pattern-count 100
 
@@ -133,6 +144,7 @@ testing-random-data: $(TEST_FILES)
 $(TEST_FILES) &: $(RANDOM_DATA_PY)
 	$(RANDOM_DATA_PY) --seed $(DATA_SEED) --sequences $(TEST_SEQUENCES) \
 		--patterns $(TEST_PATTERNS) --answers $(TEST_ANSWERS) \
+		--approx-answers $(TEST_APPROX_ANSWERS) -k $(KS) \
 		--sequence-length 120 --sequence-variance 4 --pattern-length 4 \
 		--pattern-variance 1 --sequence-count 100 --pattern-count 10
 
