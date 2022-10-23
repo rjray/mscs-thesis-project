@@ -78,7 +78,7 @@ void enter_pattern(std::string pat, int idx,
 /*
   Build the goto function and the (partial) output function.
 */
-void build_goto(std::vector<std::string> pats, int num_pats,
+void build_goto(std::vector<std::string> const &pats, int num_pats,
                 std::vector<std::vector<int>> &goto_fn,
                 std::vector<std::set<int>> &output_fn) {
   std::vector<std::vector<int>> new_goto;
@@ -118,8 +118,8 @@ void build_goto(std::vector<std::string> pats, int num_pats,
 /*
   Build the failure function and complete the output function.
 */
-std::vector<int> build_failure(std::vector<std::vector<int>> goto_fn,
-                               std::vector<std::set<int>> output_fn) {
+std::vector<int> build_failure(std::vector<std::vector<int>> const &goto_fn,
+                               std::vector<std::set<int>> &output_fn) {
   // Need a simple queue of state numbers.
   std::queue<int> queue;
 
@@ -165,7 +165,7 @@ std::vector<int> build_failure(std::vector<std::vector<int>> goto_fn,
 }
 
 std::vector<MultiPatternData>
-init_aho_corasick(std::vector<std::string> patterns_data) {
+init_aho_corasick(std::vector<std::string> const &patterns_data) {
   std::vector<MultiPatternData> return_val;
   return_val.reserve(4);
   int patterns_count = patterns_data.size();
@@ -192,8 +192,8 @@ init_aho_corasick(std::vector<std::string> patterns_data) {
   Instead of returning a single int, returns an array of ints as long as the
   number of patterns (pattern_count).
 */
-std::vector<int> aho_corasick(std::vector<MultiPatternData> &pat_data,
-                              std::string &sequence) {
+std::vector<int> aho_corasick(std::vector<MultiPatternData> const &pat_data,
+                              std::string const &sequence) {
   // Unpack pat_data
   int pattern_count = std::get<int>(pat_data[0]);
   std::vector<std::vector<int>> goto_fn =
