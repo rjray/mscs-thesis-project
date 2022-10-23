@@ -275,7 +275,7 @@ void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
 
   int initial_state[ASIZE];
   for (int i = 0; i < ASIZE; i++)
-    initial_state[i] = -1;
+    initial_state[i] = FAIL;
   int state_size = ASIZE * sizeof(int);
 
   // Calculate the maximum number of states as being the sum of the lengths of
