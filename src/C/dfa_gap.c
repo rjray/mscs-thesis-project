@@ -9,14 +9,6 @@
 
 #include "run.h"
 
-#if defined(__INTEL_LLVM_COMPILER)
-#define LANG "c-intel"
-#elif defined(__llvm__)
-#define LANG "c-llvm"
-#elif defined(__GNUC__)
-#define LANG "c-gcc"
-#endif
-
 // Rather than implement a translation table for the four characters in the DNA
 // alphabet, for now just let the alphabet be the full ASCII range and only use
 // those four.
@@ -28,11 +20,11 @@
 /*
   The ALPHABET/ALPHABET_COUNT values are used when setting up the transitions
   around the "gap" states in the DFA. Since we're being lazy about translating
-  ACGT to 0-3 and using an alphabet of 128 instead, this will save a lot of
-  time in loops during the creation of the DFA.
+  ACGT to 0-3 and using an alphabet of 128 instead, this will save some time in
+  loops during the creation of the DFA.
 */
 #define ALPHABET_COUNT 4
-static int ALPHABET[] = {65, 67, 71, 84};
+static int ALPHABET[ALPHABET_COUNT] = {65, 67, 71, 84};
 
 void create_dfa(unsigned char *pattern, int m, int k, int **dfa,
                 int *terminal) {

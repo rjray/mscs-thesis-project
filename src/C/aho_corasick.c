@@ -11,14 +11,6 @@
 
 #include "run.h"
 
-#if defined(__INTEL_LLVM_COMPILER)
-#define LANG "c-intel"
-#elif defined(__llvm__)
-#define LANG "c-llvm"
-#elif defined(__GNUC__)
-#define LANG "c-gcc"
-#endif
-
 // Rather than implement a translation table for the four characters in the DNA
 // alphabet, for now just let the alphabet be the full ASCII range and only use
 // those four.
@@ -34,7 +26,7 @@
   this array to shorten those loops.
 */
 #define OFFSETS_COUNT 4
-static int ALPHA_OFFSETS[] = {65, 67, 71, 84};
+static int ALPHA_OFFSETS[OFFSETS_COUNT] = {65, 67, 71, 84};
 
 /*
   Need a simple implementation of a set with just a few operations (add,
