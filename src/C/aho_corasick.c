@@ -220,9 +220,6 @@ void build_goto(unsigned char *pats[], int num_pats, int **goto_fn,
   Set *new_output;
   int max_states = 0;
 
-  // int initial_state[ASIZE];
-  // for (int i = 0; i < ASIZE; i++)
-  //   initial_state[i] = FAIL;
   int state_size = ASIZE * sizeof(int);
 
   // Calculate the maximum number of states as being the sum of the lengths of
@@ -238,18 +235,9 @@ void build_goto(unsigned char *pats[], int num_pats, int **goto_fn,
     fprintf(stderr, "build_goto: new_goto malloc failed\n");
     exit(-1);
   }
-  for (int i = 0; i < max_states; i++) {
+  for (int i = 0; i < max_states; i++)
     for (int j = 0; j < ASIZE; j++)
       new_goto[i * ASIZE + j] = -1;
-    // int *ptr = malloc(state_size);
-    // if (ptr == NULL) {
-    //   fprintf(stderr, "build_goto: new_goto malloc failed\n");
-    //   exit(-1);
-    // } else {
-    //   memcpy(ptr, (int *)initial_state, state_size);
-    //   new_goto[i] = ptr;
-    // }
-  }
 
   // Allocate for the output function
   new_output = (Set *)calloc(max_states, sizeof(Set));
