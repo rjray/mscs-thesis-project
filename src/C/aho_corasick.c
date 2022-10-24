@@ -37,8 +37,8 @@
 static int ALPHA_OFFSETS[] = {65, 67, 71, 84};
 
 /*
-  Need a simple implementation of a set with just a few operations (create,
-  add, and clean up).
+  Need a simple implementation of a set with just a few operations (add,
+  contains, and union).
 */
 
 // How big to create the set-storage. The set isn't designed to grow, so this
@@ -52,29 +52,6 @@ struct _Set {
 typedef struct _Set Set;
 
 /*
-  Create a new set instance.
-*/
-Set *create_set(void) {
-  Set *new_set = (Set *)malloc(sizeof(Set));
-  if (new_set == NULL) {
-    fprintf(stderr, "create_set: malloc failed\n");
-    exit(-1);
-  }
-
-  new_set->used = 0;
-  return new_set;
-}
-
-/*
-  Delete the given set (freeing all dynamic memory).
-*/
-void delete_set(Set *set) {
-  free(set);
-
-  return;
-}
-
-/*
   Add the given int to the set.
 */
 void add_to_set(Set *set, const int num) {
@@ -86,9 +63,9 @@ void add_to_set(Set *set, const int num) {
 /*
   Test whether the given value is in the set already.
 */
-int value_in_set(Set *set, const int value) {
-  for (int i = 0; i < set->used; i++)
-    if (set->elements[i] == value)
+int value_in_set(Set set, const int value) {
+  for (int i = 0; i < set.used; i++)
+    if (set.elements[i] == value)
       return 1;
 
   return 0;
@@ -100,7 +77,7 @@ int value_in_set(Set *set, const int value) {
 void set_union(Set *set1, Set *set2) {
   for (int i = 0; i < set2->used; i++) {
     int value = set2->elements[i];
-    if (!value_in_set(set1, value))
+    if (!value_in_set(*set1, value))
       add_to_set(set1, value);
   }
 
@@ -208,16 +185,15 @@ int queue_empty(Queue *queue) { return (queue->head > queue->rear) ? 1 : 0; }
   needed. When done, add the index of the pattern into the partial output
   function for the state of the last character.
 */
-void enter_pattern(unsigned char *pat, int idx, int **goto_fn,
-                   Set **output_fn) {
+void enter_pattern(unsigned char *pat, int idx, int *goto_fn, Set *output_fn) {
   int len = strlen((char *)pat);
   int j = 0, state = 0;
   static int new_state = 0;
 
   // Find the first leaf corresponding to a character in `pat`. From there is
   // where a new state (if needed) will be added.
-  while (goto_fn[state][pat[j]] != FAIL) {
-    state = goto_fn[state][pat[j]];
+  while (goto_fn[state * ASIZE + pat[j]] != FAIL) {
+    state = goto_fn[state * ASIZE + pat[j]];
     j++;
   }
 
@@ -226,11 +202,11 @@ void enter_pattern(unsigned char *pat, int idx, int **goto_fn,
   // already in the automaton.
   for (int p = j; p < len; p++) {
     new_state++;
-    goto_fn[state][pat[p]] = new_state;
+    goto_fn[state * ASIZE + pat[p]] = new_state;
     state = new_state;
   }
 
-  add_to_set(output_fn[state], idx);
+  add_to_set(&output_fn[state], idx);
 
   return;
 }
@@ -238,15 +214,15 @@ void enter_pattern(unsigned char *pat, int idx, int **goto_fn,
 /*
   Build the goto function and the (partial) output function.
 */
-void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
-                Set ***output_fn, int *num_states) {
-  int **new_goto;
-  Set **new_output;
+void build_goto(unsigned char *pats[], int num_pats, int **goto_fn,
+                Set **output_fn, int *num_states) {
+  int *new_goto;
+  Set *new_output;
   int max_states = 0;
 
-  int initial_state[ASIZE];
-  for (int i = 0; i < ASIZE; i++)
-    initial_state[i] = FAIL;
+  // int initial_state[ASIZE];
+  // for (int i = 0; i < ASIZE; i++)
+  //   initial_state[i] = FAIL;
   int state_size = ASIZE * sizeof(int);
 
   // Calculate the maximum number of states as being the sum of the lengths of
@@ -257,30 +233,30 @@ void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
   *num_states = max_states;
 
   // Allocate for the goto function
-  new_goto = (int **)calloc(max_states, sizeof(int *));
+  new_goto = (int *)malloc(max_states * state_size);
   if (new_goto == NULL) {
-    fprintf(stderr, "build_goto: new_goto calloc failed\n");
+    fprintf(stderr, "build_goto: new_goto malloc failed\n");
     exit(-1);
   }
   for (int i = 0; i < max_states; i++) {
-    int *ptr = malloc(state_size);
-    if (ptr == NULL) {
-      fprintf(stderr, "build_goto: new_goto malloc failed\n");
-      exit(-1);
-    } else {
-      memcpy(ptr, (int *)initial_state, state_size);
-      new_goto[i] = ptr;
-    }
+    for (int j = 0; j < ASIZE; j++)
+      new_goto[i * ASIZE + j] = -1;
+    // int *ptr = malloc(state_size);
+    // if (ptr == NULL) {
+    //   fprintf(stderr, "build_goto: new_goto malloc failed\n");
+    //   exit(-1);
+    // } else {
+    //   memcpy(ptr, (int *)initial_state, state_size);
+    //   new_goto[i] = ptr;
+    // }
   }
 
   // Allocate for the output function
-  new_output = (Set **)calloc(max_states, sizeof(Set *));
+  new_output = (Set *)calloc(max_states, sizeof(Set));
   if (new_output == NULL) {
     fprintf(stderr, "build_goto: new_output calloc failed\n");
     exit(-1);
   }
-  for (int i = 0; i < max_states; i++)
-    new_output[i] = create_set();
 
   // OK, now actually build the goto function and output function.
 
@@ -290,8 +266,8 @@ void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
 
   // Set the unused transitions in state 0 to point back to state 0:
   for (int i = 0; i < ASIZE; i++)
-    if (new_goto[0][i] == FAIL)
-      new_goto[0][i] = 0;
+    if (new_goto[i] == FAIL)
+      new_goto[i] = 0;
 
   *goto_fn = new_goto;
   *output_fn = new_output;
@@ -301,7 +277,7 @@ void build_goto(unsigned char *pats[], int num_pats, int ***goto_fn,
 /*
   Build the failure function and complete the output function.
 */
-void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
+void build_failure(int **failure_fn, int *goto_fn, Set *output_fn,
                    int num_states) {
   // Need a simple queue of state numbers.
   Queue *queue = create_queue();
@@ -313,7 +289,7 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
   // The queue starts out empty. Set it to be all states reachable from state 0
   // and set failure(state) for those states to be 0.
   for (int i = 0; i < OFFSETS_COUNT; i++) {
-    int state = goto_fn[0][ALPHA_OFFSETS[i]];
+    int state = goto_fn[ALPHA_OFFSETS[i]];
     if (state == 0)
       continue;
 
@@ -328,16 +304,16 @@ void build_failure(int **failure_fn, int **goto_fn, Set **output_fn,
     int r = dequeue(queue);
     for (int i = 0; i < OFFSETS_COUNT; i++) {
       int a = ALPHA_OFFSETS[i];
-      int s = goto_fn[r][a];
+      int s = goto_fn[r * ASIZE + a];
       if (s == FAIL)
         continue;
 
       enqueue(queue, s);
       int state = failure[r];
-      while (goto_fn[state][a] == FAIL)
+      while (goto_fn[state * ASIZE + a] == FAIL)
         state = failure[state];
-      failure[s] = goto_fn[state][a];
-      set_union(output_fn[s], output_fn[failure[s]]);
+      failure[s] = goto_fn[state * ASIZE + a];
+      set_union(&output_fn[s], &output_fn[failure[s]]);
     }
   }
 
@@ -352,9 +328,9 @@ void **init_aho_corasick(unsigned char **patterns_data, int patterns_count) {
   *pat_count = patterns_count;
 
   // Initialize the multi-pattern structure.
-  int **goto_fn;
+  int *goto_fn;
   int *failure_fn;
-  Set **output_fn;
+  Set *output_fn;
   int num_states;
   build_goto((unsigned char **)patterns_data, patterns_count, &goto_fn,
              &output_fn, &num_states);
@@ -382,9 +358,9 @@ int *aho_corasick(void **pat_data, unsigned char *sequence) {
 
   // Unpack pat_data:
   int *pattern_count = (int *)pat_data[0];
-  int **goto_fn = (int **)pat_data[1];
+  int *goto_fn = (int *)pat_data[1];
   int *failure_fn = (int *)pat_data[2];
-  Set **output_fn = (Set **)pat_data[3];
+  Set *output_fn = (Set *)pat_data[3];
 
   int *matches = (int *)calloc(*pattern_count, sizeof(int));
   if (matches == NULL) {
@@ -393,12 +369,12 @@ int *aho_corasick(void **pat_data, unsigned char *sequence) {
   }
 
   for (int i = 0; i < n; i++) {
-    while (goto_fn[state][sequence[i]] == FAIL)
+    while (goto_fn[state * ASIZE + sequence[i]] == FAIL)
       state = failure_fn[state];
 
-    state = goto_fn[state][sequence[i]];
-    for (int m = 0; m < output_fn[state]->used; m++)
-      matches[output_fn[state]->elements[m]]++;
+    state = goto_fn[state * ASIZE + sequence[i]];
+    for (int m = 0; m < output_fn[state].used; m++)
+      matches[output_fn[state].elements[m]]++;
   }
 
   return matches;
