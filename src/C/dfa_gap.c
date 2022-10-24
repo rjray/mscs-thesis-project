@@ -26,70 +26,60 @@
 #define FAIL -1
 
 /*
-  For the creation of the failure function, we *would* loop over all of the
-  values [0, ASIZE] looking for those that are non-fail. That would be very
-  inefficient, given that our alphabet is actually just four characters. Use
-  this array to shorten those loops.
+  The ALPHABET/ALPHABET_COUNT values are used when setting up the transitions
+  around the "gap" states in the DFA. Since we're being lazy about translating
+  ACGT to 0-3 and using an alphabet of 128 instead, this will save a lot of
+  time in loops during the creation of the DFA.
 */
 #define ALPHABET_COUNT 4
 static int ALPHABET[] = {65, 67, 71, 84};
 
-void create_dfa(unsigned char *pattern, int m, int k, int ***dfa, int *A) {
-  // Create a template of a state that can be memcpy'd into new states.
-  int initial_state[ASIZE];
-  for (int i = 0; i < ASIZE; i++)
-    initial_state[i] = FAIL;
+void create_dfa(unsigned char *pattern, int m, int k, int **dfa,
+                int *terminal) {
   int state_size = ASIZE * sizeof(int);
 
-  // We know that the number of states will be m + 1 + k(m - 1).
-  int max_states = m + 1 + k * (m - 1);
+  // We know that the number of states will be 1 + m + k(m - 1).
+  int max_states = 1 + m + k * (m - 1);
 
   // Allocate for the DFA
-  int **new_dfa = (int **)calloc(max_states, sizeof(int *));
+  int *new_dfa = (int *)malloc(max_states * state_size);
   if (new_dfa == NULL) {
-    fprintf(stderr, "build_goto: create_dfa calloc failed\n");
+    fprintf(stderr, "build_goto: create_dfa malloc failed\n");
     exit(-1);
   }
-  for (int i = 0; i < max_states; i++) {
-    int *ptr = malloc(state_size);
-    if (ptr == NULL) {
-      fprintf(stderr, "build_goto: create_dfa malloc failed\n");
-      exit(-1);
-    } else {
-      memcpy(ptr, (int *)initial_state, state_size);
-      new_dfa[i] = ptr;
-    }
-  }
+  for (int i = 0; i < max_states; i++)
+    for (int j = 0; j < ASIZE; j++)
+      new_dfa[i * ASIZE + j] = -1;
 
   // Start building the DFA. Start with state 0 and iterate through the
-  // characters of pattern.
+  // characters of `pattern`.
 
   // First step: Set d(0, p_0) = state(1)
-  new_dfa[0][pattern[0]] = 1;
+  new_dfa[pattern[0]] = 1;
 
   // Start `state` and `new_state` both at 1
   int state = 1, new_state = 1;
 
-  // Loop over remaining pattern (index 1 to the end). Because we know the size
-  // of the DFA, there is no need to initialize each new state, that's been
-  // done already.
+  // Loop over remaining `pattern` (index 1 to the end). Because we know the
+  // size of the DFA, there is no need to initialize each new state, that's
+  // been done already.
   for (int i = 1; i < m; i++) {
     // Move `new_state` to the next place.
     new_state++;
-    // The previous `state` maps to `new_state` on pattern[i]
-    new_dfa[state][pattern[i]] = new_state;
+    // The previous `state` maps to `new_state` on `pattern[i]`
+    new_dfa[state * ASIZE + pattern[i]] = new_state;
     // `last_state` is used to control setting transitions for other values
     int last_state = state;
     for (int j = 1; j <= k; j++) {
-      // For each of 1..k, we start a new state for which pattern[i] maps to
+      // For each of 1..k, we start a new state for which `pattern[i]` maps to
       // `new_state`.
-      new_dfa[new_state + j][pattern[i]] = new_state;
+      new_dfa[(new_state + j) * ASIZE + pattern[i]] = new_state;
       for (int n = 0; n < ALPHABET_COUNT; n++) {
         if (ALPHABET[n] == pattern[i])
           continue;
-        // Every character that isn't pattern[i] needs to map `last_state` to
+        // Every character that isn't `pattern[i]` needs to map `last_state` to
         // this new state-value.
-        new_dfa[last_state][ALPHABET[n]] = new_state + j;
+        new_dfa[last_state * ASIZE + ALPHABET[n]] = new_state + j;
       }
       // Shift `last_state` for the next iteration.
       last_state = new_state + j;
@@ -101,7 +91,7 @@ void create_dfa(unsigned char *pattern, int m, int k, int ***dfa, int *A) {
   }
 
   // At completion, the value of `state` is our terminal.
-  *A = state;
+  *terminal = state;
   // Assign the new DFA to the given pointer to return it.
   *dfa = new_dfa;
   return;
@@ -118,7 +108,7 @@ void **init_dfa_gap(unsigned char *pattern, int k) {
   // Set up the DFA structure for the algorithm to use:
   int *m = (int *)calloc(1, sizeof(int));
   *m = strlen((const char *)pattern);
-  int **dfa;
+  int *dfa;
   int *terminal = (int *)calloc(1, sizeof(int));
   create_dfa(pattern, *m, k, &dfa, terminal);
 
@@ -134,18 +124,22 @@ void **init_dfa_gap(unsigned char *pattern, int k) {
   given sequence.
 */
 int dfa_gap(void **pat_data, unsigned char *sequence) {
-  int **dfa = (int **)pat_data[0];
-  int terminal = *((int *)pat_data[1]);
-  int m = *((int *)pat_data[2]);
   int matches = 0;
   int n = strlen((const char *)sequence);
 
+  // Unpack pat_data:
+  int *dfa = (int *)pat_data[0];
+  int terminal = *((int *)pat_data[1]);
+  int m = *((int *)pat_data[2]);
+
   int end = n - m;
+  // Note that we have to examine from 0 to `end` inclusive, or we could miss
+  // an exact pattern match at the very end of `sequence`.
   for (int i = 0; i <= end; i++) {
     int state = 0;
     int ch = 0;
-    while ((i + ch) < n && dfa[state][sequence[i + ch]] != FAIL)
-      state = dfa[state][sequence[i + ch++]];
+    while ((i + ch) < n && dfa[state * ASIZE + sequence[i + ch]] != FAIL)
+      state = dfa[state * ASIZE + sequence[i + ch++]];
 
     if (state == terminal)
       matches++;
