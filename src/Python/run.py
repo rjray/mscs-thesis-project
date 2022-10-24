@@ -96,3 +96,56 @@ def run_multi(init, code, name, argv):
     print(f"language: python\nalgorithm: {name}\nruntime: {elapsed:.6f}")
 
     return return_code
+
+
+def run_approx(init, code, name, argv):
+    if len(argv) < 4 or len(argv) > 5:
+        raise Exception(f"Usage: {argv[0]} k sequences patterns <answers>")
+
+    k = int(argv[1])
+    sequences_data = read_sequences(argv[2])
+    patterns_data = read_patterns(argv[3])
+    if len(argv) == 5:
+        answers_file = argv[4] % k
+        answers_data, k_read = read_answers(answers_file, True)
+        if len(answers_data) != len(patterns_data):
+            raise Exception(
+                "Count mismatch between patterns file and answers file"
+            )
+        if k != k_read:
+            raise Exception("Mismatch between k value and answers file")
+    else:
+        answers_data = None
+
+    start_time = perf_counter()
+    return_code = 0
+
+    # Preprocess patterns and sequences, since all of the algorithms that use
+    # this module need (or can use) the same style of data.
+    patterns_data = [list(map(ord, pattern)) for pattern in patterns_data]
+    sequences_data = [list(map(ord, sequence)) for sequence in sequences_data]
+
+    for pattern, pat in enumerate(patterns_data):
+        pat_data = init(pat, k)
+
+        for sequence, seq in enumerate(sequences_data):
+            matches = code(pat_data, seq)
+
+            if answers_data is not None:
+                if matches != answers_data[pattern][sequence]:
+                    print(
+                        f"Pattern {pattern + 1} mismatch against sequence",
+                        f"{sequence + 1} ({matches} !=",
+                        f"{answers_data[pattern][sequence]})",
+                        file=stderr
+                    )
+                    return_code += 1
+
+    # Note the end-time before doing anything else:
+    elapsed = perf_counter() - start_time
+
+    print(
+        f"language: python\nalgorithm: {name}\nk: {k}\nruntime: {elapsed:.6f}"
+    )
+
+    return return_code

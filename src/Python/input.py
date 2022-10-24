@@ -1,13 +1,13 @@
-def read_two_ints(f):
+def read_header(f):
     line = f.readline()
 
-    return tuple(map(int, line.strip().split(" ")))
+    return list(map(int, line.strip().split(" ")))
 
 
 def read_sequences(file):
     with open(file, "r") as f:
         # Python does not need the second integer here.
-        count, _ = read_two_ints(f)
+        count = read_header(f)[0]
 
         data = f.read().splitlines()
 
@@ -21,10 +21,17 @@ def read_patterns(file):
     return read_sequences(file)
 
 
-def read_answers(file):
+def read_answers(file, need_k=False):
     with open(file, "r") as f:
-        # We need the second integer in this case.
-        count, num_count = read_two_ints(f)
+        numbers = read_header(f)
+
+        if need_k:
+            # We need all three numbers in this case.
+            count, num_count, k = numbers
+        else:
+            # We need just the first two in this case.
+            count, num_count = numbers
+            k = None
 
         data = f.read().splitlines()
 
@@ -38,4 +45,7 @@ def read_answers(file):
                 f"Data line {idx+1} has incorrect number of entries"
             )
 
-    return data
+    if need_k:
+        return data, k
+    else:
+        return data
