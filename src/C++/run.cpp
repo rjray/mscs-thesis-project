@@ -175,7 +175,7 @@ int run_approx(am_initializer init, am_algorithm code, std::string name,
   // Read the initial integer and three data files. Any of these that encounter
   // an error will throw an exception. The filenames are in the order: sequences
   // patterns answers.
-  int k = (int)std::stoi(argv[1]);
+  int k = std::stoi(argv[1]);
   std::vector<std::string> sequences_data = read_sequences(argv[2]);
   int sequences_count = sequences_data.size();
   std::vector<std::string> patterns_data = read_patterns(argv[3]);
@@ -183,7 +183,9 @@ int run_approx(am_initializer init, am_algorithm code, std::string name,
   std::vector<std::vector<int>> answers_data;
   if (argc == 5) {
     int k_read;
-    answers_data = read_answers(argv[4], &k_read);
+    char answers_file[256];
+    sprintf(answers_file, argv[4], k);
+    answers_data = read_answers(answers_file, &k_read);
     int answers_count = answers_data.size();
     if (answers_count != patterns_count)
       throw std::runtime_error{

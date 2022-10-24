@@ -234,7 +234,9 @@ int run_approx(am_initializer init, am_algorithm code, char *name, int argc,
     exit(-1);
   if (argc == 5) {
     int k_read;
-    int answers_count = read_answers(argv[4], &answers_data, &k_read);
+    char answers_file[256];
+    sprintf(answers_file, argv[4], k);
+    int answers_count = read_answers(answers_file, &answers_data, &k_read);
     if (answers_count == 0)
       exit(-1);
     if (answers_count != patterns_count) {
