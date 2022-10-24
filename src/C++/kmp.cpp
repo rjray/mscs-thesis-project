@@ -5,7 +5,6 @@
   of Exact String-Matching Algorithms," by Christian Charras and Thierry Lecroq.
 */
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,7 +13,8 @@
 /*
   Initialize the jump-table that KMP uses.
 */
-void make_next_table(std::string pat, int m, std::vector<int> &next_table) {
+void make_next_table(std::string const &pat, int m,
+                     std::vector<int> &next_table) {
   int i, j;
 
   i = 0;
@@ -30,11 +30,9 @@ void make_next_table(std::string pat, int m, std::vector<int> &next_table) {
     else
       next_table[i] = j;
   }
-
-  return;
 }
 
-std::vector<PatternData> init_kmp(std::string pattern) {
+std::vector<PatternData> init_kmp(std::string const &pattern) {
   std::vector<PatternData> return_val;
   return_val.reserve(2);
   int m = pattern.length();
@@ -54,13 +52,13 @@ std::vector<PatternData> init_kmp(std::string pattern) {
   Perform the KMP algorithm on the given pattern of length m, against the
   sequence of length n.
 */
-int kmp(std::vector<PatternData> pat_data, std::string sequence) {
+int kmp(std::vector<PatternData> const &pat_data, std::string const &sequence) {
   int i, j;
   int matches = 0;
 
   // Unpack pat_data:
-  std::string pattern = std::get<std::string>(pat_data[0]);
-  std::vector<int> next_table = std::get<std::vector<int>>(pat_data[1]);
+  auto const &pattern = std::get<std::string>(pat_data[0]);
+  auto const &next_table = std::get<std::vector<int>>(pat_data[1]);
 
   // Get the size of the pattern and the sequence.
   int m = pattern.length();

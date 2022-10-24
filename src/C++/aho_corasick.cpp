@@ -5,41 +5,29 @@
   is coded directly from the algorithm pseudo-code in the Aho-Corasick paper.
 */
 
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <queue>
 #include <set>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "run.hpp"
 
-#if defined(__INTEL_LLVM_COMPILER)
-#define LANG "cpp-intel"
-#elif defined(__llvm__)
-#define LANG "cpp-llvm"
-#elif defined(__GNUC__)
-#define LANG "cpp-gcc"
-#endif
-
 // Rather than implement a translation table for the four characters in the DNA
 // alphabet, for now just let the alphabet be the full ASCII range and only use
 // those four.
-#define ASIZE 128
+constexpr int ASIZE = 128;
 
-// The "fail" value is used to determine certain states in the goto function.
-#define FAIL -1
+// The "fail" value is used to determine certain states in the goto
+// function.
+constexpr int FAIL = -1;
 
 /*
-  For the creation of the failure function, we *would* loop over all of the
-  values [0, ASIZE] looking for those that are non-fail. That would be very
-  inefficient, given that our alphabet is actually just four characters. Use
-  this array to shorten those loops.
+  For the creation of the failure function, we *would* loop over all of
+  the values [0, ASIZE] looking for those that are non-fail. That would
+  be very inefficient, given that our alphabet is actually just four
+  characters. Use this array to shorten those loops.
 */
-#define OFFSETS_COUNT 4
+constexpr int OFFSETS_COUNT = 4;
 static std::vector<int> ALPHA_OFFSETS = {65, 67, 71, 84};
 
 /*
@@ -47,7 +35,7 @@ static std::vector<int> ALPHA_OFFSETS = {65, 67, 71, 84};
   needed. When done, add the index of the pattern into the partial output
   function for the state of the last character.
 */
-void enter_pattern(std::string pat, int idx,
+void enter_pattern(std::string const &pat, int idx,
                    std::vector<std::vector<int>> &goto_fn,
                    std::vector<std::set<int>> &output_fn) {
   int len = pat.length();
@@ -71,8 +59,6 @@ void enter_pattern(std::string pat, int idx,
   }
 
   output_fn[state].insert(idx);
-
-  return;
 }
 
 /*
@@ -81,8 +67,6 @@ void enter_pattern(std::string pat, int idx,
 void build_goto(std::vector<std::string> const &pats, int num_pats,
                 std::vector<std::vector<int>> &goto_fn,
                 std::vector<std::set<int>> &output_fn) {
-  std::vector<std::vector<int>> new_goto;
-  std::vector<std::set<int>> new_output;
   int max_states = 0;
 
   // Calculate the maximum number of states as being the sum of the lengths of
@@ -92,27 +76,21 @@ void build_goto(std::vector<std::string> const &pats, int num_pats,
     max_states += pats[i].length();
 
   // Allocate for the goto function
-  new_goto.resize(max_states, std::vector<int>(ASIZE));
-  for (int i = 0; i < max_states; i++)
-    std::fill_n(new_goto[i].begin(), ASIZE, FAIL);
+  goto_fn.resize(max_states, std::vector<int>(ASIZE, FAIL));
 
   // Allocate for the output function
-  new_output.resize(max_states, std::set<int>());
+  output_fn.resize(max_states, std::set<int>());
 
   // OK, now actually build the goto function and output function.
 
   // Add each pattern in turn:
   for (int i = 0; i < num_pats; i++)
-    enter_pattern(pats[i], i, new_goto, new_output);
+    enter_pattern(pats[i], i, goto_fn, output_fn);
 
   // Set the unused transitions in state 0 to point back to state 0:
-  for (int i = 0; i < ASIZE; i++)
-    if (new_goto[0][i] == FAIL)
-      new_goto[0][i] = 0;
-
-  goto_fn = new_goto;
-  output_fn = new_output;
-  return;
+  for (int i = 0; i < OFFSETS_COUNT; i++)
+    if (goto_fn[0][ALPHA_OFFSETS[i]] == FAIL)
+      goto_fn[0][ALPHA_OFFSETS[i]] = 0;
 }
 
 /*
@@ -124,7 +102,8 @@ std::vector<int> build_failure(std::vector<std::vector<int>> const &goto_fn,
   std::queue<int> queue;
 
   // Allocate the failure function storage. This also needs to be as long as
-  // goto_fn is, for safety.
+  // goto_fn is, for safety. Initializing all of its slots to 0 will allow a
+  // shortcut or two in the rest of the algorithm.
   std::vector<int> failure_fn;
   failure_fn.resize(goto_fn.size(), 0);
 
@@ -136,7 +115,6 @@ std::vector<int> build_failure(std::vector<std::vector<int>> const &goto_fn,
       continue;
 
     queue.push(state);
-    failure_fn[state] = 0;
   }
 
   // This uses some single-letter variable names that match the published
@@ -196,11 +174,9 @@ std::vector<int> aho_corasick(std::vector<MultiPatternData> const &pat_data,
                               std::string const &sequence) {
   // Unpack pat_data
   int pattern_count = std::get<int>(pat_data[0]);
-  std::vector<std::vector<int>> goto_fn =
-      std::get<std::vector<std::vector<int>>>(pat_data[1]);
-  std::vector<int> failure_fn = std::get<std::vector<int>>(pat_data[2]);
-  std::vector<std::set<int>> output_fn =
-      std::get<std::vector<std::set<int>>>(pat_data[3]);
+  auto const &goto_fn = std::get<std::vector<std::vector<int>>>(pat_data[1]);
+  auto const &failure_fn = std::get<std::vector<int>>(pat_data[2]);
+  auto const &output_fn = std::get<std::vector<std::set<int>>>(pat_data[3]);
 
   int state = 0;
   int n = sequence.length();

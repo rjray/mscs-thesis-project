@@ -9,14 +9,6 @@
 
 #include "run.hpp"
 
-#if defined(__INTEL_LLVM_COMPILER)
-#define LANG "cpp-intel"
-#elif defined(__llvm__)
-#define LANG "cpp-llvm"
-#elif defined(__GNUC__)
-#define LANG "cpp-gcc"
-#endif
-
 // Rather than implement a translation table for the four characters in the DNA
 // alphabet, for now just let the alphabet be the full ASCII range and only use
 // those four.
@@ -34,15 +26,13 @@ constexpr int FAIL = -1;
 constexpr int ALPHABET_COUNT = 4;
 static std::array<int, 4> ALPHABET = {65, 67, 71, 84};
 
-void create_dfa(std::string pattern, int m, int k,
+void create_dfa(std::string const &pattern, int m, int k,
                 std::vector<std::vector<int>> &dfa, int &terminal) {
   // We know that the number of states will be 1 + m + k(m - 1).
   int max_states = 1 + m + k * (m - 1);
 
   // Allocate for the DFA
-  dfa.resize(max_states, std::vector<int>(ASIZE));
-  for (int i = 0; i < max_states; i++)
-    std::fill_n(dfa[i].begin(), ASIZE, FAIL);
+  dfa.resize(max_states, std::vector<int>(ASIZE, FAIL));
 
   // Start building the DFA. Start with state 0 and iterate through the
   // characters of `pattern`.

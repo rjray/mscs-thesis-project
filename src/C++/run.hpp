@@ -13,8 +13,8 @@
 typedef std::variant<std::string, std::vector<int>, unsigned long,
                      std::vector<unsigned long>>
     PatternData;
-typedef int (*algorithm)(std::vector<PatternData>, std::string);
-typedef std::vector<PatternData> (*initializer)(std::string);
+typedef int (*algorithm)(std::vector<PatternData> const &, std::string const &);
+typedef std::vector<PatternData> (*initializer)(std::string const &);
 extern int run(initializer init, algorithm algo, std::string name, int argc,
                char *argv[]);
 
