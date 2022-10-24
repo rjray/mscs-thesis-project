@@ -12,10 +12,10 @@
 #include "input.hpp"
 
 /*
-  Read two numbers from a line of the file pointed to by `input`. Store them in
-  a vector of int and return it.
+  Read the numbers from the first line of the file pointed to by `input`. Store
+  them in a vector of int and return it.
 */
-std::vector<int> read_two_ints(std::ifstream &input) {
+std::vector<int> read_header(std::ifstream &input) {
   std::string line;
   std::vector<int> ints;
 
@@ -24,10 +24,6 @@ std::vector<int> read_two_ints(std::ifstream &input) {
 
   for (std::string value; std::getline(ss, value, ' ');) {
     ints.push_back(std::stoi(value));
-  }
-
-  if (ints.size() != 2) {
-    throw std::runtime_error{"Wrong number of integers on first line"};
   }
 
   return ints;
@@ -52,7 +48,7 @@ std::vector<std::string> read_sequences(std::string fname) {
     throw std::runtime_error{error.str()};
   }
 
-  std::vector<int> ints = read_two_ints(input);
+  std::vector<int> ints = read_header(input);
   unsigned int num_lines = ints[0];
 
   std::vector<std::string> data;
@@ -84,7 +80,7 @@ std::vector<std::string> read_patterns(std::string fname) {
   each data-line (one for each sequence read). As with the others, the return
   value is a vector of the data read, here std::vector<std::vector<int>>.
 */
-std::vector<std::vector<int>> read_answers(std::string fname) {
+std::vector<std::vector<int>> read_answers(std::string fname, int *k) {
   std::ifstream input{fname};
   if (!input.is_open()) {
     std::ostringstream error;
@@ -92,9 +88,11 @@ std::vector<std::vector<int>> read_answers(std::string fname) {
     throw std::runtime_error{error.str()};
   }
 
-  std::vector<int> ints = read_two_ints(input);
+  std::vector<int> ints = read_header(input);
   unsigned int num_lines = ints[0];
   unsigned int num_ints = ints[1];
+  if (k != nullptr)
+    *k = ints[2];
 
   // Allocate the vector-of-vectors in `table`:
   std::vector<std::vector<int>> table;

@@ -28,4 +28,11 @@ typedef std::vector<MultiPatternData> (*mp_initializer)(
 extern int run_multi(mp_initializer init, mp_algorithm algo, std::string name,
                      int argc, char *argv[]);
 
+typedef int (*am_algorithm)(std::vector<MultiPatternData> const &,
+                            std::string const &);
+typedef std::vector<MultiPatternData> (*am_initializer)(std::string const &,
+                                                        int);
+extern int run_approx(am_initializer init, am_algorithm algo, std::string name,
+                      int argc, char *argv[]);
+
 #endif // !_RUN_HPP
