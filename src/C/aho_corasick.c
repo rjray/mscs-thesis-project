@@ -37,15 +37,15 @@
 static int ALPHA_OFFSETS[] = {65, 67, 71, 84};
 
 /*
-  Need a simple implementation of a set with just a few operations (add, grow,
-  create, and clean up).
+  Need a simple implementation of a set with just a few operations (create,
+  add, and clean up).
 */
 
-// How big to create the set-storage, and how much to grow it by.
-#define SET_SIZE 8
+// How big to create the set-storage. The set isn't designed to grow, so this
+// has to equal to or greater than the largest expected output_fn value.
+#define SET_SIZE 100
 struct _Set {
-  int *elements;
-  int size;
+  int elements[SET_SIZE];
   int used;
 };
 
@@ -61,14 +61,7 @@ Set *create_set(void) {
     exit(-1);
   }
 
-  new_set->elements = (int *)calloc(SET_SIZE, sizeof(int));
-  if (new_set->elements == NULL) {
-    fprintf(stderr, "create_set: calloc failed\n");
-    exit(-1);
-  }
-  new_set->size = SET_SIZE;
   new_set->used = 0;
-
   return new_set;
 }
 
@@ -76,22 +69,7 @@ Set *create_set(void) {
   Delete the given set (freeing all dynamic memory).
 */
 void delete_set(Set *set) {
-  free(set->elements);
   free(set);
-
-  return;
-}
-
-/*
-  "Grow" the set by an extra block of SET_SIZE.
-*/
-void grow_set(Set *set) {
-  set->size += SET_SIZE;
-  set->elements = realloc(set->elements, set->size);
-  if (set->elements == NULL) {
-    fprintf(stderr, "grow_set: realloc failed\n");
-    exit(-1);
-  }
 
   return;
 }
@@ -100,9 +78,6 @@ void grow_set(Set *set) {
   Add the given int to the set.
 */
 void add_to_set(Set *set, const int num) {
-  if (set->used == set->size)
-    grow_set(set);
-
   set->elements[set->used++] = num;
 
   return;
@@ -112,15 +87,11 @@ void add_to_set(Set *set, const int num) {
   Test whether the given value is in the set already.
 */
 int value_in_set(Set *set, const int value) {
-  int found = 0;
-
   for (int i = 0; i < set->used; i++)
-    if (set->elements[i] == value) {
-      found = 1;
-      break;
-    }
+    if (set->elements[i] == value)
+      return 1;
 
-  return found;
+  return 0;
 }
 
 /*
