@@ -20,11 +20,11 @@ constexpr int FAIL = -1;
 /*
   The ALPHABET/ALPHABET_COUNT values are used when setting up the transitions
   around the "gap" states in the DFA. Since we're being lazy about translating
-  ACGT to 0-3 and using an alphabet of 128 instead, this will save a lot of
-  time in loops during the creation of the DFA.
+  ACGT to 0-3 and using an alphabet of 128 instead, this will save some time in
+  loops during the creation of the DFA.
 */
 constexpr int ALPHABET_COUNT = 4;
-static std::array<int, 4> ALPHABET = {65, 67, 71, 84};
+static const std::array<int, ALPHABET_COUNT> ALPHABET = {65, 67, 71, 84};
 
 void create_dfa(std::string const &pattern, int m, int k,
                 std::vector<std::vector<int>> &dfa, int &terminal) {
