@@ -6,4 +6,5 @@ members = [
     "boyer_moore",
     "shift_or",
     "aho_corasick",
+    "dfa_gap",
 ]

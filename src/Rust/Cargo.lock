@@ -21,6 +21,13 @@ name = "common"
 version = "0.1.0"
 
 [[package]]
+name = "dfa_gap"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
 name = "kmp"
 version = "0.1.0"
 dependencies = [
