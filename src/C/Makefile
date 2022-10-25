@@ -120,10 +120,10 @@ aho_corasick-c-llvm: aho_corasick-llvm.o run-llvm.o input-llvm.o
 	$(CLANG) $(CFLAGS) -o aho_corasick-c-llvm aho_corasick-llvm.o run-llvm.o input-llvm.o
 
 dfa_gap-llvm.o: dfa_gap.c run.h
-	$(LLVM) $(CFLAGS) -c -o dfa_gap-llvm.o dfa_gap.c
+	$(CLANG) $(CFLAGS) -c -o dfa_gap-llvm.o dfa_gap.c
 
 dfa_gap-c-llvm: dfa_gap-llvm.o run-llvm.o input-llvm.o
-	$(LLVM) $(CFLAGS) -o dfa_gap-c-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CFLAGS) -o dfa_gap-c-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
 
 # Rules for building with Intel:
 run-intel.o: run.c run.h input.h
