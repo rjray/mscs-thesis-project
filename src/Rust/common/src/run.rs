@@ -20,10 +20,10 @@ pub enum PatternData {
 }
 
 // A type alias for the signature of the single-pattern matching algorithms.
-pub type Algorithm = dyn Fn(&[PatternData], &[u8]) -> i32;
+type Algorithm = dyn Fn(&[PatternData], &[u8]) -> i32;
 // A type alias for the signature of the single-pattern initialization
 // functions.
-pub type Initializer = dyn Fn(&[u8]) -> Vec<PatternData>;
+type Initializer = dyn Fn(&[u8]) -> Vec<PatternData>;
 
 /*
    This is the "runner" routine. It takes a pointer to the code that
@@ -133,10 +133,10 @@ pub enum MultiPatternData<T> {
 }
 
 // A type alias for the signature of the multi-pattern matching algorithms.
-pub type MPAlgorithm<T> = dyn Fn(&[MultiPatternData<T>], &[u8]) -> Vec<u32>;
+type MPAlgorithm<T> = dyn Fn(&[MultiPatternData<T>], &[u8]) -> Vec<u32>;
 // A type alias for the signature of the single-pattern initialization
 // functions.
-pub type MPInitializer<T> = dyn Fn(&[&[u8]]) -> Vec<MultiPatternData<T>>;
+type MPInitializer<T> = dyn Fn(&[&[u8]]) -> Vec<MultiPatternData<T>>;
 
 /*
    This is the "runner" routine for multi-pattern algorithms. The signature is
@@ -215,6 +215,112 @@ pub fn run_multi<T>(
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
     println!("language: rust\nalgorithm: {}", &name);
+    println!("runtime: {:.8}", elapsed.as_secs_f64());
+
+    return_code
+}
+
+// An enum to type the various sorts of values that can be returned from the
+// pre-processing of an approximate matching pattern.
+pub enum ApproxPatternData {
+    PatternIntVecVec(Vec<Vec<i32>>),
+    PatternUsize(usize),
+}
+
+// A type alias for the signature of the approximate matching algorithms.
+type AMAlgorithm = dyn Fn(&[ApproxPatternData], &[u8]) -> i32;
+// A type alias for the signature of the approximate matching initialization
+// functions.
+type AMInitializer = dyn Fn(&[u8], u32) -> Vec<ApproxPatternData>;
+
+/*
+   This is the "runner" routine for approximate matching algorithms. The
+   signature is identical to `run`, above, except for the enum type used for
+   the pattern data.
+*/
+pub fn run_approx(
+    init: &AMInitializer,
+    code: &AMAlgorithm,
+    name: &str,
+    argv: Vec<String>,
+) -> i32 {
+    let argc = argv.len();
+    if !(4..=5).contains(&argc) {
+        eprintln!(
+            "Usage: {} <k> <sequences> <patterns> [ <answers> ]",
+            &argv[0]
+        );
+
+        return -1;
+    }
+
+    // First argument is the value of k:
+    let k: u32 = argv[1].parse().unwrap();
+    // Read the data files using the routines from common::setup. The answers
+    // data uses Option<> since it does not have to be provided.
+    let sequences_data: Vec<String> = read_sequences(&argv[2]);
+    let patterns_data: Vec<String> = read_patterns(&argv[3]);
+    let answers_data: Option<Vec<Vec<u32>>> = if argc == 5 {
+        let answers_file = argv[4].replace("%d", &k.to_string());
+        Some(read_answers(&answers_file))
+    } else {
+        None
+    };
+
+    // If answers were provided, check that the number of lines matches the
+    // number of patterns.
+    if let Some(ref answers) = answers_data {
+        if answers.len() != patterns_data.len() {
+            eprintln!("Count mismatch between patterns file and answers file");
+
+            return -1;
+        }
+    }
+
+    // Run the given code. For each sequence, try each pattern against it. The
+    // `code` function pointer will return the number of matches found, which
+    // will be compared to the table of answers for that pattern. Report any
+    // mismatches.
+    let start_time = Instant::now();
+    let mut return_code: i32 = 0;
+
+    // Convert the patterns and sequences to `u8` (byte) arrays. Do this here
+    // so that it isn't repeated in the for-loops.
+    let patterns: Vec<&[u8]> =
+        patterns_data.iter().map(|p| p.as_bytes()).collect();
+    let sequences: Vec<&[u8]> =
+        sequences_data.iter().map(|s| s.as_bytes()).collect();
+
+    for (pattern, pat_bytes) in patterns.iter().enumerate() {
+        let pat_data = init(pat_bytes, k);
+
+        for (sequence, seq_bytes) in sequences.iter().enumerate() {
+            let matches = code(&pat_data, seq_bytes);
+            // If there was an error in the actual algorithm, `matches` will be
+            // <0.
+            if matches < 0 {
+                return matches;
+            }
+
+            if let Some(ref answers) = answers_data {
+                if matches as u32 != answers[pattern][sequence] {
+                    eprintln!(
+                        "Pattern {} mismatch against sequence {} ({} != {})",
+                        pattern + 1,
+                        sequence + 1,
+                        matches,
+                        answers[pattern][sequence]
+                    );
+
+                    return_code += 1;
+                }
+            }
+        }
+    }
+
+    // Note the end time before doing anything else.
+    let elapsed = start_time.elapsed();
+    println!("language: rust\nalgorithm: {}\nk: {}", &name, k);
     println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     return_code

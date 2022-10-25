@@ -11,7 +11,7 @@ use std::path::Path;
     Read one line from the BufRead-capable value `rdr`, and expect it to parse
     into (at least) two integer values. Return a vector of the integers read.
 */
-fn read_two_ints<R: io::BufRead>(rdr: &mut R, path: &String) -> Vec<u32> {
+fn read_header<R: io::BufRead>(rdr: &mut R, path: &String) -> Vec<u32> {
     let mut buffer = String::new();
 
     // Read one line from rdr and ensure that we got it. Panic on error.
@@ -25,11 +25,6 @@ fn read_two_ints<R: io::BufRead>(rdr: &mut R, path: &String) -> Vec<u32> {
         .split(' ')
         .filter_map(|s| s.parse::<u32>().ok())
         .collect();
-
-    // If there are not exactly two values in ints, that's an error.
-    if ints.len() != 2 {
-        panic!("{}: Wrong number of integers on first line", &path);
-    }
 
     ints
 }
@@ -55,7 +50,7 @@ pub fn read_sequences(filename: &String) -> Vec<String> {
 
     // This will consume the first line of the file, and get the number of
     // data-lines that are expected.
-    let ints = read_two_ints(&mut rdr, filename);
+    let ints = read_header(&mut rdr, filename);
     let sequences_count: u32 = ints[0];
 
     // Read the remaining lines, converting the Result<> types to String values
@@ -96,7 +91,7 @@ pub fn read_answers(filename: &String) -> Vec<Vec<u32>> {
 
     // This will consume the first line of the file, and get the number of
     // data-lines that are expected.
-    let ints = read_two_ints(&mut rdr, filename);
+    let ints = read_header(&mut rdr, filename);
     // Here we use both values from the line, the second tells us how many ints
     // should be on each line that gets read.
     let lines_count: u32 = ints[0];
