@@ -7,7 +7,7 @@ use Exporter qw(import);
 
 our @EXPORT = qw(read_sequences read_patterns read_answers);
 
-sub read_two_ints {
+sub read_header {
     my $fh = shift;
 
     my $line = <$fh>;
@@ -23,7 +23,7 @@ sub read_sequences {
 
     if (open my $fh, q{<}, $file) {
         # Perl does not need the second integer here.
-        my ($count) = read_two_ints($fh);
+        my ($count) = read_header($fh);
         chomp(@data = <$fh>);
         close $fh;
 
@@ -45,12 +45,16 @@ sub read_patterns {
 }
 
 sub read_answers {
-    my $file = shift;
+    my ($file, $kref) = @_;
     my @data;
 
     if (open my $fh, q{<}, $file) {
-        # We need the second integer in this case.
-        my ($count, $num_count) = read_two_ints($fh);
+        # We need the second integer in this case, and possibly a third.
+        my ($count, $num_count, $k) = read_header($fh);
+        if ($kref) {
+            ${$kref} = $k;
+        }
+
         chomp(@data = <$fh>);
         close $fh;
 
