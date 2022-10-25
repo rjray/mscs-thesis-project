@@ -53,6 +53,18 @@ EXPERIMENTS_FILE := experiments_data.yml
 # results. Note that the scripts (Perl and Python) override this for the longer
 # algorithms (but not for the Aho-Corasick runs).
 RUNCOUNT := 25
+# The default number of runs that each "long" experiment will do, when running
+# for results. The scripts (Perl and Python) use this for the longer algorithms
+# (but not for the Aho-Corasick runs).
+LONG_RUNCOUNT := 5
+# The default number of runs that each approximate-matching experiment will do,
+# when running for results. Note that the scripts (Perl and Python) override
+# this for the longer algorithms with APPROX_LONG_RUNCOUNT.
+APPROX_RUNCOUNT := 10
+# And finally, the default number of runs that each approximate-matching
+# experiment will make if they're known to be excessively-long (Perl and Python
+# in this case). Python's dfa_gap with k=5 takes 3 hours by itself.
+APPROX_LONG_RUNCOUNT := 3
 
 # The file to write valgrind results to for the `memcheck` rule, and a def for
 # valgrind itself.
@@ -105,18 +117,21 @@ memcheck:
 		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS)
 	make -C C++ memcheck NO_INTEL=$(NO_INTEL) \
 		VALGRIND=$(VALGRIND) \
 		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS)
 	make -C Rust memcheck VALGRIND=$(VALGRIND) \
 		MEMCHECK_FILE=../$(MEMCHECK_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS)
 	echo "# Memory check completed:" `date` >> $(MEMCHECK_FILE)
 
 # Rules relevant to the creation/cleaning of the data files:
@@ -199,51 +214,81 @@ experiments: data $(HARNESS)
 		NO_INTEL=$(NO_INTEL) \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
+		LONG_RUNCOUNT=$(LONG_RUNCOUNT) \
+		APPROX_RUNCOUNT=$(APPROX_RUNCOUNT) \
+		APPROX_LONG_RUNCOUNT=$(APPROX_LONG_RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS) \
+		K="$(K)"
 	$(MAKE) -C C++ experiments \
 		NO_INTEL=$(NO_INTEL) \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
+		LONG_RUNCOUNT=$(LONG_RUNCOUNT) \
+		APPROX_RUNCOUNT=$(APPROX_RUNCOUNT) \
+		APPROX_LONG_RUNCOUNT=$(APPROX_LONG_RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS) \
+		K="$(K)"
 	$(MAKE) -C Rust experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
+		LONG_RUNCOUNT=$(LONG_RUNCOUNT) \
+		APPROX_RUNCOUNT=$(APPROX_RUNCOUNT) \
+		APPROX_LONG_RUNCOUNT=$(APPROX_LONG_RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS) \
+		K="$(K)"
 	$(MAKE) -C Perl experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
+		LONG_RUNCOUNT=$(LONG_RUNCOUNT) \
+		APPROX_RUNCOUNT=$(APPROX_RUNCOUNT) \
+		APPROX_LONG_RUNCOUNT=$(APPROX_LONG_RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS) \
+		K="$(K)"
 	$(MAKE) -C Python experiments \
 		HARNESS=../$(HARNESS) \
 		RUNCOUNT=$(RUNCOUNT) \
+		LONG_RUNCOUNT=$(LONG_RUNCOUNT) \
+		APPROX_RUNCOUNT=$(APPROX_RUNCOUNT) \
+		APPROX_LONG_RUNCOUNT=$(APPROX_LONG_RUNCOUNT) \
 		EXPERIMENTS_FILE=../$(EXPERIMENTS_FILE) \
 		SEQUENCES=../$(RANDOM_SEQUENCES) \
 		PATTERNS=../$(RANDOM_PATTERNS) \
-		ANSWERS=../$(RANDOM_ANSWERS)
+		ANSWERS=../$(RANDOM_ANSWERS) \
+		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS) \
+		K="$(K)"
 	@echo "# Experiments completed:" `date` >> $(EXPERIMENTS_FILE)
 
 test-experiments: testing-data C Rust
 	$(MAKE) -C C test-experiments NO_INTEL=$(NO_INTEL) \
 		SEQUENCES=../$(TEST_SEQUENCES) PATTERNS=../$(TEST_PATTERNS) \
-		ANSWERS=../$(TEST_ANSWERS)
+		ANSWERS=../$(TEST_ANSWERS) APPROX_ANSWERS=../$(TEST_APPROX_ANSWERS) \
+		K="1 2"
 	$(MAKE) -C C++ test-experiments NO_INTEL=$(NO_INTEL) \
 		SEQUENCES=../$(TEST_SEQUENCES) PATTERNS=../$(TEST_PATTERNS) \
-		ANSWERS=../$(TEST_ANSWERS)
+		ANSWERS=../$(TEST_ANSWERS) APPROX_ANSWERS=../$(TEST_APPROX_ANSWERS) \
+		K="1 2"
 	$(MAKE) -C Rust test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
-		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS) \
+		APPROX_ANSWERS=../$(TEST_APPROX_ANSWERS) K="1 2"
 	$(MAKE) -C Perl test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
-		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS) \
+		APPROX_ANSWERS=../$(TEST_APPROX_ANSWERS) K="1 2"
 	$(MAKE) -C Python test-experiments SEQUENCES=../$(TEST_SEQUENCES) \
-		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS)
+		PATTERNS=../$(TEST_PATTERNS) ANSWERS=../$(TEST_ANSWERS) \
+		APPROX_ANSWERS=../$(TEST_APPROX_ANSWERS) K="1 2"

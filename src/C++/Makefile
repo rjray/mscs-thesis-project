@@ -3,6 +3,9 @@ include ../defines.mk
 GCC_TARGETS := $(addprefix ./,$(addsuffix -cpp-gcc,$(ALGORITHMS)))
 LLVM_TARGETS := $(addprefix ./,$(addsuffix -cpp-llvm,$(ALGORITHMS)))
 INTEL_TARGETS := $(addprefix ./,$(addsuffix -cpp-intel,$(ALGORITHMS)))
+GCC_APPROX_TARGETS := $(addprefix ./,$(addsuffix -cpp-gcc,$(APPROX_ALGORITHMS)))
+LLVM_APPROX_TARGETS := $(addprefix ./,$(addsuffix -cpp-llvm,$(APPROX_ALGORITHMS)))
+INTEL_APPROX_TARGETS := $(addprefix ./,$(addsuffix -cpp-intel,$(APPROX_ALGORITHMS)))
 
 # These start out without Intel, in case the user doesn't want the Intel stuff
 # used.
@@ -27,27 +30,30 @@ ICX=icpx
 # Unless they specifically disabled the use of the Intel toolchain, add it in.
 ifeq ($(NO_INTEL),)
 TARGETS += $(INTEL_TARGETS)
+APPROX_TARGETS += $(INTEL_APPROX_TARGETS)
 TOP_TARGETS += intel
 endif
 
-TEST_EXPERIMENTS = $(addprefix test-experiments-,$(TOP_TARGETS))
-EXPERIMENTS = $(addprefix experiments-,$(TOP_TARGETS))
+TEST_EXPERIMENTS := $(addprefix test-experiments-,$(TOP_TARGETS))
+TEST_APPROX_EXPERIMENTS := $(addprefix test-approx-experiments-,$(TOP_TARGETS))
+EXPERIMENTS := $(addprefix experiments-,$(TOP_TARGETS))
+APPROX_EXPERIMENTS := $(addprefix approx-experiments-,$(TOP_TARGETS))
 
 all: $(TOP_TARGETS)
 
-gcc: $(GCC_TARGETS)
+gcc: $(GCC_TARGETS) $(GCC_APPROX_TARGETS)
 
-llvm: $(LLVM_TARGETS)
+llvm: $(LLVM_TARGETS) $(LLVM_APPROX_TARGETS)
 
-intel: $(INTEL_TARGETS)
+intel: $(INTEL_TARGETS) $(INTEL_APPROX_TARGETS)
 
-test-experiments: $(TEST_EXPERIMENTS)
+test-experiments: $(TEST_EXPERIMENTS) $(TEST_APPROX_EXPERIMENTS)
 
-experiments: $(EXPERIMENTS)
+experiments: $(EXPERIMENTS) $(APPROX_EXPERIMENTS)
 
 clean:
 	$(RM) *.o
-	$(RM) $(TARGETS)
+	$(RM) $(TARGETS) $(APPROX_TARGETS)
 
 reset: clean all
 
@@ -175,6 +181,18 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(GCC_TARGETS),$(call RUN_test_experiment,$(target)))
 
+test-approx-experiments-gcc:
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run tests)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run tests)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answer file not specified, no checking will be done)
+endif
+	$(foreach target,$(GCC_APPROX_TARGETS),$(call RUN_test_approx_experiment,$(target)))
+
 experiments-gcc:
 ifeq ($(HARNESS),)
 	$(error Harness not specified, cannot run experiments)
@@ -190,6 +208,25 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(GCC_TARGETS),$(call RUN_experiment,$(target)))
 
+approx-experiments-gcc:
+ifeq ($(HARNESS),)
+	$(error Harness not specified, cannot run experiments)
+endif
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run experiments)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run experiments)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answers file not specified, no checking will be done)
+endif
+	$(foreach target,$(GCC_APPROX_TARGETS),\
+		$(foreach k,$(K),\
+			$(call RUN_approx_experiment,$(target) $(k))\
+		)\
+	)
+
 test-experiments-llvm:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
@@ -201,6 +238,18 @@ ifeq ($(ANSWERS),)
 	$(warning Answer file not specified, no checking will be done)
 endif
 	$(foreach target,$(LLVM_TARGETS),$(call RUN_test_experiment,$(target)))
+
+test-approx-experiments-llvm:
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run tests)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run tests)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answer file not specified, no checking will be done)
+endif
+	$(foreach target,$(LLVM_APPROX_TARGETS),$(call RUN_test_approx_experiment,$(target)))
 
 experiments-llvm:
 ifeq ($(HARNESS),)
@@ -217,6 +266,25 @@ ifeq ($(ANSWERS),)
 endif
 	$(foreach target,$(LLVM_TARGETS),$(call RUN_experiment,$(target)))
 
+approx-experiments-llvm:
+ifeq ($(HARNESS),)
+	$(error Harness not specified, cannot run experiments)
+endif
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run experiments)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run experiments)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answers file not specified, no checking will be done)
+endif
+	$(foreach target,$(LLVM_APPROX_TARGETS),\
+		$(foreach k,$(K),\
+			$(call RUN_approx_experiment,$(target) $(k))\
+		)\
+	)
+
 test-experiments-intel:
 ifeq ($(SEQUENCES),)
 	$(error Sequences file not specified, cannot run tests)
@@ -228,6 +296,18 @@ ifeq ($(ANSWERS),)
 	$(warning Answer file not specified, no checking will be done)
 endif
 	$(foreach target,$(INTEL_TARGETS),$(call RUN_test_experiment,$(target)))
+
+test-approx-experiments-intel:
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run tests)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run tests)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answer file not specified, no checking will be done)
+endif
+	$(foreach target,$(INTEL_APPROX_TARGETS),$(call RUN_test_approx_experiment,$(target)))
 
 experiments-intel:
 ifeq ($(HARNESS),)
@@ -243,3 +323,22 @@ ifeq ($(ANSWERS),)
 	$(warning Answers file not specified, no checking will be done)
 endif
 	$(foreach target,$(INTEL_TARGETS),$(call RUN_experiment,$(target)))
+
+approx-experiments-intel:
+ifeq ($(HARNESS),)
+	$(error Harness not specified, cannot run experiments)
+endif
+ifeq ($(SEQUENCES),)
+	$(error Sequences file not specified, cannot run experiments)
+endif
+ifeq ($(PATTERNS),)
+	$(error Patterns file not specified, cannot run experiments)
+endif
+ifeq ($(APPROX_ANSWERS),)
+	$(warning Answers file not specified, no checking will be done)
+endif
+	$(foreach target,$(INTEL_APPROX_TARGETS),\
+		$(foreach k,$(K),\
+			$(call RUN_approx_experiment,$(target) $(k))\
+		)\
+	)
