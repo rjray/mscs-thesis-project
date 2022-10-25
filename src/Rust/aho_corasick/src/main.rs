@@ -154,8 +154,6 @@ fn build_goto(
     goto_fn: &mut Vec<Vec<i32>>,
     output_fn: &mut Vec<Set>,
 ) {
-    // // Convert the vector of strings into arrays of `u8`.
-    // let pats: Vec<&[u8]> = patterns.iter().map(|p| p.as_bytes()).collect();
     // This value tracks the current high state number and is used in
     // successive calls to enter_pattern() to know what index new states are
     // created at.
