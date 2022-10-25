@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
   // Make sure there are enough arguments still in argv:
   int remaining = argc - optind;
-  if (!show_info && (remaining < 3 || remaining > 4)) {
+  if (!show_info && remaining < 3) {
     fprintf(stderr, "Wrong number of arguments (%d) given to %s\n", remaining,
             argv[0]);
     exit(EXIT_FAILURE);
