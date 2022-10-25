@@ -120,10 +120,10 @@ aho_corasick-cpp-llvm: aho_corasick-llvm.o run-llvm.o input-llvm.o
 	$(CLANG) $(CPPFLAGS) -o aho_corasick-cpp-llvm aho_corasick-llvm.o run-llvm.o input-llvm.o
 
 dfa_gap-llvm.o: dfa_gap.cpp run.hpp
-	$(GCC) $(CPPFLAGS) -c -o dfa_gap-llvm.o dfa_gap.cpp
+	$(LLVM) $(CPPFLAGS) -c -o dfa_gap-llvm.o dfa_gap.cpp
 
 dfa_gap-cpp-llvm: dfa_gap-llvm.o run-llvm.o input-llvm.o
-	$(GCC) $(CPPFLAGS) -o dfa_gap-cpp-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
+	$(LLVM) $(CPPFLAGS) -o dfa_gap-cpp-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
 
 # Rules for building with Intel:
 run-intel.o: run.cpp run.hpp input.hpp
@@ -157,10 +157,10 @@ aho_corasick-cpp-intel: aho_corasick-intel.o run-intel.o input-intel.o
 	$(ICX) $(CPPFLAGS) -o aho_corasick-cpp-intel aho_corasick-intel.o run-intel.o input-intel.o
 
 dfa_gap-intel.o: dfa_gap.cpp run.hpp
-	$(GCC) $(CPPFLAGS) -c -o dfa_gap-intel.o dfa_gap.cpp
+	$(ICX) $(CPPFLAGS) -c -o dfa_gap-intel.o dfa_gap.cpp
 
 dfa_gap-cpp-intel: dfa_gap-intel.o run-intel.o input-intel.o
-	$(GCC) $(CPPFLAGS) -o dfa_gap-cpp-intel dfa_gap-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o dfa_gap-cpp-intel dfa_gap-intel.o run-intel.o input-intel.o
 
 # Rules for running the experiments, broken down by toolchain.
 test-experiments-gcc:
