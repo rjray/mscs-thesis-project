@@ -1,4 +1,4 @@
-\begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
     \node[state,initial]   (s_0)                  {0};
     \node[state]           (s_1)  [below of=s_0]  {1};
     \node[state]           (s_2)  [below of=s_1]  {2};
@@ -23,29 +23,29 @@
         (s_1) edge node {T}      (s_2)
         (s_1) edge node {A,C,G}  (s_6)
         (s_2) edge node {A}      (s_3)
-        (s_2) edge node {A,C,G}  (s_9)
+        (s_2) edge[above] node {C,G,T}  (s_9)
         (s_3) edge node {G}      (s_4)
-        (s_3) edge node {A,C,G}  (s_12)
+        (s_3) edge node {A,C,T}  (s_12)
         (s_4) edge node {C}      (s_5)
-        (s_4) edge node {A,C,G}  (s_15)
+        (s_4) edge[above] node {A,G,T}  (s_15)
         (s_6) edge node {A,C,G}  (s_7)
         (s_6) edge node {T}      (s_2)
         (s_7) edge node {A,C,G}  (s_8)
-        (s_7) edge node {T}      (s_2)
-        (s_8) edge node {T}      (s_2)
-        (s_9) edge node {A,C,G}  (s_10)
+        (s_7) edge[bend left, above] node {T}      (s_2)
+        (s_8) edge[bend left, below] node {T}      (s_2)
+        (s_9) edge[above] node {C,G,T}  (s_10)
         (s_9) edge node {A}      (s_3)
-        (s_10) edge node {A,C,G} (s_11)
-        (s_10) edge node {A}     (s_3)
-        (s_11) edge node {A}     (s_3)
-        (s_12) edge node {A,C,G} (s_13)
+        (s_10) edge[above] node {C,G,T} (s_11)
+        (s_10) edge[bend right, above] node {A}     (s_3)
+        (s_11) edge[bend right, below] node {A}     (s_3)
+        (s_12) edge node {A,C,T} (s_13)
         (s_12) edge node {G}     (s_4)
-        (s_13) edge node {A,C,G} (s_14)
-        (s_13) edge node {G}     (s_4)
-        (s_14) edge node {G}     (s_4)
-        (s_15) edge node {A,C,G} (s_16)
+        (s_13) edge node {A,C,T} (s_14)
+        (s_13) edge[bend left, above] node {G}     (s_4)
+        (s_14) edge[bend left, below] node {G}     (s_4)
+        (s_15) edge[above] node {A,G,T} (s_16)
         (s_15) edge node {C}     (s_5)
-        (s_16) edge node {A,C,G} (s_17)
-        (s_16) edge node {C}     (s_5)
-        (s_17) edge node {C}     (s_5);
+        (s_16) edge[above] node {A,G,T} (s_17)
+        (s_16) edge[bend right, above] node {C}     (s_5)
+        (s_17) edge[bend right, below] node {C}     (s_5);
 \end{tikzpicture}
