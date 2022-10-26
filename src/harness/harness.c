@@ -34,7 +34,7 @@ double get_time() {
 int main(int argc, char **argv) {
   int opt, run_count = 10, show_info = 0, verbose = 0, skip0 = 0;
   char *output_file = (char *)calloc(256, sizeof(char));
-  char **exec_argv = (char **)calloc(8, sizeof(char *));
+  char **exec_argv = (char **)calloc(12, sizeof(char *));
   FILE *file;
 
   while ((opt = getopt(argc, argv, "vin:f:s")) != -1) {
@@ -79,13 +79,10 @@ int main(int argc, char **argv) {
     exec_argv[idx++] = "/bin/time";
     exec_argv[idx++] = "-f";
     exec_argv[idx++] = "max_memory: %M";
-    // Copy the program argument's pointer to exec_argv:
-    exec_argv[idx++] = argv[optind];
-    // Copy the input file arguments' pointers to exec_argv:
-    exec_argv[idx++] = argv[optind + 1]; // sequences
-    exec_argv[idx++] = argv[optind + 2]; // patterns
-    if (remaining == 4)
-      exec_argv[idx++] = argv[optind + 3];
+    // Copy the program elements' pointers to exec_argv:
+    for (int i = 0; i < remaining; i++) {
+      exec_argv[idx++] = argv[optind + i];
+    }
   }
 
   rapl_init(CORE, show_info);
