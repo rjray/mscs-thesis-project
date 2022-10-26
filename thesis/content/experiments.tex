@@ -327,6 +327,53 @@ The Perl and Python implementations were both significantly shorter in length th
 
 The Rust implementation went through several iterations before reaching its final form. The first version closely followed the C++ version: the use of resizable vectors through the native \texttt{Vec<>} type, and implementations of set and queue from the standard Rust library. This initial version severely under-performed in comparison to the other two compiled solutions. With help from the Rust community, it was determined that the two collection classes were incurring large amounts of overhead. To address this, they were replaced with simple implementations adapted from the C code. As with the Perl and Python versions, the \texttt{Vec<>} type was allowed to handle the dynamic natures of the $g$ and $output$ functions. As with C++, some intermediate experiments were performed that pre-allocated these vectors based on estimates of needed space. But here also it was found that at best the performance remained the same, and in some runs was noticeably worse.
 
+\subsubsection{Approximate Matching by DFA with Gaps}
+
+For the fifth and final algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
+
+The idea of using a DFA to represent the pattern was inspired primarily by~\cite{aho.corasick.1975} and~\cite{becchi.crowley.2008}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automata. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
+
+From this, a different type of approximate-matching can be pictured: one that allows for well-defined, finite ``gaps'' between elements of the pattern being matched. Given a value $k$ that is a positive integer, gaps that are up to $k$ characters in length can be tolerated while still regarding the pattern as matching a point in the target sequence. And when $k = 0$, the approach becomes the naive exact-matching approach that is of time-complexity O($mn$).
+
+Current algorithms for approximate matching in DNA sequences use a variety of approaches, such as edit distance. But methods based on edit distance can result in all changes or differences being clumped together as opposed to distributed across the pattern in a more balanced fashion. The algorithm described here is designed to prevent such uneven distribution of the gap letters in the matched segment of the sequence.
+
+The basis of the algorithm is the notion that such an approximate match as described here can be expressed in terms of a regular expression that supports the specification of ranges of matches for a given class or symbol in the expression. Such a specification is generally encoded as \texttt{$\lbrace a,b \rbrace$} in an expression, where $a$ and $b$ are integers and $b \geq a$. Most compatible engines support several variant forms of this:
+
+\begin{description}
+\item[\texttt{$\lbrace a \rbrace$}:] matches exactly $a$ occurrences
+\item[\texttt{$\lbrace a, \rbrace$}:] matches at least $a$ occurrences, with no upper limit
+\item[\texttt{$\lbrace ,b \rbrace$}:] matches at most $b$ occurrences, with as few as zero
+\end{description}
+
+Using the third construct and the same ``CTAGC'' pattern used for the previous single-pattern algorithms, an example regular expression for a value of $k = 3$ could look like:
+
+\begin{center}
+\texttt{C.$\lbrace ,3 \rbrace$T.$\lbrace ,3 \rbrace$A.$\lbrace ,3 \rbrace$G.$\lbrace ,3 \rbrace$C}
+\end{center}
+
+However, this not quite correct in that the dot ``\texttt{.}'' matches all characters. This is not desirable, as any ``T'' encountered after the initial ``C'' should move to that part of the pattern rather than being subsumed by the dot. Restricting the counting-states to just the alphabet of the problem, and eliminating the target letter from the gap consideration gives us:
+
+\begin{center}
+\texttt{C[ACG]$\lbrace ,3 \rbrace$T[CGT]$\lbrace ,3 \rbrace$A[ACT]$\lbrace ,3 \rbrace$G[AGT]$\lbrace ,3 \rbrace$C}
+\end{center}
+
+This, given that $k$ is known at the time of the construction, can be readily transformed into a DFA.
+
+As an initial naive approach to the algorithm, the constructed DFA will emulate the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern $p$ being searched for. It first creates $m + 1$ states, numbered from 0 to $m$, that represent the start-state and the $m$ characters of the pattern. Then for each state from 1 to $m - 1$ (inclusive) the additional states are created as a sort of ``branch'' off of each ``trunk'' state. The new states are arranged in such a way as to transition from one to the next on any letter that is \textit{not} the next trunk-state's letter. The last of the branch states will map all non-matching letters to a pre-defined ``failure'' value, indicating that the target letter was not found within a $k$-length gap. This DFA is illustrated in figure~\ref{fig:dfa_dfa}. In this diagram, the branches alternate between left and right so as to allow the labels of the transitions to be clearer.
+
+In this DFA, the number of states needed ($N$) can be easily calculated as a function of $m$ and $k$:
+
+\[N~=~1 + m + k(m - 1)\]
+
+Thus, for a specific pattern of length $m$, the size of the DFA grows linearly with $k$.
+
+\begin{figure}[ht]
+\centering
+\input{figures/dfa-dfa}
+\caption{DFA-Gap finite automaton}
+\label{fig:dfa_dfa}
+\end{figure}
+
 \subsubsection{Other Algorithms Considered}
 
 \subsection{Optimizations}
@@ -334,9 +381,9 @@ The Rust implementation went through several iterations before reaching its fina
 Over the course of the development of the experiments code in each language, the need became clear for some basic optimizations. In every case, any optimization was applied consistently across all languages. Some examples of optimizations include:
 
 \begin{description}
-\item[Data Preprocessing:] While the C and C++ languages were able to seamlessly use individual characters from the strings as array indices, Rust and the scripting languages were not. Based on an assumption that production-targeted code would apply any similar preprocessing, the strings were converted to forms directly usable by the other languages. In the case of Rust, this was a conversion of strings to arrays of unsigned 8-bit integers. In the case of Python, it was a direct mapping of strings (which are already treated as sequences by Python) into the ordinal values  of each character. Perl required the most preprocessing, with strings first being converted to arrays of individual characters before being mapped to their ordinal values.
+\item[Data Preprocessing:] While the C and C++ languages were able to seamlessly use individual characters from the strings as array indices, Rust and the scripting languages were not. Based on an assumption that production-targeted code would apply any similar preprocessing, the strings were converted to forms directly usable by the other languages. In the case of Rust, this was a conversion of strings to arrays of unsigned 8-bit integers. In the case of Python, it was a direct mapping of strings (which are already treated as sequences by Python) into the ordinal values of each character. Perl required the most preprocessing, with strings first being converted to arrays of individual characters before being mapped to their ordinal values.
 \item[Pattern Preprocessing:] To bring down the running times of the script languages' longer experiments, a mechanism for preprocessing patterns was developed that allowed for each pattern to be processed only once prior to being applied to all sequences. Without this, some instances of the Knuth-Morris-Pratt algorithm took close to an hour to complete.
-\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would have had very little effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the readability of the code.
+\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would have had little effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the overall readability of the code.
 \end{description}
 
 All optimization steps were designed to be done inside the timing window of the runner module, and contributed to the reported algorithm run-time.
@@ -350,9 +397,11 @@ The data used for the experiments was generated in a random fashion. It was spec
 
 Data generation was handled by a Python script written to allow almost all parameters of the resulting data to be tuned. The script's options included a seed value for the random number generator, which allowed for consistent generation of the data once the parameters were tuned to satisfaction.
 
-Sequence generation was a straightforward process of determining a length from the provided base length and variance values then using the standard random number generator provided by Python was used to draw $n$ letters from the set of allowed characters.
+Sequence generation was a straightforward process of determining a length from the provided base length and variance values. The standard random number generator provided by Python was then used to draw the sequence of $n$ letters from the set of valid characters.
 
-To ensure that algorithms would be as thoroughly exercised as possible, each candidate pattern was tested before acceptance and required to match a minimum threshold (0.10\%) of the sequences. Generation of the patterns was done by first selecting the length from the specified range, then extracting a sequence of that length from a random location in a candidate sequence. Candidate sequences were chosen by selecting every $i^{th}$ sequence from the full list (starting with the first sequence), with $i$ being the number of sequences requested divided by the number of patterns requested.
+To ensure that algorithms would be as thoroughly exercised as possible, each candidate pattern was tested before acceptance. The requirement for acceptance was that it match a minimum threshold (0.10\%) of the full set of sequences. Generation of the patterns was done by first selecting the pattern length from the specified range, then extracting a sequence of that length from a random location in a candidate sequence. Candidate sequences were chosen by selecting every $i^{th}$ sequence from the full list (starting with the first sequence), with $i$ being the total number of sequences divided by the total number of patterns being generated.
+
+For the approximate-matching algorithm, the same set of patterns was used since they were already known to meet the minimum-matching criteria. For this algorithm, a $k$ value of 0 would lead to the same set of matches as an exact-matching algorithm would find.
 
 \subsubsection{Shape of the Data Used}
 
@@ -361,14 +410,17 @@ The data set selected for these experiments consisted of the following:
 \begin{itemize}
 \item 100,000 sequence strings of length ranging from 1,008 to 1,040 characters ($1,024 \pm 16$). The number of patterns and their length was chosen to provide sufficient data to extensively exercise each algorithm implementation, while still fitting within the physical memory of the testing platform.
 \item 100 pattern strings of length ranging from 8 to 10 characters ($9 \pm 1$). The length was adjusted several times through command-line parameters to the data-generation utility until a size was found for which the generated patterns would reliably meet the minimum threshold for sequences matched. The matching percentage over the 100 patterns ranged from 0.10\% to 1.62\%, with an average of 0.76\%.
-\item A full set of correct counts of each pattern's occurrences in each sequence. This was established using a backtracking regular expression search for each of the selected patterns over each of the generated sequences. The regular expression was designed to properly include overlapping pattern occurrences.
+\item A full set of correct counts of each pattern's occurrences in each sequence, as would be found by an exact-matching algorithm. This was established using a backtracking regular expression search for each of the selected patterns over each of the generated sequences. The regular expression was designed to properly include overlapping pattern occurrences.
+\item An additional set of answer-files were generated for the approximate-matching algorithm, for values of $k$ ranging from 1 to 5. These, too, were generated using crafted regular expressions that would detect overlapping occurrences of the patterns.
 \end{itemize}
 
 A smaller data set was also generated for the purpose of testing and validation of the programs prior to full experiment runs.
 
+The size of the data set was chosen after some preliminary experiments showed this size to be large-enough to rigorously exercise the algorithms while still running in reasonable time overall. This allowed for the experiments to be run repeatedly as the code itself evolved.
+
 \subsection{Testing Platform}
 
-The experiments were run on a dedicated machine running a version of the Linux operating system. The set of installed software was kept minimized to reduce the interference with general energy usage during the runs of experiments.
+The experiments were run on a dedicated machine running a version of the Linux operating system. The set of installed software was kept minimal to reduce the interference with general energy usage during the runs of experiments.
 
 \subsubsection{Hardware Specifications}
 
