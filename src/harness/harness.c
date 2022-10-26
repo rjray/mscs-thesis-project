@@ -55,8 +55,10 @@ int main(int argc, char **argv) {
       skip0 = 1;
       break;
     default:
-      fprintf(stderr, "Usage: %s [ -i ] [ -n count ] [ -f output ] <files>\n",
-              argv[0]);
+      fprintf(
+          stderr,
+          "Usage: %s [ -v ] [ -i ] [ -s ] [ -n count ] [ -f output ] <files>\n",
+          argv[0]);
       exit(EXIT_FAILURE);
     }
   }
