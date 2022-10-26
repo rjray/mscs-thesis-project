@@ -145,7 +145,7 @@ def run_approx(init, code, name, argv):
     elapsed = perf_counter() - start_time
 
     print(
-        f"language: python\nalgorithm: {name}\nk: {k}\nruntime: {elapsed:.6f}"
+        f"language: python\nalgorithm: {name}({k})\nruntime: {elapsed:.6f}"
     )
 
     return return_code

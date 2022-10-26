@@ -222,8 +222,7 @@ int run_approx(am_initializer init, am_algorithm code, std::string name,
   double end_time = get_time();
 
   std::cout << "language: " << LANG << "\n"
-            << "algorithm: " << name << "\n"
-            << "k: " << k << "\n"
+            << "algorithm: " << name << "(" << k << ")\n"
             << "runtime: " << std::setprecision(8) << end_time - start_time
             << "\n";
 

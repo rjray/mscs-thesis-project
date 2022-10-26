@@ -281,8 +281,8 @@ int run_approx(am_initializer init, am_algorithm code, char *name, int argc,
 
   // Note the end time, before freeing memory.
   double end_time = get_time();
-  fprintf(stdout, "language: %s\nalgorithm: %s\n", LANG, name);
-  fprintf(stdout, "k: %d\nruntime: %.8g\n", k, end_time - start_time);
+  fprintf(stdout, "language: %s\nalgorithm: %s(%d)\n", LANG, name, k);
+  fprintf(stdout, "runtime: %.8g\n", end_time - start_time);
 
   // Free all the memory that was allocated by the routines in input.c:
   for (int i = 0; i < patterns_count; i++)

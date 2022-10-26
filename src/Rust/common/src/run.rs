@@ -320,7 +320,7 @@ pub fn run_approx(
 
     // Note the end time before doing anything else.
     let elapsed = start_time.elapsed();
-    println!("language: rust\nalgorithm: {}\nk: {}", &name, k);
+    println!("language: rust\nalgorithm: {}({})", &name, k);
     println!("runtime: {:.8}", elapsed.as_secs_f64());
 
     return_code

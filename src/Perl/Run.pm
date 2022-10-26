@@ -189,7 +189,7 @@ sub run_approx {
     # Note the end-time before doing anything else.
     my $elapsed = tv_interval($start_time);
 
-    print "language: perl\nalgorithm: $name\nk: $k\n";
+    print "language: perl\nalgorithm: $name($k)\n";
     printf "runtime: %.6f\n", $elapsed;
 
     return $return_code;
