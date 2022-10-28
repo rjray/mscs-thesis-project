@@ -27,6 +27,7 @@
   (31:0). Use this to mask it.
  */
 #define ENERGY_MASK (long long)0x00000000ffffffff
+#define ENERGY_MAX (long long)0x0000000100000000
 
 #define MSR_RAPL_POWER_UNIT 0x606
 
@@ -55,15 +56,33 @@ int cpu_model;
 int core = 0;
 
 int pp0_avail, pp1_avail, dram_avail, psys_avail, different_units;
-double package_before, package_after;
-double pp0_before, pp0_after;
+long long package_before, package_after;
+long long pp0_before, pp0_after;
 /* Commenting-out, as these are always zeros on my systems. */
-// double pp1_before, pp1_after;
-double dram_before, dram_after;
+// long long pp1_before, pp1_after;
+long long dram_before, dram_after;
 /* Commenting-out, as these are not used in my experiments after all. */
-// double psys_before, psys_after;
+// long long psys_before, psys_after;
 
 double power_units, cpu_energy_units, time_units, dram_energy_units;
+
+/*
+  Compute the energy reading from the `before`/`after` values, scaled by
+  `scale`.
+
+  Note that in some cases `before` may be larger than `after`, due to the
+  MSR counter wrapping at 2^32.
+*/
+double compute_energy(long long before, long long after, double scale) {
+  long long diff;
+
+  if (after > before)
+    diff = after - before;
+  else
+    diff = (ENERGY_MAX - before) + after;
+
+  return (double)diff * scale;
+}
 
 int open_msr(int core) {
   char msr_filename[32];
@@ -329,42 +348,33 @@ void show_power_limit(int core) {
 
 void rapl_before(int core) {
   int fd;
-  long long result;
 
   fd = open_msr(core);
 
   // Package energy
-  result = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
-  package_before = (double)result * cpu_energy_units;
+  package_before = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
 
   // PP0 energy
-  result = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
-  pp0_before = (double)result * cpu_energy_units;
+  pp0_before = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
 
   /*
     Always reads as zeros on my systems.
 
   // PP1 energy, if available
-  if (pp1_avail) {
-    result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
-    pp1_before = (double)result * cpu_energy_units;
-  }
+  if (pp1_avail)
+    pp1_before = read_msr(fd, MSR_PP1_ENERGY_STATUS);
   */
 
   // DRAM energy, if available
-  if (dram_avail) {
-    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
-    dram_before = (double)result * dram_energy_units;
-  }
+  if (dram_avail)
+    dram_before = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
 
   /*
     Not used by my experiments after all.
 
   // PSYS energy, if available
-  if (psys_avail) {
-    result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
-    psys_before = (double)result * cpu_energy_units;
-  }
+  if (psys_avail)
+    psys_before = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
   */
 
   close(fd);
@@ -374,34 +384,33 @@ void rapl_before(int core) {
 
 void rapl_after(FILE *fp, int core) {
   int fd;
-  long long result;
 
   fd = open_msr(core);
 
-  result = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
-  package_after = (double)result * cpu_energy_units;
-  fprintf(fp, "package: %.18f\n", package_after - package_before);
+  package_after = read_msr(fd, MSR_PKG_ENERGY_STATUS) & ENERGY_MASK;
+  fprintf(fp, "package: %.14f\n",
+          compute_energy(package_before, package_after, cpu_energy_units));
 
-  result = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
-  pp0_after = (double)result * cpu_energy_units;
-  fprintf(fp, "pp0: %.18f\n", pp0_after - pp0_before);
+  pp0_after = read_msr(fd, MSR_PP0_ENERGY_STATUS) & ENERGY_MASK;
+  fprintf(fp, "pp0: %.14f\n",
+          compute_energy(pp0_before, pp0_after, cpu_energy_units));
 
   /*
     Always comes up zeros on my machines.
 
   // PP1 energy, if available
   if (pp1_avail) {
-    result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
-    pp1_after = (double)result * cpu_energy_units;
-    fprintf(fp, "pp1: %.18f\n", pp1_after - pp1_before);
+    pp1_after = read_msr(fd, MSR_PP1_ENERGY_STATUS);
+    fprintf(fp, "pp1: %.14f\n",
+            compute_energy(pp1_before, pp1_after, cpu_energy_units));
   }
   */
 
   // DRAM energy, if available
   if (dram_avail) {
-    result = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
-    dram_after = (double)result * dram_energy_units;
-    fprintf(fp, "dram: %.18f\n", dram_after - dram_before);
+    dram_after = read_msr(fd, MSR_DRAM_ENERGY_STATUS) & ENERGY_MASK;
+    fprintf(fp, "dram: %.14f\n",
+            compute_energy(dram_before, dram_after, dram_energy_units));
   }
 
   /*
@@ -409,9 +418,9 @@ void rapl_after(FILE *fp, int core) {
 
   // PSYS energy, if available
   if (psys_avail) {
-    result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
-    psys_after = (double)result * cpu_energy_units;
-    fprintf(fp, "psys: %.18f\n", psys_after - psys_before);
+    psys_after = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
+    fprintf(fp, "psys: %.14f\n",
+            compute_energy(psys_before, psys_after, cpu_energy_units));
   }
   */
 
