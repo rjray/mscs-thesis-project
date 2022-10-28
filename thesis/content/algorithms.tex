@@ -281,7 +281,7 @@ Dividing the DFA-Gap process into two parts, the first part is the creation of t
 
 Lines 1--6 initialize the elements. The body of the outer for-loop runs from line 8 to line 19, and is primarily concerned with extending the trunk of the DFA. The inner for-loop, lines 13--16, builds one branch connected to the state that was the head of the trunk prior to lines 8--10. After the outer loop completes, lines 21--23 assign $A$ (the set of acceptance states) and $q_0$ (the starting state) and return a 3-element tuple of these values along with the transition function $\delta$ itself. This tuple represents what the next part of the algorithm requires in order to perform the matching process.
 
-Lines 2, 4, 9, and 13 reference a process that was not explicitly defined: \texttt{CreateState()}. The implementation of this would be depending on the approach to the algorithm as a whole. In these examples, it is assumed that this process creates one complete state representation with all transitions initialized to the failure value. This allows the default transition to be a failure unless explicitly updated by the this part of the algorithm.
+Lines 2, 4, 9, and 13 reference a process that was not explicitly defined: \texttt{CreateState()}. The implementation of this would be dependent on the approach to the algorithm as a whole. In these examples, it is assumed that this process creates one complete state representation with all transitions initialized to the failure value. This allows the default transition to be a failure unless explicitly updated by the this part of the algorithm.
 
 \subsubsection{Matching with the DFA}
 
@@ -308,7 +308,7 @@ The second part of the process is to use the DFA in the matching process. This i
   \For{$i \leftarrow 0$ \KwTo \End}{
     \State $\leftarrow q_0$\;
     \Ch $\leftarrow 0$\;
-    \While{$\delta(\State,s_{i+\Ch}) \neq$ FAIL}{
+    \While{$\delta(\State,s_{i+\Ch}) \neq$ \textit{failure}}{
       \State $\leftarrow \delta(\State,s_{i+\Ch})$\;
       \Ch $\leftarrow$ $\Ch+1$\;
     }
@@ -346,7 +346,7 @@ Following algorithm~\ref{alg:find_pattern_with_gaps}, the following steps take p
 \item $\delta(0,C)$ is read, transitions to $state=1$, $ch$ increments to 1
 \item $\delta(1,C)$ is read, transitions to $state=3$, $ch$ increments to 2
 \item $\delta(3,G)$ is read, failure detected
-\item $state$ not in $A$, so loop advances and $i=1$
+\item $state$ is not in $A$, so loop advances and $i=1$
 \item $state$ and $ch$ each reset to 0
 \item $\delta(0,C)$ is read, transitions to $state=1$, $ch$ increments to 1
 \item $\delta(1,G)$ is read, transitions to $state=2$, $ch$ increments to 2
@@ -354,7 +354,7 @@ Following algorithm~\ref{alg:find_pattern_with_gaps}, the following steps take p
 \item $\delta(4,A)$ is read, transitions to $state=7$, $ch$ increments to 4
 \item $\delta(7,G)$ is read, transitions to $state=6$, $ch$ increments to 5
 \item $\delta(6,C)$ is read, failure detected
-\item $state$ is in $A$, so a tuple of (1,CGAAG) is saved on $matches$
+\item $state$ is in $A$, so a tuple of (1, ``CGAAG'') is saved on $matches$
 \end{enumerate}
 
 At this point the loop would resume with $i=2$, but this sufficiently illustrates the process. A total of 9 state transitions were made, resulting in the location of a match 5 characters in size. At the reading of each state transition only one character look-up was required since the $\delta$ function initializes each new state to default all transitions to the failure value.
