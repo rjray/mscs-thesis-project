@@ -1,0 +1,22 @@
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state,initial]   (s_0)                {0};
+    \node[state]           (s_1) [below of=s_0] {1};
+    \node[state]           (s_2) [below of=s_1] {2};
+    \node[state]           (s_3) [left of=s_1]  {3};
+    \node[state]           (s_4) [below of=s_2] {4};
+    \node[state]           (s_5) [left of=s_2]  {5};
+    \node[state,accepting] (s_6) [below of=s_4] {6};
+    \node[state]           (s_7) [left of=s_4]  {7};
+
+    \path[->]
+        (s_0) edge node {C} (s_1)
+        (s_1) edge node {G} (s_2)
+        (s_1) edge node {A,C,T} (s_3)
+        (s_2) edge node {A} (s_4)
+        (s_2) edge node {C,G,T} (s_5)
+        (s_3) edge node {G} (s_2)
+        (s_4) edge node {G} (s_6)
+        (s_4) edge node {A,C,T} (s_7)
+        (s_5) edge node {A} (s_4)
+        (s_7) edge node {G} (s_6);
+\end{tikzpicture}

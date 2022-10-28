@@ -87,11 +87,11 @@ While the Knuth-Morris-Pratt algorithm had made 10 character comparisons to find
 
 The Bitap algorithm (sometimes known as ``Shift-Or'', or ``Shift-Add'') was initially developed by B\'{a}lint D\"{o}m\"{o}lki in 1964. In 1989 it was re-invented by Ricardo Baeza-Yates and Gaston H. Gonnet, and published in~\cite{baeza.yates.gonnet.1992} in 1992. Here, it has been chosen for the distinctive approach when compared to the other algorithms.
 
-In terms of time complexity, the algorithm is on the same level as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the same input data.
+In terms of time complexity, the algorithm is on the same terms as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the same input data.
 
 The structure of the algorithm is based on encoding the pattern in a vector of bitmaps. The vector has length equal to the alphabet size, and each element of the vector is a bit-field of width $W$, where $W$ is the size in bits of an unsigned integer. $W$ also limits the length of the pattern in this implementation, though it is possible to implement the algorithm for longer patterns.
 
-The vector is initialized in the preprocessing phase first to an all-1's value in each space, and then modified through a single pass over the pattern. For each character in the pattern, the vector space corresponding to that character has the bit that corresponds to the position in the pattern flipped to 0. The resulting vector fully encodes the pattern. Using the example pattern from the previous two algorithms, imagine that the elements of the vector ($S$) are exactly as wide as the pattern (5 bits) and that there are only the four elements corresponding to the restricted alphabet of the pattern. This is shown in figure~\ref{fig:bitap_s_positions}.
+The vector is initialized in the preprocessing phase first to an all-1's value in each slot, and then modified through a single pass over the pattern. For each character in the pattern, the slot corresponding to that character has the bit that corresponds to the pattern position flipped to 0. The resulting vector fully encodes the pattern. Using the example pattern from the previous two algorithms (``CTAGC''), imagine that the elements of the vector ($S$) are exactly as wide as the pattern (5 bits) and that there are only the four elements corresponding to the restricted alphabet of the pattern. This is shown in figure~\ref{fig:bitap_s_positions}.
 
 \begin{figure}[ht]
 \centering
@@ -100,7 +100,9 @@ The vector is initialized in the preprocessing phase first to an all-1's value i
 \label{fig:bitap_s_positions}
 \end{figure}
 
-During the process of computing the $S$ vector, a ``limit'' value is also calculated: it starts out as 0, and has a number of bits set equal to the full with of the pattern. At the end of the loop that calculates $S$, the value of $limit$ is shifted to the right by one bit, then subject to a bit-complement operation. The result is a value that can be compared to, when determining if a match has been found.
+Here, it is clear that the letter ``C'' appears twice in the pattern as there are two 0-values in S(C). Each of the other three letters appear just once. Examining the bits of each S-value shows exactly where each letter appears in the pattern.
+
+During the process of computing the $S$ vector, a ``limit'' value is also calculated: it starts out as 0, and has a number of bits set equal to the full with of the pattern. At the end of the loop that calculates $S$, the value of $limit$ is shifted to the right by one bit, then subjected to a bit-complement operation. The result is a value that can be directly used in comparison, when determining if a match has been found.
 
 The process of searching for a match begins with a $state$ value of $W$ bit-width, set to all 1's. The target string is read one character at a time. For each iteration of this loop, $state$ is shifted to the left one bit (introducing a 0) and then \texttt{or}'d with the $S$ value of the character under the index. If, after this operation (the ``shift-or''), the value of $state$ is less than the value of $limit$ then a match has been found and will be reported.
 
@@ -167,7 +169,9 @@ To illustrate the process of this algorithm, consider the target string that beg
 \label{fig:ac_progression}
 \end{figure}
 
-Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and moves the DFA to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
+Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is a failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and moves the DFA to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
+
+Here, the Aho-Corasick algorithm has positively identified the presence of two of the three patterns encoded by the DFA. Only 5 character comparisons were made, and no back-tracking was required to find the second pattern.
 
 \subsection{Approximate Matching with Gaps}
 
@@ -194,7 +198,7 @@ Using the third construct and the ``CTAGC'' pattern, an example regular expressi
 \texttt{C.$\lbrace ,3 \rbrace$T.$\lbrace ,3 \rbrace$A.$\lbrace ,3 \rbrace$G.$\lbrace ,3 \rbrace$C}
 \end{center}
 
-However, this not quite correct in that the dot ``\texttt{.}'' matches all characters. This is not desirable, as any ``T'' encountered after the initial ``C'' should move to that part of the pattern rather than being subsumed by the dot. Additionally, in a general regular expression engine the dot will match \textit{all} characters, including those not part of the DNA alphabet. Restricting the counting-states to just the alphabet of the problem, and eliminating the target letter from the gap consideration gives us:
+However, this not correct because the dot (``\texttt{.}'') matches all characters. This is not desirable, as any ``T'' encountered after the initial ``C'' should move to that part of the pattern rather than possibly being subsumed by the dot. Additionally, in a general regular expression engine the dot will match \textit{all} characters, including those not part of the DNA alphabet. Restricting the counting-states to just the alphabet of the problem, and eliminating the target letter from the gap consideration gives us:
 
 \begin{center}
 \texttt{C[ACG]$\lbrace ,3 \rbrace$T[CGT]$\lbrace ,3 \rbrace$A[ACT]$\lbrace ,3 \rbrace$G[AGT]$\lbrace ,3 \rbrace$C}
@@ -202,7 +206,20 @@ However, this not quite correct in that the dot ``\texttt{.}'' matches all chara
 
 This, given that $k$ is known at the time of the construction, can be readily transformed into a DFA.
 
-As an initial na\"{i}ve approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern being searched for. It first creates $m + 1$ states, numbered from 0 to $m$, that represent the start-state and the $m$ characters of the pattern. These are considered the ``trunk'' states. Then for each trunk state from 1 to $m - 1$ (inclusive) the additional states are created as a ``branch'' off of each trunk state. The new states are arranged in such a way as to transition from one to the next on any letter that is \textit{not} the next trunk-state's letter. The last of the branch states will map all non-matching letters to a pre-defined ``failure'' value, indicating that the target letter was not found within a $k$-length gap. This DFA is illustrated in figure~\ref{fig:dfa_dfa}. In this diagram, the branches alternate between left and right of the trunk so as to allow the labels of the transitions to be clearer. The numbering of the states reflects their order of creation, as will be shown later in algorithm~\ref{alg:create_dfa}.
+As an initial na\"{i}ve approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern being searched for. It first creates states 0 and 1, representing the initial state and the the state reached by encountering the first character of the pattern ($p_0$). These two states constitute the beginning of the ``trunk'' of the DFA. Then the algorithm loops from 1 to $m-1$, performing the following steps for each loop iteration:
+
+\begin{enumerate}
+\item A new state is created on the trunk (``\texttt{new\_state}'')
+\item The previous head of the trunk is linked to the new state by a transition on $p_i$
+\item The previous head is recorded in a temporary variable (``\texttt{last\_state}'')
+\item A second loop runs from 1 to $k$ that creates the branch states and their transitions to \texttt{new\_state}
+\item The head of the trunk becomes \texttt{new\_state}
+\item The value of \texttt{new\_state} is advanced by $k$
+\end{enumerate}
+
+At the end of the outer loop, the head of the trunk is recorded as the (sole) acceptance state for the DFA, and state 0 is recorded as the starting state.
+
+This DFA (using the example pattern and $k=3$) is illustrated in figure~\ref{fig:dfa_dfa}. In this diagram, the branches alternate between left and right of the trunk so as to allow the labels of the transitions to be more clearly readable. The numbering of the states reflects their order of creation, as detailed above and as will be outlined later in algorithm~\ref{alg:create_dfa}.
 
 \begin{figure}[ht]
 \centering
@@ -215,9 +232,60 @@ In this DFA, the number of states needed ($N$) can be easily calculated as a fun
 
 \[N~=~1 + m + k(m - 1)\]
 
-Thus, for a given pattern of length $m$, the size of the DFA grows linearly with $k$.
+Thus, for a given pattern of length $m$, the size of the DFA grows linearly with $k$. If the DFA is built using counting states (per~\cite{becchi.crowley.2008}), then the value of $k$ will have no influence on the number of states, which will then be $2m$.
+
+\subsubsection{Creation of the DFA}
+
+Dividing the DFA-Gap process into two parts, the first part is the creation of the automaton itself. This is outlined here in algorithm~\ref{alg:create_dfa}:
+
+\IncMargin{1em}
+\begin{algorithm}[ht]
+  \DontPrintSemicolon
+  \SetKwInOut{Input}{Input}
+  \SetKwInOut{Output}{Output}
+  \SetKwFunction{CreateState}{CreateState}
+  \SetKwData{State}{state}
+  \SetKwData{NewState}{new\_state}
+  \SetKwData{LastState}{last\_state}
+
+  \Input{$P$, the pattern to match ($p_0$ ... $p_{m-1}$)\newline $\Sigma$, the alphabet ($\lbrace~A, C, G, T~\rbrace$)\newline $k$, the maximum gap allowed between characters of $P$}
+  \Output{The finite automaton $M = (q_0, A, \delta)$, where $q_0$ is the starting state, $A$ is the set of accepting states ($A \neq \emptyset$), and $\delta$ is the transition function}
+  \BlankLine
+  $\delta$ $\leftarrow$ \textit{empty list}\;
+  \CreateState{$\delta$,0}\;
+  $\delta(0, p_0)$ $\leftarrow$ 1\;
+  \CreateState{$\delta$,1}\;
+  \State $\leftarrow$ 1\;
+  \NewState $\leftarrow$ 1\;
+  \For{$i \leftarrow 1$ \KwTo $m - 1$}{
+    \NewState $\leftarrow$ $\NewState+1$\;
+    \CreateState{$\delta$,\NewState}\;
+    $\delta(\State, p_i)$ $\leftarrow$ \NewState\;
+    \LastState $\leftarrow$ \State\;
+    \For{$j \leftarrow$ 1 \KwTo $k$}{
+      \CreateState{$\delta$,$\NewState + j$}\;
+      $\delta(\NewState + j,p_i$) $\leftarrow$ \NewState\;
+      $\delta(\LastState,\Sigma - p_i$) $\leftarrow$ $\NewState + j$\;
+      \LastState $\leftarrow$ $\NewState + j$\;
+    }
+    \State $\leftarrow$ \NewState\;
+    \NewState $\leftarrow$ $\NewState + k$
+  }
+  $A$ $\leftarrow$ \State\;
+  $q_0$ $\leftarrow$ 0\;
+  \KwRet{$(q_0, A, \delta)$}
+\caption{CreateDFA}
+\label{alg:create_dfa}
+\end{algorithm}
+\DecMargin{1em}
+
+Lines 1--6 initialize the elements. The body of the outer for-loop runs from line 8 to line 19, and is primarily concerned with extending the trunk of the DFA. The inner for-loop, lines 13--16, builds one branch connected to the state that was the head of the trunk prior to lines 8--10. After the outer loop completes, lines 21--23 assign $A$ (the set of acceptance states) and $q_0$ (the starting state) and return a 3-element tuple of these values along with the transition function $\delta$ itself. This tuple represents what the next part of the algorithm requires in order to perform the matching process.
+
+Lines 2, 4, 9, and 13 reference a process that was not explicitly defined: \texttt{CreateState()}. The implementation of this would be depending on the approach to the algorithm as a whole. In these examples, it is assumed that this process creates one complete state representation with all transitions initialized to the failure value. This allows the default transition to be a failure unless explicitly updated by the this part of the algorithm.
 
 \subsubsection{Matching with the DFA}
+
+The second part of the process is to use the DFA in the matching process. This is outlined here in algorithm~\ref{alg:find_pattern_with_gaps}:
 
 \IncMargin{1em}
 \begin{algorithm}[ht]
@@ -245,55 +313,48 @@ Thus, for a given pattern of length $m$, the size of the DFA grows linearly with
       \Ch $\leftarrow$ $\Ch+1$\;
     }
     \If{\State $\in$ A}{
-      S' $\leftarrow$ $S[i~..~(i + \Ch)]$\;
+      S' $\leftarrow$ $S[i~..~(i + \Ch - 1)]$\;
       \Append{\Matches,$(i,~S')$}\;
     }
-    \KwRet{\Matches}\;
   }
+  \KwRet{\Matches}\;
 \caption{FindPatternWithGaps}
 \label{alg:find_pattern_with_gaps}
 \end{algorithm}
 \DecMargin{1em}
 
-\subsubsection{Creation of the DFA}
+Here, lines 1--3 again are simple initialization. This includes a call to the previous algorithm to obtain the DFA elements that are needed for the process. The outer loop is a standard for-loop that iterates over the range of characters in the target sequence $S$ that can be candidates for the first character in a match. The process of traversing the DFA in search of a match is done in the while-loop. Here, there are only two statements: an advancement of the $state$ value, and incrementing the $ch$ value. When the $\delta$ function finds that the combination of $state$ and $s_{i+ch}$ results in a failure state, the while-loop exits.
 
-\IncMargin{1em}
-\begin{algorithm}[ht]
-  \DontPrintSemicolon
-  \SetKwInOut{Input}{Input}
-  \SetKwInOut{Output}{Output}
-  \SetKwFunction{CreateState}{CreateState}
-  \SetKwData{State}{state}
-  \SetKwData{NewState}{new\_state}
-  \SetKwData{LastState}{last\_state}
+When the while-loop exits, if the value of $state$ is a member of the set $A$ then a match has been found. Recall that $A$ will have only one element, so this comparison can be reduced to a simple equality comparison. The designated list $matches$ collects each found instance as a tuple of the index $i$ within $S$ and the complete matched string with gap characters.
 
-  \Input{$P$, the pattern to match ($p_0$ ... $p_{m-1}$)\newline $\Sigma$, the alphabet ($\lbrace~A, C, G, T~\rbrace$)\newline $k$, the maximum gap allowed between characters of $P$}
-  \Output{The finite automaton $M = (q_0, A, \delta)$, where $q_0$ is the starting state, $A$ is the set of accepting states ($A \neq \emptyset$), and $\delta$ is the transition function}
-  \BlankLine
-  $\delta$ $\leftarrow$ \textit{empty list}\;
-  \CreateState{$\delta$,0}\;
-  $\delta(0, p_0)$ $\leftarrow$ 1\;
-  \CreateState{$\delta$,1}\;
-  \State $\leftarrow$ 1
-  \NewState $\leftarrow$ 1
-  \For{$i \leftarrow 1$ \KwTo $m - 1$}{
-    \NewState $\leftarrow$ $\NewState+1$\;
-    \CreateState{$\delta$,\NewState}\;
-    $\delta(\State, p_i)$ $\leftarrow$ \NewState\;
-    \LastState $\leftarrow$ \State\;
-    \For{$j \leftarrow$ 1 \KwTo $k$}{
-      \CreateState{$\delta$,$\NewState + j$}\;
-      $\delta(\NewState + j,p_i$) $\leftarrow$ \NewState\;
-      $\delta(\LastState,\Sigma - p_i$) $\leftarrow$ $\NewState + j$\;
-      \LastState $\leftarrow$ $\NewState + j$\;
-    }
-    \State $\leftarrow$ \NewState\;
-    \NewState $\leftarrow$ $\NewState + k$
-  }
-  $A$ $\leftarrow$ \State\;
-  $q_0$ $\leftarrow$ 0\;
-  \KwRet{$(q_0, A, \delta)$}
-\caption{CreateDFA}
-\label{alg:create_dfa}
-\end{algorithm}
-\DecMargin{1em}
+\subsubsection{Example}
+
+Using a smaller example pattern of ``CGAG'' and a value of $k=1$, the DFA shown in figure~\ref{fig:dfa_example} is built. For demonstration purposes, the sequence ``CCGAAGC'' will be used to search within.
+
+\begin{figure}[ht]
+\centering
+\input{figures/dfa-example}
+\caption{DFA for the pattern CGAG}
+\label{fig:dfa_example}
+\end{figure}
+
+Following algorithm~\ref{alg:find_pattern_with_gaps}, the following steps take place:
+
+\begin{enumerate}
+\item Loop starts at $i=0$
+\item $state=0$, $ch=0$
+\item $\delta(0,C)$ is read, transitions to $state=1$, $ch$ increments to 1
+\item $\delta(1,C)$ is read, transitions to $state=3$, $ch$ increments to 2
+\item $\delta(3,G)$ is read, failure detected
+\item $state$ not in $A$, so loop advances and $i=1$
+\item $state$ and $ch$ each reset to 0
+\item $\delta(0,C)$ is read, transitions to $state=1$, $ch$ increments to 1
+\item $\delta(1,G)$ is read, transitions to $state=2$, $ch$ increments to 2
+\item $\delta(2,A)$ is read, transitions to $state=4$, $ch$ increments to 3
+\item $\delta(4,A)$ is read, transitions to $state=7$, $ch$ increments to 4
+\item $\delta(7,G)$ is read, transitions to $state=6$, $ch$ increments to 5
+\item $\delta(6,C)$ is read, failure detected
+\item $state$ is in $A$, so a tuple of (1,CGAAG) is saved on $matches$
+\end{enumerate}
+
+At this point the loop would resume with $i=2$, but this sufficiently illustrates the process. A total of 9 state transitions were made, resulting in the location of a match 5 characters in size. At the reading of each state transition only one character look-up was required since the $\delta$ function initializes each new state to default all transitions to the failure value.
