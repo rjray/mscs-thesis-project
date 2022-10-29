@@ -77,4 +77,4 @@ def dfa_gap(pat_data, sequence):
 
 
 if __name__ == "__main__":
-    exit(run_approx(init_dfa_gap, dfa_gap, "kmp", argv))
+    exit(run_approx(init_dfa_gap, dfa_gap, "dfa_gap", argv))
