@@ -8,6 +8,7 @@ To explore these hypotheses a range of experiments were executed in the chosen l
 To begin, some concepts will be covered and terms will be defined.
 
 \subsubsection{RAPL (Running Average Power Limit)}
+\label{subsubsec:rapl}
 
 The \textit{Running Average Power Limit} (RAPL) measurement system was introduced by Intel into their CPU products starting with the Sandybridge family of processors. The system allows measuring energy over several areas:
 
@@ -55,7 +56,7 @@ The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's 
 
 \subsection{Languages}
 
-The experiments were performed on five languages. The languages were chosen for their commonalities as well as their differences:
+The experiments were performed using five languages. The languages were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
 \item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping, as well as being popular in bioinformatics computing.
