@@ -12,7 +12,11 @@ import yaml
 NUMERICAL_KEYS = [
     "runtime", "total_runtime", "package", "pp0", "dram", "max_memory"
 ]
+
+FIX_CONST = 2**32 * 0.00006104
+
 ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
+APPROX_ALGORITHMS = [f"dfa_gap({k + 1})" for k in range(5)]
 ALGORITHM_LABELS = {
     "kmp": "Knuth-Morris-Pratt",
     "boyer_moore": "Boyer-Moore",
@@ -20,6 +24,9 @@ ALGORITHM_LABELS = {
     "aho_corasick": "Aho-Corasick",
     "combined": "Combined Data",
 }
+for k in range(5):
+    ALGORITHM_LABELS[APPROX_ALGORITHMS[k]] = f"DFA-Gap (k={k + 1})"
+
 LANGUAGES = [
     "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust"
 ]
@@ -161,6 +168,9 @@ def validate(data):
                     f"  ! Iteration {iteration} of {language} {algorithm}",
                     f"has a negative numerical value in {key}"
                 )
+                fix_val = FIX_CONST + record[key]
+                print(f"    Value {record[key]} corrected to {fix_val}")
+                record[key] = fix_val
                 continue
 
     return good
@@ -197,23 +207,8 @@ def build_structure(data):
     return struct, languages, algorithms
 
 
-# Get the maximum size of any of the cells in data.
-def get_max_size(data, langs, algos):
-    sizes = []
-
-    for lang in langs:
-        for algo in algos:
-            sizes.append(len(data[lang][algo]))
-
-    return max(sizes)
-
-
 # Do the analysis over the data. Determine means, medians, etc.
 def analyze_data(data, langs, algos):
-    # Start by getting the maximum size of iterations in the data. Everything
-    # else will be held to this as the standard, and notes will be made on any
-    # that are short.
-    max_size = get_max_size(data, langs, algos)
     new_data = {}
 
     for lang in langs:
@@ -234,7 +229,7 @@ def analyze_data(data, langs, algos):
             #   5. Variance
             #   6. Any notes about short samples
             for key in NUMERICAL_KEYS:
-                cell = {"notes": None}
+                cell = {}
                 values = map(lambda x: x[key], iters)
                 values = np.array(
                     list(filter(lambda x: x >= 0.0, values)), dtype=float
@@ -248,9 +243,6 @@ def analyze_data(data, langs, algos):
                 cell["median"] = median(values)
                 cell["stdev"] = stdev(values)
                 cell["variance"] = variance(values)
-                if size != max_size:
-                    # It can only be smaller
-                    cell["notes"] = f"Based on {size} (of {max_size}) samples"
                 new_data[lang][algo][key] = cell
                 # Add to the running combined value:
                 new_data[lang]["combined"][key] = \
@@ -500,7 +492,7 @@ def create_tables(data, languages, filename):
         # Create each table individually.
 
         # Create a run-time table for each algorithm:
-        for algo in ALGORITHMS:
+        for algo in ALGORITHMS + APPROX_ALGORITHMS:
             create_computed_table(
                 f, data, languages, algo, "runtime",
                 caption=f"{ALGORITHM_LABELS[algo]} run-times",
@@ -508,7 +500,7 @@ def create_tables(data, languages, filename):
             )
 
         # Create a pp0/dram energy-usage table for each algorithm:
-        for algo in ALGORITHMS:
+        for algo in ALGORITHMS + APPROX_ALGORITHMS:
             create_computed_table(
                 f, data, languages, algo, ["pp0", "dram"],
                 caption=f"{ALGORITHM_LABELS[algo]} PP0/DRAM energy usage",
@@ -516,7 +508,7 @@ def create_tables(data, languages, filename):
             )
 
         # Create a package energy-usage-per-second table for each algorithm:
-        for algo in ALGORITHMS:
+        for algo in ALGORITHMS + APPROX_ALGORITHMS:
             caption = \
                 f"{ALGORITHM_LABELS[algo]} package energy usage over run-time"
             create_computed_table(
@@ -526,7 +518,7 @@ def create_tables(data, languages, filename):
             )
 
         # Create a max-memory table for each algorithm:
-        for algo in ALGORITHMS:
+        for algo in ALGORITHMS + APPROX_ALGORITHMS:
             caption = \
                 f"{ALGORITHM_LABELS[algo]} total memory usage"
             create_computed_table(
