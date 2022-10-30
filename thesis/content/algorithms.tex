@@ -174,6 +174,7 @@ Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which th
 Here, the Aho-Corasick algorithm has positively identified the presence of two of the three patterns encoded by the DFA. Only 5 character comparisons were made, and no back-tracking was required to find the second pattern.
 
 \subsection{Approximate Matching with Gaps}
+\label{subsec:dfa_gap}
 
 For the fifth and final algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
 
