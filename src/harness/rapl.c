@@ -74,12 +74,10 @@ double power_units, cpu_energy_units, time_units, dram_energy_units;
   MSR counter wrapping at 2^32.
 */
 double compute_energy(long long before, long long after, double scale) {
-  long long diff;
+  long long diff = after - before;
 
-  if (after > before)
-    diff = after - before;
-  else
-    diff = (ENERGY_MAX - before) + after;
+  if (diff < 0)
+    diff += ENERGY_MAX;
 
   return (double)diff * scale;
 }
