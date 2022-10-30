@@ -9,7 +9,6 @@ use constant ASIZE => 128;
 use constant FAIL => -1;
 
 use List::Util qw(uniq);
-use Time::HiRes qw(gettimeofday tv_interval);
 
 use Run qw(run_multi);
 

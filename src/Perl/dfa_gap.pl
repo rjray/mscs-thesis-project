@@ -7,8 +7,6 @@ use lib $Bin;
 use constant ASIZE => 128;
 use constant FAIL => -1;
 
-use Time::HiRes qw(gettimeofday tv_interval);
-
 use Run qw(run_approx);
 
 my @ALPHABET = qw(65 67 71 84);
