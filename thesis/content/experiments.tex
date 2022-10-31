@@ -5,7 +5,7 @@ To gather the desired measurements a range of experiments were executed in the c
 
 \subsection{Definitions and Measurements}
 
-To begin, some concepts will be covered and terms will be defined.
+To begin, some concepts will be introduced and terms defined.
 
 \subsubsection{RAPL (Running Average Power Limit)}
 \label{subsubsec:rapl}
@@ -28,7 +28,7 @@ Reading the RAPL data is done through the \textit{model-specific registers} (MSR
 
 In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S~=~61.04~\mu$J.
 
-Obtaining the data during run-time from RAPL requires reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
+Obtaining the data during run-time from RAPL required reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
 
 An issue with the RAPL system was encountered during runs of the experiments: because the value of the energy registers is 32 bits in size, it wraps around to 0 when the maximum value is reached. This caused occasional anomalous readings in cases where the register would reset between the initial reading and the final reading, resulting in a negative overall value. The program that processed the output from the experiments was adjusted to recognize such values and adjust them by applying a constant value computed as $C~=~S \times 2^{32}$, where $S$ is the scaling factor for that value's type (Package, DRAM, etc.).
 
@@ -38,11 +38,23 @@ Adding the appropriate constant for the type of value that was anomalous dealt w
 
 The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
 
-As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas.2020} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Here, the purpose of measuring SLOC will be simple: comparison of the implementation of identical algorithms in different languages.
+As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas.2020} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen.2007} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple: comparison of the implementation of identical algorithms in different languages.
 
-For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{sloc: \texttt{https://github.com/flosse/sloc}}
+For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{sloc: \texttt{https://github.com/flosse/sloc}}.
 
-\subsubsection{Metrics}
+\subsubsection{Language Conciseness Through Compression}
+
+In~\cite{bergmans.et.al.2021}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater code-redundancy necessary to express the purposes of the program.
+
+Given that none of the experiment source files are of significant length, this metric was applied at the language level, looking at all files for each language in per-language archive files.
+
+\subsubsection{Cyclomatic Complexity}
+
+Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe.1976}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to a ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
+
+Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard}\footnote{lizard: \texttt{https://github.com/terryyin/lizard}} was used for all languages except Perl, which was not supported by the tool. To gather the metrics for the Perl code a second tool, called \texttt{countperl}\footnote{From the Perl-Metrics-Simple package for Perl, \texttt{https://metacpan.org/dist/Perl-Metrics-Simple}}, was used. It is not clear if the techniques for measuring Perl were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{sec:results}.
+
+\subsubsection{Summary of Metrics}
 
 For each program comprising an experiment, the following data was gathered either dynamically (from executions of the program) or statically (through non-execution analysis of program source code).
 
@@ -54,19 +66,25 @@ For each program comprising an experiment, the following data was gathered eithe
 \item[DRAM Energy Usage:] The energy consumed by the DRAM during the full lifespan of the program. Measured in Joules.
 \item[Full (Package) Energy Usage:] The energy consumed by the full (socketed) package, which includes the CPU cores' energy but not the DRAM energy. Also measured in Joules.
 \item[Source Lines Of Code:] The measured lines of code in the implementation of the program, using a tool (\texttt{sloc}) designed to measure these values using consistent standards across the different programming languages.
+\item[Cyclomatic Complexity:] The measured complexity of the code, including both the average complexity for the file and specific complexities for those functions that directly correspond to each other across the different implementations.
 \end{description}
 
 The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
+Independent of the per-program metrics, a measurement of conciseness was made using the compression-based technique described in~\citep{bergmans.et.al.2021}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
+
 \subsection{Languages}
+\label{subsec:languages}
 
 The experiments were performed using five languages. The languages were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
 \item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping, as well as being popular in bioinformatics computing.
 \item Each language is currently in widespread use across different disciplines of software development.
-\item The languages have differing aspects in their approach to memory management, as are detailed below.
+\item The languages showcase differing aspects the approach to memory management, as are detailed below.
 \end{itemize}
+
+Each language section includes a sample of the language, implementing the naive (O($mn$)) matching algorithm.
 
 \subsubsection{C}
 
@@ -76,7 +94,9 @@ C relies on what is referred to as \textit{manual memory management}, meaning th
 
 Memory management in C is done through a collection of functions in the C standard library, including \texttt{malloc}, \texttt{calloc}, \texttt{realloc}, \texttt{reallocarray}, and \texttt{free}. While \texttt{free} returns allocated memory to the heap, the other functions either allocate memory or change the size of an existing block of allocated memory.
 
-Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. Due to the low-level nature of C and the maturity of the compilers, C generally performed the best at each algorithm compared to other languages.
+Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. Due to the low-level nature of C and the maturity of the compilers, C generally performed the best at each algorithm compared to other languages. Listing~\ref{lst:naive_c} shows a C implementation of the naive algorithm.
+
+\input{code/naive.c}
 
 \subsubsection{C++}
 
@@ -84,7 +104,9 @@ C++ was developed initially as an extension of C, by Bjarne Stroustrup while wor
 
 In C++, Stroustrup originated the programming idiom of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} (RAII). Most dynamic memory is managed via class constructors and destructors, though C++ also supports the \texttt{malloc}-based memory management mechanisms inherited from C.
 
-Experiments using the C++ language were also run on the same three compiler toolchains as C: GCC, LLVM, and Intel.
+Experiments using the C++ language were also run on the same three compiler toolchains as C: GCC, LLVM, and Intel. Listing~\ref{lst:naive_cpp} shows the naive algorithm implemented in C++.
+
+\input{code/naive.cpp}
 
 \subsubsection{Perl}
 
@@ -92,21 +114,33 @@ Perl is a scripting language developed by Larry Wall while working as a programm
 
 Perl's reach grew tremendously with the introduction of the World Wide Web's Common Gateway Interface due to its native support for regular expressions and strong text-processing capabilities. Initially developed as a general-purpose scripting language, Perl borrowed features from languages such as C, Awk, Sed, and the \texttt{sh} shell. Perl also offers features generally associated with functional programming, including first-class and higher order functions, lexical closures, garbage collection, and list comprehensions.
 
-Perl is dynamically-typed and multi-paradigm in nature. It supports procedural as well as object-oriented programming styles as well as metaprogramming.
+Perl is dynamically-typed and multi-paradigm in nature. It supports procedural as well as object-oriented programming styles as well as metaprogramming. Its garbage collection approach to memory management is based on reference counting.
+
+A Perl implementation of the naive algorithm is given in listing~\ref{lst:naive_perl}.
+
+\input{code/naive.pl}
 
 \subsubsection{Python}
 
 Python is another scripting language, developed by Guido van Rossum while at Centrum Wiskunde \& Informatica in the late 1980's and first released as version 0.9.0 in 1991. Like Perl, it is also dynamically-typed and multi-paradigm in its nature. As a language, Python consistently ranks high in user popularity on such measures as the TIOBE Programming Community Index\footnote{TIOBE Index: \texttt{https://www.tiobe.com/tiobe-index/}}.
 
+Python's memory management is a combination of reference counting and a cycle-detecting garbage collector. A Python implementation of the naive algorithm is given in listing~\ref{lst:naive_python}.
+
+\input{code/naive.py}
+
 \subsubsection{Rust}
 
 Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature.rust.2020}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay.2021}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.64.0 and was released in September of 2022.
 
-An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
+An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
 
 With languages such as C and C++, \textit{data ownership} is handled largely through practice and convention. An instance of a C++ \texttt{std::string} owns the buffer allocated for the storage of the string data. Other variables may be created, though, that point to the same buffer or a single character within it. These other interests in the content of the string buffer have their own responsibility for noticing when the original string object is destroyed and the buffer freed. After such point, the outside interests are each responsible for marking their references as no longer valid.
 
 In contrast, Rust integrates the concept of ownership directly into the language itself. Compile-time checks enforce ownership and report violations. When the owner of a value is ``dropped'' (Rust terminology for freeing) the owned value is dropped as well. While the variables themselves are on the stack, the content is allocated on the heap. Variables own their values, and the complex datatypes (structs, tuples, arrays, and vectors) own their elements.
+
+Listing~\ref{lst:naive_rust} shows the naive algorithm as implemented in Rust. Note that the subroutine is named slightly differently in this case, as \texttt{match} is a keyword in Rust.
+
+\input{code/naive.rs}
 
 \subsection{General Implementation of the Algorithms}
 
@@ -198,16 +232,50 @@ As was the case with some of the previous algorithms, the main differences betwe
 
 The Rust version of this algorithm is largely identical in structure to the C and C++ versions. In terms of SLOC, it comes in longer than either of those, due primarily to the number of lines used for pattern-matching in the processing of the pattern data structure created by the initialization routine.
 
-The Perl implementation suffered from some readability issues attributable to the ways in which Perl handles slicing an array that has been passed by reference rather than by value. Perl also features a postfix-increment operator, allowing a savings of one line in the SLOC score. In contrast, the Python implementation once again gained conciseness and readability through clear syntax around iterators and slightly cleaner syntax around treating strings as arrays and applying slicing operations to them.
+The Perl implementation suffered from some readability issues attributable to the ways in which Perl handles slicing an array that has been passed by reference rather than by value. Perl also features a postfix-increment operator, allowing a savings of one line in the SLOC score. In contrast, the Python implementation once again gained conciseness and readability through its clear syntax around iterators and slightly cleaner syntax around treating strings as arrays and applying slicing operations to them.
+
+\subsection{Initial Observations on Complexity}
+
+At this point, some initial observations can be made about the complexity of some of the code. In the code examples given throughout section~\ref{subsec:languages}, all implementations of the naive algorithm had the same cyclomatic complexity value of 3. All also produced the same directed flow graph, shown in figure~\ref{fig:graph-naive}. In this graph, nodes 1 and 6 represent the entry and exit to the function. Node 2 represents the for-loop, and node 3 represents the if-conditional block.
+
+\begin{figure}[ht]
+\centering
+\input{figures/graph-naive}
+\caption{Flow graph of the naive algorithm}
+\label{fig:graph-naive}
+\end{figure}
+
+Part of the reason for this is that the complexity measurement does not take into account calls to functions that are part of the given language's standard library. In the cases of C and C++, both utilized library functions: \texttt{strncmp} in C and \texttt{substr} in C++. In contrast, the use of \texttt{substr} in Perl is a keyword of the language. Python and Rust skip this entirely by virtue of having array-slicing be a core language feature, along with the ability to compare two slices directly. Had the complexity-measuring tools taken the library calls into account, that would have changed the graph for those languages from one connected component to two, and resulted in a higher complexity score.
+
+Compare this to the \texttt{make\_next\_table} functions defined in the implementations of Knuth-Morris-Pratt. The complexity tool found the Python version to have a score of 6 while the C and C++ versions both scored 5. The reason for the distinction is that C and C++ allocated the array variable \textit{next\_table} prior to the function call and pass it as a parameter. By contrast, in Python \textit{next\_table} was created within the function. The loop used to create it is the source of the extra point of complexity. Figures~\ref{fig:graph-kmp-py} and~\ref{fig:graph-kmp-cpp} illustrate these slightly-different flow graphs. In~\ref{fig:graph-kmp-py}, the extra for-loop represented by states 2 and 3 are where the extra complexity is introduced.
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+\centering
+\input{figures/graph-kmp-py}
+\caption{Flow of the Python \texttt{make\_next\_table} function}
+\label{fig:graph-kmp-py}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\centering
+\input{figures/graph-kmp-cpp}
+\caption{Flow of the C++ \texttt{make\_next\_table} function}
+\label{fig:graph-kmp-cpp}
+\end{minipage}
+\end{figure}
+
+The resulting complexity of the various implementations is explored in more depth in section~\ref{sec:results}.
 
 \subsection{Optimizations}
 
-Over the course of the development of the experiments code in each language, the need became clear for some basic optimizations. In every case, any optimization was applied consistently across all languages. Some examples of optimizations include:
+Over the course of the development of the experiments in each language, the need became clear for some basic optimizations. In every case, any optimization was applied consistently across all languages. Some examples of optimizations include:
 
 \begin{description}
 \item[Data Preprocessing:] While the C and C++ languages were able to seamlessly use individual characters from the strings as array indices, Rust and the scripting languages were not. Based on an assumption that production-targeted code would apply any similar preprocessing, the strings were converted to forms directly usable by the other languages. In the case of Rust, this was a conversion of strings to arrays of unsigned 8-bit integers. In the case of Python, it was a direct mapping of strings (which are already treated as sequences by Python) into the ordinal values of each character. Perl required the most preprocessing, with strings first being converted to arrays of individual characters before being mapped to their ordinal values.
-\item[Pattern Preprocessing:] To bring down the running times of the script languages' experiments, a mechanism for preprocessing patterns was developed that allowed for each pattern to be processed only once prior to being applied to all sequences. Without this, some instances of the Knuth-Morris-Pratt algorithm (for example) took close to an hour to complete.
-\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would have had little effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the overall readability of the code.
+\item[Pattern Preprocessing:] To bring down the running times of the scripting languages' experiments, a mechanism for preprocessing patterns was developed that allowed for each pattern to be processed only once prior to being applied to all sequences. Without this, some instances of the Knuth-Morris-Pratt algorithm (for example) took close to an hour to complete. One the structure of this was established, it was also applied to the compiled languages as well.
+\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would had little or no effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the overall readability of the code.
+\item[Compiler Options:] For the three compiled languages, consistent choices of compiler options for optimization were applied. For the C and C++ code, the same options were used for both languages. For the Rust code, the \texttt{cargo} utility was run with an option that instructed the compiler to build optimized code instead of debug-instrumented code. These were not applicable to the Perl and Python code, as both of those are interpreted languages.
 \end{description}
 
 All optimization steps were designed to be done inside the timing window of the runner module, and contributed to the reported algorithm run-time.
@@ -244,7 +312,7 @@ The size of the data set was chosen after some preliminary experiments showed th
 
 \subsection{Testing Platform}
 
-The experiments were run on a dedicated machine running a version of the Linux operating system. The set of installed software was kept minimal to reduce the interference with general energy usage during the runs of experiments.
+The experiments were run on a dedicated machine running a version of the Linux operating system. The set of installed software was kept minimal to reduce the chance of background processes influencing the readings of general energy usage during the runs of experiments.
 
 \subsubsection{Hardware Specifications}
 
@@ -274,11 +342,11 @@ The CPU is dual-core, with hyperthreading cores, for a total of 4 computational 
 
 The NUC was cleaned of the vendor-installed operating system. Linux was installed on it using the minimal server edition of Ubuntu Linux 22.04.1. All unnecessary packages and software services were either disabled or removed completely.
 
-The development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python interpreter was also provided by Homebrew. The Rust language toolchain was installed and managed using the ``Rustup''\footnote{rustup: \texttt{https://rustup.rs/}} management software. Core software development packages from Ubuntu were also installed at this time.
+The development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python and Perl interpreters that were used were also provided by Homebrew, as were the majority of the tools used for developing, testing, and evaluating the experiments. The Rust language toolchain was installed and managed using the ``Rustup''\footnote{rustup: \texttt{https://rustup.rs/}} management software. Core software development packages from Ubuntu were also installed at this time.
 
 \subsubsection{Compilers and Other Tools}
 
-Table~\ref{table:tools} lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the Python details indicates that the remaining tools were used on the development machine only, not on the NUC. These tools were used in the testing and evaluation of the experiments code prior to running experiments on the NUC.
+Table~\ref{table:tools} lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the Python details indicates that the remaining tools were used on the development machine only, not on the NUC. These tools were used in the testing and evaluation of the experiments code separately from running experiments on the NUC.
 
 \begin{table}[h!]
 \begin{center}
@@ -288,16 +356,20 @@ Table~\ref{table:tools} lists the primary software tools and packages that were 
 \hline
 GNU Make & 4.3 & Ubuntu 22.04\\
 GCC & 11.2.0 & Ubuntu 22.04\\
-LLVM & 15.0.3 & Linux Homebrew\\
+LLVM & 15.0.3 & Homebrew\\
 Intel\textregistered~oneAPI Compiler & 2022.2.0 & Intel\\
 Rust & 1.64.0 & Rustup Manager\\
-Perl & 5.36.0 & Linux Homebrew\\
-Python & 3.10.8 & Linux Homebrew\\
+Perl & 5.36.0 & Homebrew\\
+Python & 3.10.8 & Homebrew\\
 \hline
 \hline
-Valgrind & 3.20.0 & Linux Homebrew\\
-\texttt{sloc} & 0.2.1 & Linux Homebrew\\
+Valgrind & 3.20.0 & Homebrew\\
+\texttt{sloc} & 0.2.1 & Homebrew\\
 \texttt{perf} & 5.15.53 & Ubuntu 22.04\\
+\texttt{cloc} & 1.94 & Homebrew \\
+\texttt{xz} & 5.2.7 & Homebrew \\
+\texttt{lizard} & 1.17.10 & Homebrew \\
+\texttt{countperl} & 1.0.1 & Ubuntu 22.04 \\
 \hline
 \end{tabular}
 \caption{List of software tools used}
@@ -305,6 +377,6 @@ Valgrind & 3.20.0 & Linux Homebrew\\
 \end{center}
 \end{table}
 
-The tools used for the experiments themselves include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
+The tools used for the experiments themselves do include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
 
-The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
+The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the conciseness and expressiveness of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of expressiveness via compression. The \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.

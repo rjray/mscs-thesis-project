@@ -3,15 +3,15 @@
 
 Five algorithms in total were chosen to be used in providing the basis for evaluating the languages under evaluation. Of the five, four are exact-matching algorithms and one is an approximate-matching algorithm. One algorithm matches multiple patterns in a single examination of a sequence, while the remaining algorithms match only single patterns.
 
-In this section, these algorithms are introduced and the first four briefly explained. The fifth algorithm will receive a more in-depth treatment due to it being a new approach.
+In this section, these algorithms are introduced and the first four briefly explained. The fifth algorithm will receive a more in-depth treatment due to it being a new approach. An understanding of the underlying mechanics of the algorithms will be helpful when later evaluating the implementations of them.
 
 \subsection{Knuth, Morris, and Pratt}
 
 The Knuth-Morris-Pratt~\cite{knuth.morris.pratt.1977} algorithm is one of the foundational algorithms in the area of string matching and text searching. It is still used in the present day, with implementations as recent as the Rust-Bio project~\cite{rust.bio.2015}. This was chosen primarily for historical significance, but also for ease of implementation.
 
-Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time linear to the sum of the pattern length and the target length.
+Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time-complexity linear to the sum of the pattern length and the target length.
 
-Generally when matching, the pattern is aligned with positions in the target string. Shifting is done when a character mismatch is found between an index in the target and the corresponding index in the pattern. Where a na\"{i}ve implementation might shift the pattern by one place after each failed match, resulting in a time complexity approaching O($mn$), the Knuth-Morris-Pratt approach is built on the concept of an auxiliary table (referred to as the ``next'' table) that instructs the matching algorithm on how much to shift the pattern over the target stream. Based on repetition within the pattern itself, the table may call for a shift of the pattern by more than one character for a given mismatch.
+Generally when matching, the pattern is aligned with positions in the target string. Shifting is done when a character mismatch is found between an index in the target and the corresponding index in the pattern. Where a naive implementation might shift the pattern by one place after each failed match, resulting in a time complexity approaching O($mn$), the Knuth-Morris-Pratt approach is built on the concept of an auxiliary table (referred to as the ``next'' table) that instructs the matching algorithm on how much to shift the pattern over the target stream. Based on repetition within the pattern itself, the table may call for a shift of the pattern by more than one character for a given mismatch.
 
 The computation of this table is shown in the paper to require O($m$) steps, and the process of matching the pattern to the target takes at most an additional $2n$ steps. This is due to the fact that, at each step of the matching process, only one of the text pointer or the pattern pointer are moved (each of which can only move $n$ times at most). This results in a worst-case run-time bounded by O($m+n$).
 
@@ -180,7 +180,7 @@ For the fifth and final algorithm in the suite of experiments, it was decided to
 
 The idea of using a DFA to represent the pattern is inspired primarily by~\cite{aho.corasick.1975} and~\cite{becchi.crowley.2008}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automata. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
 
-From this, a different type of approximate-matching can be pictured: one that allows for well-defined, finite ``gaps'' between elements of the pattern being matched. Given a value $k$ that is a positive integer, gaps that are up to $k$ characters in length can be tolerated while still regarding the pattern as matching a point in the target sequence. And when $k = 0$, the approach becomes the na\"{i}ve exact-matching approach that is of time-complexity O($mn$).
+From this, a different type of approximate-matching can be pictured: one that allows for well-defined, finite ``gaps'' between elements of the pattern being matched. Given a value $k$ that is a positive integer, gaps that are up to $k$ characters in length can be tolerated while still regarding the pattern as matching a point in the target sequence. And when $k = 0$, the approach becomes the naive exact-matching approach that is of time-complexity O($mn$).
 
 Current algorithms for approximate matching in DNA sequences use a variety of approaches, such as edit distance. But methods based on edit distance can result in all changes or differences being clumped together as opposed to distributed across the pattern in a more balanced fashion. For example, given the same ``CTAGC'' pattern used for the previous single-pattern algorithms and $k = 3$ this algorithm would allow as many as 12 additions to the pattern in order to match a position in the sequence. Simply allowing an edit distance of 12 in a different algorithm could potentially lead to all 12 additions being between two of the pattern characters. The algorithm described here is designed to prevent such uneven distribution of the gap letters in the matched segment of the sequence.
 
@@ -207,7 +207,7 @@ However, this not correct because the dot (``\texttt{.}'') matches all character
 
 This, given that $k$ is known at the time of the construction, can be readily transformed into a DFA.
 
-As an initial na\"{i}ve approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern being searched for. It first creates states 0 and 1, representing the initial state and the the state reached by encountering the first character of the pattern ($p_0$). These two states constitute the beginning of the ``trunk'' of the DFA. Then the algorithm loops from 1 to $m-1$, performing the following steps for each loop iteration:
+As an initial naive approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern being searched for. It first creates states 0 and 1, representing the initial state and the the state reached by encountering the first character of the pattern ($p_0$). These two states constitute the beginning of the ``trunk'' of the DFA. Then the algorithm loops from 1 to $m-1$, performing the following steps for each loop iteration:
 
 \begin{enumerate}
 \item A new state is created on the trunk (``\texttt{new\_state}'')
