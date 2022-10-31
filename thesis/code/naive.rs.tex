@@ -1,0 +1,15 @@
+\begin{lstlisting}[language=Rust,caption={Rust naive implementation},label={lst:naive_rust}]
+fn match_string(pattern: &str, string: &str) -> Vec<usize> {
+    let mut matches: Vec<int> = Vec::new();
+    let m = pattern.len();
+    let n = string.len();
+
+    for i in 0..=(n - m) {
+        if pattern == string[i..(i + m)] {
+            matches.push(i);
+        }
+    }
+
+    matches
+}
+\end{lstlisting}

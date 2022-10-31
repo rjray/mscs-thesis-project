@@ -1,0 +1,14 @@
+\begin{lstlisting}[language=C++,caption={C++ naive implementation},label={lst:naive_cpp}]
+std::vector<int> match(std::string pattern, std::string string) {
+  std::vector<int> matches;
+  int m = pattern.length();
+  int n = string.length();
+
+  for (int i = 0; i <= n - m; i++) {
+    if (pattern == string.substr(i, m))
+      matches.push_back(i);
+  }
+
+  return matches;
+}
+\end{lstlisting}

@@ -1,0 +1,17 @@
+\begin{lstlisting}[language=Perl,caption={Perl naive implementation},label={lst:naive_perl}]
+sub match {
+    my ($pattern, $string) = @_;
+
+    my $m = length $pattern;
+    my $n = length $string;
+    my @matches = ();
+
+    for my $i (0 .. ($n - $m)) {
+        if ($pattern = substr $string, $i, $m) {
+            push @matches, $i;
+        }
+    }
+
+    return \@matches;
+}
+\end{lstlisting}

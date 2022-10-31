@@ -1,0 +1,19 @@
+\begin{lstlisting}[language=C,caption={C naive implementation},label={lst:naive_c}]
+int match(const char *pattern, const char *string, int **matches) {
+  int *saved_matches = NULL;
+  int found_matches = 0;
+  int m = strlen(pattern);
+  int n = strlen(string);
+
+  for (int i = 0; i <= n - m; i++) {
+    if (!strncmp((const char *)(string + i), pattern, m)) {
+      found_matches++;
+      saved_matches = realloc(saved_matches, found_matches * sizeof(int));
+      saved_matches[found_matches - 1] = i;
+    }
+  }
+
+  **matches = saved_matches;
+  return found_matches;
+}
+\end{lstlisting}

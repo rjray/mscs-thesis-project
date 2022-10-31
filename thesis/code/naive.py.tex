@@ -1,0 +1,12 @@
+\begin{lstlisting}[language=Python,caption={Python naive implementation},label={lst:naive_python}]
+def match(pattern, string):
+    m = len(pattern)
+    n = len(string)
+    matches = []
+
+    for i in range(n - m + 1):
+        if pattern == string[i:(i + m)]:
+            matches.append(i)
+
+    return matches
+\end{lstlisting}
