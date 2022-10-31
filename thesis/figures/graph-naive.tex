@@ -1,0 +1,18 @@
+\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+    \node[state] (s_1)                {1};
+    \node[state] (s_2) [below of=s_1] {2};
+    \node[state] (s_3) [below of=s_2] {3};
+    \node[state] (s_4) [right of=s_3] {4};
+    \node[state] (s_5) [below of=s_3] {5};
+    \node[state] (s_6) [below of=s_5] {6};
+
+    \path[->]
+        (s_1) edge             node {} (s_2)
+        (s_2) edge             node {} (s_3)
+        (s_2) edge[bend right] node {} (s_6)
+        (s_3) edge             node {} (s_4)
+        (s_3) edge             node {} (s_5)
+        (s_4) edge             node {} (s_5)
+        (s_5) edge[bend left]  node {} (s_3);
+\end{tikzpicture}
+
