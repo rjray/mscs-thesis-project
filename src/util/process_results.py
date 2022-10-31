@@ -164,6 +164,9 @@ def validate(data):
 
         for key in NUMERICAL_KEYS:
             if record[key] < 0.0:
+                # Because the MSRs that are read for energy consumption numbers
+                # roll over at 32 bits, sometimes we get a negative number that
+                # stems from the "after" value being smaller than the "before".
                 print(
                     f"  ! Iteration {iteration} of {language} {algorithm}",
                     f"has a negative numerical value in {key}"
