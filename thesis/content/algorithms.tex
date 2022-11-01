@@ -3,7 +3,7 @@
 
 Five algorithms in total were chosen to be used in providing the basis for evaluating the languages under evaluation. Of the five, four are exact-matching algorithms and one is an approximate-matching algorithm. One algorithm matches multiple patterns in a single examination of a sequence, while the remaining algorithms match only single patterns.
 
-In this section, these algorithms are introduced and the first four briefly explained. The fifth algorithm will receive a more in-depth treatment due to it being a new approach. An understanding of the underlying mechanics of the algorithms will be helpful when later evaluating the implementations of them.
+In this section, these algorithms are introduced and the first four briefly explained. The fifth algorithm will receive a more in-depth treatment due to it being a new approach. An understanding of the underlying mechanics of the algorithms will be helpful when later evaluating their implementations.
 
 \subsection{Knuth, Morris, and Pratt}
 
@@ -115,11 +115,11 @@ The process of searching for a match begins with a $state$ value of $W$ bit-widt
 
 Figure~\ref{fig:bitap_matching} shows the process of matching the example pattern to the same sequence used in previous algorithm examples. The $j$ column indicates the index of the character in the sequence, $s_j$ is the character at $j$, and $S(s_j)$ is the $S$-value for that character. The $state$ column shows the value of that variable at each iteration, while the ``result'' column shows the value of $state$ after the \texttt{or}-operation. Not shown is the $limit$ value, which in this example is \texttt{10000} (16 decimal). On the row where $j = 7$, we see that the high bit of $state$ is a 0 for the first time. This signals a match ($state < limit$), and the matching index is $j - m + 1$, or 3.
 
-In this example the Bitap algorithm has found the match after 8 rounds of the shift-or operation. No direct character-level comparisons were made, nor were any equality comparisons made. The process of finding the match involved only the two bit-level operations and a single ``less-than'' comparison for each iteration of the main loop.
+In this example the Bitap algorithm found the match after 8 rounds of the shift-or operation. No direct character-level comparisons were made, nor were any equality comparisons made. The process of finding the match involved only the two bit-level operations and a single ``less-than'' comparison for each iteration of the main loop.
 
 \subsection{Aho and Corasick}
 
-Alfred V. Aho and Margaret J. Corasick published their algorithm for searching multiple patterns at once in 1975~\cite{aho.corasick.1975}. In their algorithm, a finite number of patterns are merged into a single deterministic finite automata (DFA) which can then be applied over any number of target strings. The DFA is capable of finding all locations of all patterns in the set, with overlapping, in a single pass through the target string. This makes the algorithm considerably faster than the others for the simple reason that Aho-Corasick scans each target string once, regardless of the number of patterns. By contrast, each of the previous algorithms would scan the target once per pattern. The choice of this algorithm was driven by an interest in comparing a multi-pattern algorithm to the single-pattern options, and an interest in using a DFA for the matching process.
+Alfred V. Aho and Margaret J. Corasick published their algorithm for searching multiple patterns at once in 1975~\cite{aho.corasick.1975}. In their algorithm, a finite number of patterns are merged into a single deterministic finite automaton (DFA) which can then be applied over any number of target strings. The DFA is capable of finding all locations of all patterns in the set, with overlapping, in a single pass through the target string. This makes the algorithm significantly faster than the others for the simple reason that Aho-Corasick scans each target string once, regardless of the number of patterns. By contrast, each of the single-pattern algorithms scans the target string once per pattern. The choice of this algorithm was driven by an interest in comparing a multi-pattern algorithm to the single-pattern options, and an interest in exploring the use of a finite automaton for the matching process.
 
 Aho and Corasick designed the pattern matching machine as a collection of three functions:
 
@@ -169,16 +169,16 @@ To illustrate the process of this algorithm, consider the target string that beg
 \label{fig:ac_progression}
 \end{figure}
 
-Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is a failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and moves the DFA to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
+Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is a failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and the DFA moves to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
 
-Here, the Aho-Corasick algorithm has positively identified the presence of two of the three patterns encoded by the DFA. Only 5 character comparisons were made, and no back-tracking was required to find the second pattern.
+Here, the Aho-Corasick algorithm has positively identified the presence of two of the three patterns encoded by the DFA. Only 5 characters from the target string were processed, and because the DFA indexes by the ordinal values of the characters no direct comparisons were made. Further, no back-tracking was required to find the second pattern.
 
 \subsection{Approximate Matching with Gaps}
 \label{subsec:dfa_gap}
 
 For the fifth and final algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
 
-The idea of using a DFA to represent the pattern is inspired primarily by~\cite{aho.corasick.1975} and~\cite{becchi.crowley.2008}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automata. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
+The idea of using a DFA to represent the pattern is inspired primarily by~\cite{aho.corasick.1975} and~\cite{becchi.crowley.2008}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automaton. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
 
 From this, a different type of approximate-matching can be pictured: one that allows for well-defined, finite ``gaps'' between elements of the pattern being matched. Given a value $k$ that is a positive integer, gaps that are up to $k$ characters in length can be tolerated while still regarding the pattern as matching a point in the target sequence. And when $k = 0$, the approach becomes the naive exact-matching approach that is of time-complexity O($mn$).
 
