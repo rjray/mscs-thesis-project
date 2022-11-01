@@ -98,7 +98,7 @@ def run_multi(init, code, name, argv):
     return return_code
 
 
-def run_approx(init, code, name, argv):
+def run_approx_main(init, code, name, argv, preprocess=True):
     if len(argv) < 4 or len(argv) > 5:
         raise Exception(f"Usage: {argv[0]} k sequences patterns <answers>")
 
@@ -120,10 +120,12 @@ def run_approx(init, code, name, argv):
     start_time = perf_counter()
     return_code = 0
 
-    # Preprocess patterns and sequences, since all of the algorithms that use
-    # this module need (or can use) the same style of data.
-    patterns_data = [list(map(ord, pattern)) for pattern in patterns_data]
-    sequences_data = [list(map(ord, sequence)) for sequence in sequences_data]
+    if preprocess:
+        # Preprocess patterns and sequences, since most of the algorithms that
+        # use this module need (or can use) the same style of data.
+        patterns_data = [list(map(ord, pattern)) for pattern in patterns_data]
+        sequences_data = [list(map(ord, sequence))
+                          for sequence in sequences_data]
 
     for pattern, pat in enumerate(patterns_data):
         pat_data = init(pat, k)
@@ -149,3 +151,11 @@ def run_approx(init, code, name, argv):
     )
 
     return return_code
+
+
+def run_approx(init, code, name, argv):
+    return run_approx_main(init, code, name, argv)
+
+
+def run_approx_raw(init, code, name, argv):
+    return run_approx_main(init, code, name, argv, False)
