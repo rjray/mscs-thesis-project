@@ -71,6 +71,10 @@ APPROX_LONG_RUNCOUNT := 3
 MEMCHECK_FILE := memcheck.txt
 VALGRIND := valgrind
 
+# Command and file for SLOC data:
+SLOC := sloc
+SLOC_FILE := sloc-`date '+%Y%m%d'`.csv
+
 # The languages under inspection, and clean-targets for those that have them.
 LANGUAGES := C Cpp Rust Perl Python
 LANG_CLEAN := $(addsuffix -clean,$(LANGUAGES))
@@ -133,6 +137,12 @@ memcheck:
 		ANSWERS=../$(RANDOM_ANSWERS) \
 		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS)
 	echo "# Memory check completed:" `date` >> $(MEMCHECK_FILE)
+
+# A rule to create the SLOC data in CSV format.
+sloc:
+	find C C++ Perl Python Rust \
+		-name \*.[ch] -o -name \*.[ch]pp -o -name \*.p[lm] -o -name \*.py -o \
+		-name \*.rs | sort | xargs $(SLOC) -f csv -d -a pm=pl > $(SLOC_FILE)
 
 # Rules relevant to the creation/cleaning of the data files:
 
