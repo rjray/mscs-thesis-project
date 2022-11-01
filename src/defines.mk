@@ -83,4 +83,4 @@ endif
 ifeq ($(APPROX_ANSWERS),)
 	$(warning Answer file not specified, no checking will be done)
 endif
-	$(foreach target,$(TARGETS),$(call RUN_approx_memcheck,$(target)))
+	$(foreach target,$(APPROX_TARGETS),$(call RUN_approx_memcheck,$(target)))
