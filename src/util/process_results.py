@@ -17,6 +17,7 @@ FIX_CONST = 2**32 * 0.00006104
 
 ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
 APPROX_ALGORITHMS = [f"dfa_gap({k + 1})" for k in range(5)]
+SCRIPT_ONLY_ALGORITHMS = [f"regexp({k + 1})" for k in range(5)]
 ALGORITHM_LABELS = {
     "kmp": "Knuth-Morris-Pratt",
     "boyer_moore": "Boyer-Moore",
@@ -26,6 +27,7 @@ ALGORITHM_LABELS = {
 }
 for k in range(5):
     ALGORITHM_LABELS[APPROX_ALGORITHMS[k]] = f"DFA-Gap (k={k + 1})"
+    ALGORITHM_LABELS[SCRIPT_ONLY_ALGORITHMS[k]] = f"Regexp (k={k + 1})"
 
 LANGUAGES = [
     "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust"
@@ -148,7 +150,7 @@ def parse_command_line():
 #
 #   1. No iterations of any language/algorithm pair failed
 #   2. Any iteration that has a negative value for any of the numerical keys
-#      is suitably noted (and will be later removed by `build_structure`).
+#      is suitably noted and adjusted back into range.
 def validate(data):
     good = True
 
@@ -458,14 +460,13 @@ def create_computed_table(
         print("", file=f)
 
     # Emit the preamble:
-    print(f"%% Table #{tables_written}:", file=f)
+    print(f"%% Caption: {caption}", file=f)
+    print(f"%% Label: {label}", file=f)
     print(f"%% Language(s): {langs}", file=f)
     print(f"%% Algorithm(s): {algos}", file=f)
     print(f"%% Field(s): {fields}", file=f)
     if divisor:
         print(f"%% Divisor(s): {divisor}", file=f)
-    print(f"%% Caption: {caption}", file=f)
-    print(f"%% Label: {label}", file=f)
     print("\\begin{table}", file=f)
     print(f"\\begin{{tabular}}{{|{colspec}|}}", file=f)
     print("\\hline", file=f)
