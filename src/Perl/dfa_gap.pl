@@ -93,4 +93,4 @@ sub dfa_gap {
     return $matches;
 }
 
-exit run_approx(\&init_dfa_gap, \&dfa_gap, 'dfa_gap', @ARGV);
+exit run_approx(\&init_dfa_gap, \&dfa_gap, 'dfa_gap', \@ARGV);

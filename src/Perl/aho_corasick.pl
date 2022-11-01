@@ -154,4 +154,4 @@ sub aho_corasick {
     return \@matches;
 }
 
-exit run_multi(\&init_aho_corasick, \&aho_corasick, 'aho_corasick', @ARGV);
+exit run_multi(\&init_aho_corasick, \&aho_corasick, 'aho_corasick', \@ARGV);

@@ -66,4 +66,4 @@ sub kmp {
     return $matches;
 }
 
-exit run(\&init_kmp, \&kmp, 'kmp', @ARGV);
+exit run(\&init_kmp, \&kmp, 'kmp', \@ARGV);

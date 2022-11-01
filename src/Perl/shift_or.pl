@@ -58,4 +58,4 @@ sub shift_or {
     return $matches;
 }
 
-exit run(\&init_shift_or, \&shift_or, 'shift_or', @ARGV);
+exit run(\&init_shift_or, \&shift_or, 'shift_or', \@ARGV);

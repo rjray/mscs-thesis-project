@@ -9,11 +9,11 @@ use Time::HiRes qw(gettimeofday tv_interval);
 
 use Input;
 
-our @EXPORT_OK = qw(run run_multi run_approx);
+our @EXPORT_OK = qw(run run_multi run_approx run_approx_raw);
 
 sub run {
-    my ($init, $code, $name, @argv) = @_;
-    my ($sequences_file, $patterns_file, $answers_file) = @argv;
+    my ($init, $code, $name, $argv) = @_;
+    my ($sequences_file, $patterns_file, $answers_file) = @{$argv};
     my ($sequences_data, $patterns_data, $answers_data);
 
     if (! ($sequences_file && $patterns_file)) {
@@ -69,15 +69,15 @@ sub run {
 }
 
 # This is a customization of the runner function used for the single-pattern
-# matching algorithms. This one sets up the structures needed for the A-C
-# algorithm via a call to init-(), then iterates over just the sequences (since
-# iterating over the patterns is not necessary).
+# matching algorithms. This one sets up the structures needed for the given
+# algorithm via a call to init->(), then iterates over just the sequences
+# (since iterating over the patterns is not necessary).
 #
 # The return value is 0 if the experiment correctly identified all pattern
 # instances in all sequences, and the number of misses otherwise.
 sub run_multi {
-    my ($init, $code, $name, @argv) = @_;
-    my ($sequences_file, $patterns_file, $answers_file) = @argv;
+    my ($init, $code, $name, $argv) = @_;
+    my ($sequences_file, $patterns_file, $answers_file) = @{$argv};
     my ($sequences_data, $patterns_data, $answers_data);
 
     if (! ($sequences_file && $patterns_file)) {
@@ -133,9 +133,9 @@ sub run_multi {
     return $return_code;
 }
 
-sub run_approx {
-    my ($init, $code, $name, @argv) = @_;
-    my ($k, $sequences_file, $patterns_file, $answers_file) = @argv;
+sub run_approx_main {
+    my ($init, $code, $name, $argv, $skip_preprocess) = @_;
+    my ($k, $sequences_file, $patterns_file, $answers_file) = @{$argv};
     my ($sequences_data, $patterns_data, $answers_data);
 
     if (! ($sequences_file && $patterns_file)) {
@@ -159,13 +159,15 @@ sub run_approx {
     my $start_time = [ gettimeofday ];
     my $return_code = 0;
 
-    # Preprocess patterns and sequences, since all of the algorithms that use
-    # this module need the same style of data.
-    for my $pattern (@{$patterns_data}) {
-        $pattern = [ map { ord } split //, $pattern ];
-    }
-    for my $sequence (@{$sequences_data}) {
-        $sequence = [ map { ord } split //, $sequence ];
+    if (! $skip_preprocess) {
+        # Preprocess patterns and sequences, since most of the algorithms that
+        # use this module need the same style of data.
+        for my $pattern (@{$patterns_data}) {
+            $pattern = [ map { ord } split //, $pattern ];
+        }
+        for my $sequence (@{$sequences_data}) {
+            $sequence = [ map { ord } split //, $sequence ];
+        }
     }
 
     foreach my $pattern (0..$#{$patterns_data}) {
@@ -193,6 +195,14 @@ sub run_approx {
     printf "runtime: %.6f\n", $elapsed;
 
     return $return_code;
+}
+
+sub run_approx {
+    return run_approx_main(@_);
+}
+
+sub run_approx_raw {
+    return run_approx_main(@_, 'no-preprocess');
 }
 
 1;

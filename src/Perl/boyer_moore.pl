@@ -111,4 +111,4 @@ sub boyer_moore {
     return $matches;
 }
 
-exit run(\&init_boyer_moore, \&boyer_moore, 'boyer_moore', @ARGV);
+exit run(\&init_boyer_moore, \&boyer_moore, 'boyer_moore', \@ARGV);
