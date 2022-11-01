@@ -12,3 +12,4 @@ perf.data
 memcheck.txt
 # This dir will be used for the compression measurements
 compression/
+compression.txt

@@ -75,9 +75,16 @@ VALGRIND := valgrind
 SLOC := sloc
 SLOC_FILE := sloc-`date '+%Y%m%d'`.csv
 
+# Commands and values for the compression data:
+COMPRESSION_DIR := compression
+COMPRESSION_STATS := compression.txt
+CLOC := cloc
+XZ := xz
+
 # The languages under inspection, and clean-targets for those that have them.
 LANGUAGES := C Cpp Rust Perl Python
 LANG_CLEAN := $(addsuffix -clean,$(LANGUAGES))
+LANG_DIRS := C C++ Rust Perl Python
 
 # Tools.
 RANDOM_DATA_PY := ./util/random_data.py
@@ -140,9 +147,34 @@ memcheck:
 
 # A rule to create the SLOC data in CSV format.
 sloc:
-	find C C++ Perl Python Rust \
+	find $(LANG_DIRS) \
 		-name \*.[ch] -o -name \*.[ch]pp -o -name \*.p[lm] -o -name \*.py -o \
 		-name \*.rs | sort | xargs $(SLOC) -f csv -d -a pm=pl > $(SLOC_FILE)
+
+# Rule/action to determine the compression ratios
+.PHONY: compression
+compression:
+	$(RM) -r $(COMPRESSION_DIR)
+	mkdir -p $(COMPRESSION_DIR)
+	@echo Copying source files to $(COMPRESSION_DIR).
+	find $(LANG_DIRS) \
+		-name \*.[ch] -o -name \*.[ch]pp -o -name \*.p[lm] -o -name \*.py -o \
+		-name \*.rs | xargs tar cf - | (cd $(COMPRESSION_DIR) ; tar xf -)
+	@echo Copying complete.
+	@echo Stripping comments.
+	$(CLOC) --original-dir --strip-comments=nc --report-file=/dev/null $(COMPRESSION_DIR)
+	@echo Comment-removal done.
+	@echo Removing original files.
+	find compression -type f ! -name \*.nc -exec rm \{\} \;
+	@echo Done.
+	@echo Creating per-language tar archives.
+	for lang in $(LANG_DIRS); do \
+		(cd $(COMPRESSION_DIR) ; tar cf $$lang.tar $$lang); \
+	done
+	@echo Archives complete.
+	@echo Compressing and saving statistics.
+	$(XZ) --lzma2=preset=9e,lc=4,pb=0 -k -v -f $(COMPRESSION_DIR)/*.tar 2>&1 | tee $(COMPRESSION_STATS)
+	@echo Compression done.
 
 # Rules relevant to the creation/cleaning of the data files:
 
