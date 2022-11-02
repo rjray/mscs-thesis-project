@@ -3,6 +3,7 @@
 # Process the results from running the full test harness.
 
 import argparse
+import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from operator import itemgetter
@@ -52,7 +53,8 @@ DEFAULT_FILES = {
     "pps_graph": "power_per_sec.png",
     "script_runtimes_graph": "runtimes-scripts.png",
     "script_power_graph": "power-scripts.png",
-    "tables_file": "latex-tables.tex",
+    "basic_tables_file": "latex-tables.tex",
+    "iterations_table_file": "iterations.tex",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -109,10 +111,16 @@ def parse_command_line():
     )
     parser.add_argument(
         "-t",
-        "--tables",
+        "--basic-tables",
         type=str,
-        default=DEFAULT_FILES["tables_file"],
-        help="File to write the LaTeX tables into"
+        default=DEFAULT_FILES["basic_tables_file"],
+        help="File to write the basic LaTeX tables into"
+    )
+    parser.add_argument(
+        "--iterations-table",
+        type=str,
+        default=DEFAULT_FILES["iterations_table_file"],
+        help="File to write the iterations LaTeX table into"
     )
     parser.add_argument(
         "-n",
@@ -461,13 +469,12 @@ def create_computed_table(
 
     # Emit the preamble:
     print(f"%% Caption: {caption}", file=f)
-    print(f"%% Label: {label}", file=f)
+    print(f"%% Label: table:{label}", file=f)
     print(f"%% Language(s): {langs}", file=f)
     print(f"%% Algorithm(s): {algos}", file=f)
     print(f"%% Field(s): {fields}", file=f)
     if divisor:
         print(f"%% Divisor(s): {divisor}", file=f)
-    print("\\begin{table}", file=f)
     print(f"\\begin{{tabular}}{{|{colspec}|}}", file=f)
     print("\\hline", file=f)
     print(f"{headers}\\\\", file=f)
@@ -481,17 +488,12 @@ def create_computed_table(
 
     print("\\hline", file=f)
     print("\\end{tabular}", file=f)
-    if caption:
-        print(f"\\caption{{{caption}}}", file=f)
-    if label:
-        print(f"\\label{{table:{label}}}", file=f)
-    print("\\end{table}", file=f)
 
     return
 
 
-# Create all the tables, using `data` and the `filename` given.
-def create_tables(data, languages, filename):
+# Create all the basic tables, using `data` and the `filename` given.
+def create_basic_tables(data, languages, filename):
     with open(filename, "w", encoding="utf-8") as f:
         # Create each table individually.
 
@@ -511,12 +513,11 @@ def create_tables(data, languages, filename):
                 label=f"energy:{algo}"
             )
 
-        # Create a package energy-usage-per-second table for each algorithm:
+        # Create a package+dram energy-usage-per-second table per algorithm:
         for algo in ALGORITHMS + APPROX_ALGORITHMS:
-            caption = \
-                f"{ALGORITHM_LABELS[algo]} package energy usage over run-time"
+            caption = f"{ALGORITHM_LABELS[algo]} energy usage over run-time"
             create_computed_table(
-                f, data, languages, algo, "package",
+                f, data, languages, algo, ["package", "dram"],
                 caption=caption, label=f"energy_runtime:{algo}",
                 divisor="total_runtime"
             )
@@ -529,6 +530,40 @@ def create_tables(data, languages, filename):
                 f, data, languages, algo, "max_memory",
                 caption=caption, label=f"memory:{algo}"
             )
+
+    return
+
+
+def create_iterations_table(data, languages, filename):
+    algorithms = \
+        ALGORITHMS + [APPROX_ALGORITHMS[0]] + [SCRIPT_ONLY_ALGORITHMS[0]]
+    algo_labels = [ALGORITHM_LABELS[a] for a in ALGORITHMS]
+    algo_labels.append("DFA-Gap")
+    algo_labels.append("Regexp-Gap")
+    algo_headings = "&".join(algo_labels)
+    colspec = "|".join(["c"] * len(algo_labels))
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Print the preamble comments:
+        print("% Table: Algorithm iteration counts", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        # Start the table:
+        print(f"\\begin{{tabular}}{{|c|{colspec}|}}", file=f)
+        print("\\hline", file=f)
+        print(f"Language&{algo_headings} \\\\", file=f)
+        print("\\hline", file=f)
+        # Table data:
+        for lang in languages:
+            out = [LANGUAGE_LABELS[lang]]
+            for a in algorithms:
+                if a in data[lang]:
+                    out.append(str(data[lang][a]["runtime"]["samples"]))
+                else:
+                    out.append("n/a")
+            print(f"{'&'.join(out)} \\\\", file=f)
+        # Finish out the table:
+        print("\\hline", file=f)
+        print("\\end{tabular}", file=f)
 
     return
 
@@ -606,8 +641,10 @@ def main():
         print("  Done.")
 
     if not args.no_tables:
-        print("\nCreating tables...")
-        create_tables(analyzed, all_languages, args.tables)
+        print("\nCreating basic tables...")
+        create_basic_tables(analyzed, all_languages, args.basic_tables)
+        print("Creating table of iteration counts...")
+        create_iterations_table(analyzed, all_languages, args.iterations_table)
 
     print("\nDone.")
 
