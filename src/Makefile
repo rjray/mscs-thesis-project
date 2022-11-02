@@ -77,9 +77,15 @@ SLOC_FILE := sloc-`date '+%Y%m%d'`.csv
 
 # Commands and values for the compression data:
 COMPRESSION_DIR := compression
-COMPRESSION_STATS := compression.txt
+COMPRESSION_STATS := compression-`date '+%Y%m%d'`.txt
 CLOC := cloc
 XZ := xz
+
+# Commands and values for the cyclomatic complexity data:
+CYCLOMATIC_FILE_CSV := cyclomatic-`date '+%Y%m%d'`.csv
+CYCLOMATIC_FILE_JSON := cyclomatic-`date '+%Y%m%d'`.json
+LIZARD := lizard
+COUNTPERL := countperl
 
 # The languages under inspection, and clean-targets for those that have them.
 LANGUAGES := C Cpp Rust Perl Python
@@ -146,14 +152,13 @@ memcheck:
 	echo "# Memory check completed:" `date` >> $(MEMCHECK_FILE)
 
 # A rule to create the SLOC data in CSV format.
-sloc:
+sloc-data:
 	find $(LANG_DIRS) \
 		-name \*.[ch] -o -name \*.[ch]pp -o -name \*.p[lm] -o -name \*.py -o \
 		-name \*.rs | sort | xargs $(SLOC) -f csv -d -a pm=pl > $(SLOC_FILE)
 
 # Rule/action to determine the compression ratios
-.PHONY: compression
-compression:
+compression-data:
 	$(RM) -r $(COMPRESSION_DIR)
 	mkdir -p $(COMPRESSION_DIR)
 	@echo Copying source files to $(COMPRESSION_DIR).
@@ -175,6 +180,11 @@ compression:
 	@echo Compressing and saving statistics.
 	$(XZ) --lzma2=preset=9e,lc=4,pb=0 -k -v -f $(COMPRESSION_DIR)/*.tar 2>&1 | tee $(COMPRESSION_STATS)
 	@echo Compression done.
+
+# Rule/actions for calculating the cyclomatic complexity data
+cyclomatic-data:
+	$(LIZARD) --csv C C++ Python Rust > $(CYCLOMATIC_FILE_CSV)
+	$(COUNTPERL) --json Perl > $(CYCLOMATIC_FILE_JSON)
 
 # Rules relevant to the creation/cleaning of the data files:
 
