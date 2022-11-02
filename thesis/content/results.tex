@@ -1,2 +1,52 @@
 \section{Results and Analysis}
 \label{sec:results}
+
+After the completion of the experiment programs' development, an automation mechanism was developed based on the GNU Make tool. This mechanism allowed for the repeated running of the experiments suite while also providing control over aspects such as the number of repetitions and grouping of the algorithms.
+
+The basis for the mechanism was a series of additional rules added to the already-present ``Makefile'' files that had been developed for the building of each language's set of programs. A single target-rule, ``\texttt{experiments}'', would recursively descend into each language-specific directory and trigger all algorithms in sequence. Each algorithm ran a specified number of times, and in most cases the initial run was discarded. This was to prevent the possibility of the data input files being in the disk device's cache skewing the timing and energy readings with regards to later runs. All non-error output from the experiments was captured by the harness program and streamed to a single text file.
+
+The format chosen for the file of results was YAML\footnote{YAML: \texttt{https://yaml.org/}}, due to the ready availability of parsing libraries. YAML had an advantage over other formats such as CSV (comma-separated values) in that it allowed the flexibility of complex nested data were it to be necessary, while also being emitted in a streaming fashion. This greatly reduced the potential for output to be corrupted between algorithm executions.
+
+\subsection{Results from the Experiments}
+\label{subsec:results}
+
+% TODO: Fix date
+The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw data is named ``\texttt{experiments-data-YYYYMMDD.yml}''.
+
+\subsubsection{Scope of the Experiments}
+
+% TODO: Correct num of data points and num of programs
+% TODO: Table of runs indexed by language and algorithm
+The final run of the experiments generated a total of 1,160 data-points taken from runs of the 25 programs. Table~X shows the number of runs on a per-language, per-algorithm basis.
+
+\subsubsection{Outliers and the Interpreted Languages}
+
+While it was known that the interpreted languages (Python and Perl) would be slower than the compiled languages, the reality of the results was surprising: as will be shown in section~\ref{subsec:perf_comp}, below, the interpreted languages were in some cases more than 150 times slower than the fastest compiled program on the same algorithm.
+
+This discovery required adjusting the automated experiments, to reduce the number of iterations for both interpreted languages. The Knuth-Morris-Pratt, Boyer-Moore, and Bitap algorithms were all reduced to 5 iterations each, for these languages. The Aho-Corasick algorithm ran in a more reasonable length of time and was left at 25 iterations, the same number as were run for the compiled languages.
+
+For the DFA-Gap algorithm, both compiled and interpreted languages had to be reduced in terms of iterations given that approximate-matching algorithms are in general slower than their exact-matching counterparts. The compiled languages ran 10 iterations of this algorithm for values of $k$ ranging from 1 to 5, whereas the interpreted languages were necessarily limited to 3 iterations for the same values of $k$.
+
+\subsection{Performance Comparisons}
+\label{subsec:perf_comp}
+
+The following collection of tables show the comparative performance of the languages on each of the algorithms. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
+
+\subsection{Energy Usage Comparisons}
+\label{subsec:energy_comp}
+
+In this section the energy usage results are examined. The following tables show the comparative usage over time (Joules per second) for each algorithm with the same scaling method applied as was used for the performance tables. The tables here use the ``Package'' and ``DRAM'' energy values combined together, divided by total run-time.
+
+\subsection{Expressiveness Comparisons}
+\label{subsec:expr_comp}
+
+In comparing expressiveness, it is useful to look at all three of the chosen comparative measures in an aggregated fashion. First, the individual numbers will be examined. As with the previous two bases, tables will show the numbers comparing the languages. Unlike the previous sections, the numbers shown will be for the combined files of all algorithm modules, runner modules, and input modules. For each language the source code was combined in a way that facilitated each of the metrics:
+
+\begin{description}
+\item[SLOC:] Total SLOC values for each language's files were combined. In the case of C and C++, this includes relevant lines from the header files for the runner and input modules.
+\item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Any function whose value was exactly 1 was discarded so as to not artificially lower the average complexity for the module. Each module's function-level scores were then averaged, and all modules' averages for a given language were summed together.
+\item[Conciseness:] Using a method identical to Bergmans, et al~\cite{bergmans.et.al.2021}, each source code file for a given language was stripped of comments and then archived together using the standard ``\texttt{tar}'' command available on Linux. Each archive file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
+\end{description}
+
+\subsection{Combined Bases}
+\label{subsec:combined}
