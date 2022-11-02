@@ -1,0 +1,5 @@
+compression/C++.tar: 4,348 B / 30.0 KiB = 0.142
+compression/C.tar: 5,096 B / 40.0 KiB = 0.124
+compression/Perl.tar: 3,724 B / 30.0 KiB = 0.121
+compression/Python.tar: 3,356 B / 30.0 KiB = 0.109
+compression/Rust.tar: 5,152 B / 40.0 KiB = 0.126
