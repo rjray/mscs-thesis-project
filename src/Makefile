@@ -159,7 +159,7 @@ sloc-data:
 
 # Rule/action to determine the compression ratios
 compression-data:
-	$(RM) -r $(COMPRESSION_DIR)
+	@$(RM) -r $(COMPRESSION_DIR)
 	mkdir -p $(COMPRESSION_DIR)
 	@echo Copying source files to $(COMPRESSION_DIR).
 	find $(LANG_DIRS) \
@@ -180,6 +180,8 @@ compression-data:
 	@echo Compressing and saving statistics.
 	$(XZ) --lzma2=preset=9e,lc=4,pb=0 -k -v -f $(COMPRESSION_DIR)/*.tar 2>&1 | tee $(COMPRESSION_STATS)
 	@echo Compression done.
+	@echo Removing directory.
+	$(RM) -r $(COMPRESSION_DIR)
 
 # Rule/actions for calculating the cyclomatic complexity data
 cyclomatic-data:
