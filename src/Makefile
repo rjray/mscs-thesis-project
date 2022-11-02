@@ -73,17 +73,17 @@ VALGRIND := valgrind
 
 # Command and file for SLOC data:
 SLOC := sloc
-SLOC_FILE := sloc-`date '+%Y%m%d'`.csv
+SLOC_FILE := sloc.csv
 
 # Commands and values for the compression data:
 COMPRESSION_DIR := compression
-COMPRESSION_STATS := compression-`date '+%Y%m%d'`.txt
+COMPRESSION_STATS := compression.txt
 CLOC := cloc
 XZ := xz
 
 # Commands and values for the cyclomatic complexity data:
-CYCLOMATIC_FILE_CSV := cyclomatic-`date '+%Y%m%d'`.csv
-CYCLOMATIC_FILE_JSON := cyclomatic-`date '+%Y%m%d'`.json
+CYCLOMATIC_FILE_CSV := cyclomatic.csv
+CYCLOMATIC_FILE_JSON := cyclomatic.json
 LIZARD := lizard
 COUNTPERL := countperl
 
