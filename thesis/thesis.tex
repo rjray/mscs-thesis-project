@@ -1,16 +1,15 @@
-\documentclass[acmlarge, nonacm]{acmart}
+\documentclass[acmlarge, nonacm, 12pt]{acmart}
 
 \input{setup}
 
 \acmBooktitle{This will not be seen}
 
-\title{Rust and String Matching: An Evaluation Against C and C++}
 \author{Randy J. Ray}
 \renewcommand{\shortauthors}{Ray}
 
 \begin{document}
 
-\title{\mytitle{}}
+\title[\myshorttitle{}]{\mytitle{}}
 
 % Front-matter:
 \input{content/title}
@@ -26,6 +25,7 @@
 %\lstlistoflistings
 %\listof{program}{List of Programs}
 \pagebreak
+\cleardoublepage
 
 % Paper content - numbering in Arabic numerals, reset to 1
 \pagenumbering{arabic}
