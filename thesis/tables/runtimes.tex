@@ -1,0 +1,209 @@
+% Table: Comparative runtimes sub-tables
+% Generated: 2022-11-03 16:59:36.189965
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Knuth-Morris-Pratt
+        %% Label: table:runtime:kmp
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (LLVM) & 1.0000 \\
+        Rust & 1.1118 \\
+        C++ (LLVM) & 1.1376 \\
+        C (Intel) & 1.1401 \\
+        C++ (Intel) & 1.2408 \\
+        C (GCC) & 1.3145 \\
+        C++ (GCC) & 1.4147 \\
+        Perl & 38.1914 \\
+        Python & 39.9000 \\
+        \hline
+    \end{tabular}
+    \caption{Knuth-Morris-Pratt}
+    \label{table:runtime:kmp}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Boyer-Moore
+        %% Label: table:runtime:boyer_moore
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (Intel) & 1.0000 \\
+        C++ (Intel) & 1.0507 \\
+        C (GCC) & 1.0665 \\
+        Rust & 1.0833 \\
+        C++ (GCC) & 1.1236 \\
+        C++ (LLVM) & 1.1415 \\
+        C (LLVM) & 1.1550 \\
+        Perl & 47.0020 \\
+        Python & 50.0782 \\
+        \hline
+    \end{tabular}
+    \caption{Boyer-Moore}
+    \label{table:runtime:boyer_moore}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Bitap
+        %% Label: table:runtime:shift_or
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (Intel) & 1.0000 \\
+        C (GCC) & 1.0069 \\
+        C++ (Intel) & 1.0465 \\
+        C (LLVM) & 1.1220 \\
+        Rust & 1.1340 \\
+        C++ (GCC) & 1.1379 \\
+        C++ (LLVM) & 1.2389 \\
+        Perl & 155.8104 \\
+        Python & 188.2916 \\
+        \hline
+    \end{tabular}
+    \caption{Bitap}
+    \label{table:runtime:shift_or}
+\end{subtable}
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Aho-Corasick
+        %% Label: table:runtime:aho_corasick
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (LLVM) & 1.0000 \\
+        C (Intel) & 1.0406 \\
+        C (GCC) & 1.0627 \\
+        C++ (GCC) & 1.1141 \\
+        Rust & 1.1421 \\
+        C++ (LLVM) & 1.1498 \\
+        C++ (Intel) & 1.1904 \\
+        Python & 18.6569 \\
+        Perl & 39.0724 \\
+        \hline
+    \end{tabular}
+    \caption{Aho-Corasick}
+    \label{table:runtime:aho_corasick}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=1)
+        %% Label: table:runtime:dfa_gap(1)
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (GCC) & 1.0000 \\
+        C (LLVM) & 1.0085 \\
+        C++ (GCC) & 1.0900 \\
+        Rust & 1.1162 \\
+        C++ (LLVM) & 1.1215 \\
+        C (Intel) & 1.1753 \\
+        C++ (Intel) & 1.2425 \\
+        Python & 43.7215 \\
+        Perl & 50.0561 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=1)}
+    \label{table:runtime:dfa_gap(1)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=2)
+        %% Label: table:runtime:dfa_gap(2)
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (GCC) & 1.0000 \\
+        C (LLVM) & 1.0682 \\
+        C++ (GCC) & 1.1658 \\
+        C (Intel) & 1.1965 \\
+        Rust & 1.2242 \\
+        C++ (LLVM) & 1.2561 \\
+        C++ (Intel) & 1.2965 \\
+        Python & 49.2907 \\
+        Perl & 53.1640 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=2)}
+    \label{table:runtime:dfa_gap(2)}
+\end{subtable}
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=3)
+        %% Label: table:runtime:dfa_gap(3)
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (GCC) & 1.0000 \\
+        C (LLVM) & 1.0751 \\
+        C (Intel) & 1.1563 \\
+        C++ (GCC) & 1.2269 \\
+        Rust & 1.2625 \\
+        C++ (LLVM) & 1.3246 \\
+        C++ (Intel) & 1.3405 \\
+        Python & 54.5232 \\
+        Perl & 55.9667 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=3)}
+    \label{table:runtime:dfa_gap(3)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=4)
+        %% Label: table:runtime:dfa_gap(4)
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (GCC) & 1.0000 \\
+        C (LLVM) & 1.0906 \\
+        C (Intel) & 1.1500 \\
+        C++ (GCC) & 1.2666 \\
+        Rust & 1.2782 \\
+        C++ (Intel) & 1.3643 \\
+        C++ (LLVM) & 1.3765 \\
+        Python & 58.2460 \\
+        Perl & 59.0887 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=4)}
+    \label{table:runtime:dfa_gap(4)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=5)
+        %% Label: table:runtime:dfa_gap(5)
+        %% Field(s): ['runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C (GCC) & 1.0000 \\
+        C (LLVM) & 1.0805 \\
+        C (Intel) & 1.1040 \\
+        Rust & 1.2853 \\
+        C++ (GCC) & 1.3046 \\
+        C++ (Intel) & 1.3600 \\
+        C++ (LLVM) & 1.3770 \\
+        Perl & 59.6239 \\
+        Python & 60.7613 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=5)}
+    \label{table:runtime:dfa_gap(5)}
+\end{subtable}

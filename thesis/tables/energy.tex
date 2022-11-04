@@ -1,0 +1,218 @@
+% Table: Comparative energy usage sub-tables
+% Generated: 2022-11-03 16:59:36.190723
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Knuth-Morris-Pratt
+        %% Label: table:energy:kmp
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C (GCC) & 1.0568 \\
+        C (LLVM) & 1.0928 \\
+        C (Intel) & 1.0953 \\
+        C++ (GCC) & 1.1130 \\
+        C++ (LLVM) & 1.1218 \\
+        C++ (Intel) & 1.1297 \\
+        Python & 1.1864 \\
+        Perl & 1.3095 \\
+        \hline
+    \end{tabular}
+    \caption{Knuth-Morris-Pratt}
+    \label{table:energy:kmp}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Boyer-Moore
+        %% Label: table:energy:boyer_moore
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C++ (LLVM) & 1.0261 \\
+        C (GCC) & 1.0571 \\
+        C++ (GCC) & 1.0792 \\
+        C (LLVM) & 1.1072 \\
+        C++ (Intel) & 1.1073 \\
+        C (Intel) & 1.1678 \\
+        Perl & 1.3298 \\
+        Python & 1.3345 \\
+        \hline
+    \end{tabular}
+    \caption{Boyer-Moore}
+    \label{table:energy:boyer_moore}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Bitap
+        %% Label: table:energy:shift_or
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C++ (LLVM) & 1.0000 \\
+        C (Intel) & 1.0064 \\
+        C (LLVM) & 1.0128 \\
+        Rust & 1.0354 \\
+        C++ (Intel) & 1.0512 \\
+        C++ (GCC) & 1.0696 \\
+        C (GCC) & 1.0899 \\
+        Python & 1.0961 \\
+        Perl & 1.2270 \\
+        \hline
+    \end{tabular}
+    \caption{Bitap}
+    \label{table:energy:shift_or}
+\end{subtable}
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: Aho-Corasick
+        %% Label: table:energy:aho_corasick
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        C++ (LLVM) & 1.0000 \\
+        C (Intel) & 1.0287 \\
+        C (GCC) & 1.0357 \\
+        C (LLVM) & 1.0454 \\
+        C++ (Intel) & 1.0497 \\
+        C++ (GCC) & 1.0563 \\
+        Perl & 1.1269 \\
+        Rust & 1.1364 \\
+        Python & 1.1911 \\
+        \hline
+    \end{tabular}
+    \caption{Aho-Corasick}
+    \label{table:energy:aho_corasick}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=1)
+        %% Label: table:energy:dfa_gap(1)
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C (LLVM) & 1.0665 \\
+        C++ (Intel) & 1.0730 \\
+        C++ (LLVM) & 1.0791 \\
+        C (GCC) & 1.0803 \\
+        C++ (GCC) & 1.1079 \\
+        C (Intel) & 1.1189 \\
+        Python & 1.1762 \\
+        Perl & 1.2941 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=1)}
+    \label{table:energy:dfa_gap(1)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=2)
+        %% Label: table:energy:dfa_gap(2)
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C++ (LLVM) & 1.0844 \\
+        C (LLVM) & 1.0845 \\
+        C++ (Intel) & 1.1124 \\
+        C (GCC) & 1.1267 \\
+        C (Intel) & 1.1331 \\
+        C++ (GCC) & 1.1552 \\
+        Python & 1.2060 \\
+        Perl & 1.3275 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=2)}
+    \label{table:energy:dfa_gap(2)}
+\end{subtable}
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=3)
+        %% Label: table:energy:dfa_gap(3)
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C++ (LLVM) & 1.0756 \\
+        C (LLVM) & 1.1080 \\
+        C++ (Intel) & 1.1289 \\
+        C (Intel) & 1.1512 \\
+        C (GCC) & 1.1681 \\
+        C++ (GCC) & 1.1785 \\
+        Python & 1.2526 \\
+        Perl & 1.3193 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=3)}
+    \label{table:energy:dfa_gap(3)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=4)
+        %% Label: table:energy:dfa_gap(4)
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C++ (LLVM) & 1.0616 \\
+        C (LLVM) & 1.1173 \\
+        C++ (Intel) & 1.1197 \\
+        C (Intel) & 1.1455 \\
+        C++ (GCC) & 1.1762 \\
+        C (GCC) & 1.1953 \\
+        Perl & 1.2721 \\
+        Python & 1.2751 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=4)}
+    \label{table:energy:dfa_gap(4)}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+        %% Caption: DFA-Gap (k=5)
+        %% Label: table:energy:dfa_gap(5)
+        %% Field(s): ['package', 'dram']
+        %% Divisor(s): ['total_runtime']
+        \hline
+        Language & Score \\
+        \hline
+        Rust & 1.0000 \\
+        C++ (LLVM) & 1.0565 \\
+        C (LLVM) & 1.1069 \\
+        C++ (Intel) & 1.1143 \\
+        C (Intel) & 1.1295 \\
+        C++ (GCC) & 1.1799 \\
+        C (GCC) & 1.2161 \\
+        Perl & 1.3027 \\
+        Python & 1.3037 \\
+        \hline
+    \end{tabular}
+    \caption{DFA-Gap (k=5)}
+    \label{table:energy:dfa_gap(5)}
+\end{subtable}
