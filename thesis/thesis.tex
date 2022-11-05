@@ -1,35 +1,34 @@
-\documentclass[acmlarge, nonacm, 12pt]{acmart}
+\documentclass[12pt]{article}
 
 \input{setup}
 
-\acmBooktitle{This will not be seen}
-
+\title{Evaluating Languages for Bioinformatics: Energy, Expressiveness and Performance}
 \author{Randy J. Ray}
-\renewcommand{\shortauthors}{Ray}
+\date{2022}
 
 \begin{document}
-
-\title[\myshorttitle{}]{\mytitle{}}
 
 % Front-matter:
 \input{content/title}
 \input{content/committee}
 \input{content/copyright}
 
-% Table of contents - numbering starts at 4, Roman numerals
+% Abstract, Acknowledgments Table of contents - numbering starts at 4, Roman numerals
 \pagenumbering{roman}
 \setcounter{page}{4}
+\input{content/abstract}
+\clearpage
+\input{content/acknowledgments}
+\clearpage
 \tableofcontents
 \listoffigures
 \listoftables
-%\lstlistoflistings
-%\listof{program}{List of Programs}
-\pagebreak
-\cleardoublepage
+\clearpage
 
 % Paper content - numbering in Arabic numerals, reset to 1
 \pagenumbering{arabic}
 \setcounter{page}{1}
+
 \input{content/intro}
 
 \input{content/motivations}
@@ -42,9 +41,7 @@
 
 \input{content/conclusions}
 
-\input{content/acknowledgments}
-
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{plain}
 \bibliography{thesis}
 
 \end{document}
