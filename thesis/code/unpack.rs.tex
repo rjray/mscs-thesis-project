@@ -1,0 +1,18 @@
+\begin{lstlisting}[language=Rust,caption={Rust unpacking of pattern data},label={lst:rust_unpack},showstringspaces=false]
+    let pattern_count = match &pat_data[0] {
+        MultiPatternData::PatternCount(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 0"),
+    };
+    let goto_fn = match &pat_data[1] {
+        MultiPatternData::PatternIntVecVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 1"),
+    };
+    let failure_fn = match &pat_data[2] {
+        MultiPatternData::PatternUsizeVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 2"),
+    };
+    let output_fn = match &pat_data[3] {
+        MultiPatternData::PatternTypeVec(val) => val,
+        _ => panic!("Incorrect value at pat_data slot 3"),
+    };
+\end{lstlisting}
