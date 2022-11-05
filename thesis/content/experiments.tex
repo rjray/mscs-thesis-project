@@ -10,7 +10,7 @@ To begin, some concepts will be introduced and terms defined.
 \subsubsection{RAPL (Running Average Power Limit)}
 \label{subsubsec:rapl}
 
-The \textit{Running Average Power Limit} (RAPL) measurement system was introduced by Intel into their CPU products starting with the Sandybridge family of processors~\cite{khan.et.al.2018}. The system allows measuring energy over several areas:
+The \textit{Running Average Power Limit} (RAPL) measurement system was introduced by Intel into their CPU products starting with the Sandybridge family of processors~\cite{khan}. The system allows measuring energy over several areas:
 
 \begin{description}
 \item[Package:] The full (socketed) processor package, which may contain multiple cores.
@@ -22,7 +22,7 @@ The \textit{Running Average Power Limit} (RAPL) measurement system was introduce
 
 A computer system may have more than one package, and the RAPL interface includes methods for determining the number of packages and gathering the energy readings for each package separately. However, it is not possible to measure a package's energy usage at the level of an individual core.
 
-Reading the RAPL data is done through the \textit{model-specific registers} (MSR) interface, as detailed in~\cite[Chapter~14]{intel.sdm.2022}. The method involves reading several registers to determine the number of packages the system has, then determining the scaling factors for each of time units (expressed in seconds), power units (Watts), and energy units (Joules). The scaling factors are stored in a single register referred to as \texttt{MSR\_RAPL\_POWER\_UNIT}, as groups of bits within the register. Each scaling factor is a 4-bit (5-bit in the case of energy units) value used to compute a fractional floating-point number (where $b$ represents the value of the n-bit factor):
+Reading the RAPL data is done through the \textit{model-specific registers} (MSR) interface, as detailed in~\cite[Chapter~14]{intel}. The method involves reading several registers to determine the number of packages the system has, then determining the scaling factors for each of time units (expressed in seconds), power units (Watts), and energy units (Joules). The scaling factors are stored in a single register referred to as \texttt{MSR\_RAPL\_POWER\_UNIT}, as groups of bits within the register. Each scaling factor is a 4-bit (5-bit in the case of energy units) value used to compute a fractional floating-point number (where $b$ represents the value of the n-bit factor):
 
 \[S~=~\frac{1}{2^{b}}\]
 
@@ -38,19 +38,19 @@ Adding the appropriate constant for the type of value that was anomalous dealt w
 
 The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
 
-As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas.2020} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen.2007} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple: comparison of the implementation of identical algorithms in different languages.
+As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple: comparison of the implementation of identical algorithms in different languages.
 
 For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{sloc: \texttt{https://github.com/flosse/sloc}}.
 
 \subsubsection{Language Conciseness Through Compression}
 
-In~\cite{bergmans.et.al.2021}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater code-redundancy necessary to express the purposes of the program.
+In~\cite{bergmans}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater code-redundancy necessary to express the purposes of the program.
 
 Given that none of the experiment source files are of significant length, this metric was applied at the language level, looking at all files for each language in per-language archive files.
 
 \subsubsection{Cyclomatic Complexity}
 
-Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe.1976}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to a ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
+Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to a ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
 
 Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard}\footnote{lizard: \texttt{https://github.com/terryyin/lizard}} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}\footnote{From the Perl-Metrics-Simple package for Perl, \texttt{https://metacpan.org/dist/Perl-Metrics-Simple}}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli}\footnote{rust-code-analysis-cli: \texttt{https://github.com/mozilla/rust-code-analysis/}} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
 
@@ -73,7 +73,7 @@ For each program comprising an experiment, the following data was gathered eithe
 
 The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
-Independent of the per-program metrics, a measurement of conciseness was made using the compression-based technique described in~\cite{bergmans.et.al.2021}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
+Independent of the per-program metrics, a measurement of conciseness was made using the compression-based technique described in~\cite{bergmans}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
 
 \subsection{Languages}
 \label{subsec:languages}
@@ -104,7 +104,7 @@ Experiments using the C language were run on three different compiler toolchains
 
 C++ was developed initially as an extension of C, by Bjarne Stroustrup while working at AT\&T Bell Labs. It first appeared in 1985 and was initially standardized in 1998. At first envisioned as ``C with Classes'', the language has been significantly expanded over the years to include many more features while still maintaining low-level memory accessibility. C++ attempts to offer more expressive, concise coding than C, with many of C's memory-management concerns dealt with automatically by class constructors and destructors.
 
-In C++, Stroustrup originated the programming idiom of \textit{resource acquisition is initialization}~\cite{cpp.design.evolution.1994} (RAII). Most dynamic memory is managed via class constructors and destructors, though C++ also supports the \texttt{malloc}-based memory management mechanisms inherited from C.
+In C++, Stroustrup originated the programming idiom of \textit{resource acquisition is initialization}~\cite{cpp} (RAII). Most dynamic memory is managed via class constructors and destructors, though C++ also supports the \texttt{malloc}-based memory management mechanisms inherited from C.
 
 Experiments using the C++ language were also run on the same three compiler toolchains as C: GCC, LLVM, and Intel. Listing~\ref{lst:naive_cpp} shows the naive algorithm implemented in C++.
 
@@ -132,9 +132,9 @@ Python's memory management is a combination of reference counting and a cycle-de
 
 \subsubsection{Rust}
 
-Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature.rust.2020}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay.2021}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.64.0 and was released in September of 2022.
+Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.64.0 and was released in September of 2022.
 
-An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming.rust.2021}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
+An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
 
 With languages such as C and C++, \textit{data ownership} is handled largely through practice and convention. An instance of a C++ \texttt{std::string} owns the buffer allocated for the storage of the string data. Other variables may be created, though, that point to the same buffer or a single character within it. These other interests in the content of the string buffer have their own responsibility for noticing when the original string object is destroyed and the buffer freed. After such point, the outside interests are each responsible for marking their references as no longer valid.
 
@@ -188,7 +188,7 @@ The different algorithms that were chosen are listed here in the order of their 
 
 \subsubsection{Knuth, Morris, and Pratt}
 
-The C implementation of Knuth-Morris-Pratt was adapted from~\cite[Chapter 7]{handbook.2004}. Of note is the discovery that the sample code quietly takes advantage of C's use of a ``null'' byte at the end of a string to stand in for the sentinel character that the algorithm appends to the pattern string. While this optimization was also applicable to C++ (where strings are represented by instances of the \texttt{std::string} class), each of the three remaining languages were required to manually add a sentinel character to each pattern string prior to computing the corresponding ``next'' table.
+The C implementation of Knuth-Morris-Pratt was adapted from~\cite[Chapter 7]{handbook}. Of note is the discovery that the sample code quietly takes advantage of C's use of a ``null'' byte at the end of a string to stand in for the sentinel character that the algorithm appends to the pattern string. While this optimization was also applicable to C++ (where strings are represented by instances of the \texttt{std::string} class), each of the three remaining languages were required to manually add a sentinel character to each pattern string prior to computing the corresponding ``next'' table.
 
 This being the first of the algorithms implemented, it is also where the means of passing generic data from the initialization routines to the algorithm routines was developed. The differences in these methods, particularly between the compiled languages, spoke strongly to their relative expressiveness.
 
@@ -202,7 +202,7 @@ Given the dynamically-typed nature of data in Perl and Python, both of these imp
 
 \subsubsection{Boyer and Moore}
 
-The C version of the basic algorithm was drawn from~\cite[Chapter 14]{handbook.2004}. Like Knuth-Morris-Pratt, it requires a character at the end of the pattern for calculating the suffixes table. The C and C++ implementations used the ``null'' string-terminating byte for this while the others added it explicitly.
+The C version of the basic algorithm was drawn from~\cite[Chapter 14]{handbook}. Like Knuth-Morris-Pratt, it requires a character at the end of the pattern for calculating the suffixes table. The C and C++ implementations used the ``null'' string-terminating byte for this while the others added it explicitly.
 
 Starting with Rust in this case, one aspect became very clear in this algorithm's implementation: the need to regularly cast various numerical (particularly integer) types to other types. Because of the larger amount of array-indexing in this algorithm, the number of times an \texttt{i32} (signed 32-bit integer) or \texttt{u32} (unsigned) had to be cast to or from a \texttt{usize} type (an unsigned type used for lengths and indexing) was significant. While this does lead to fewer bugs in the code, at the same time it detracted from the conciseness of the Rust version.
 
@@ -212,7 +212,7 @@ The C and C++ implementations are best compared to each other, as this is anothe
 
 \subsubsection{Bitap}
 
-The C version of Bitap was taken from~\cite[Chapter 5]{handbook.2004}, where it is referred to as Shift-Or. The design of the algorithm given there is clearly drawn from the Shift-Or algorithm illustrated in~\cite{baeza.yates.gonnet.1992}. The C++ version followed the C very closely with the only changes being the use of the C++ standard classes for strings and vectors. Likewise, the Rust version of this algorithm proved very simple and bore a reasonable resemblance to the C and C++.
+The C version of Bitap was taken from~\cite[Chapter 5]{handbook}, where it is referred to as Shift-Or. The design of the algorithm given there is clearly drawn from the Shift-Or algorithm illustrated in~\cite{baeza}. The C++ version followed the C very closely with the only changes being the use of the C++ standard classes for strings and vectors. Likewise, the Rust version of this algorithm proved very simple and bore a reasonable resemblance to the C and C++.
 
 The Perl and Python implementations were also very similar to the compiled versions, with the same exception that each language has arrays as first-class data types. The Python version, however, did have one notable difference: due to Python's integers being of arbitrary size, it was not enough to take the bit-complement of 0 to get a ``full'' bit-field. In Python this resulted in a value of -1, rather than the expected $2^W - 1$ (where $W$ is the word-size used within the algorithm). To force Python to treat these values as unsigned 64-bit, it was necessary to declare a ``mask'' value equal to $2^W - 1$ and apply this to the result of every logical bit-operation performed. This incurred a significant performance penalty on the Python implementation, giving it the widest performance gap when compared against its Perl counterpart.
 

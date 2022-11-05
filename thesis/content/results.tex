@@ -77,7 +77,7 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 \begin{description}
 \item[SLOC:] Total SLOC values for each language's files were combined. In the case of C and C++, this includes relevant lines from the header files for the runner and input modules.
 \item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Any function whose value was exactly 1 was discarded so as to not artificially lower the average complexity for the module. Each module's function-level scores were then averaged, and all modules' averages for a given language were summed together.
-\item[Conciseness:] Using a method identical to Bergmans, et al~\cite{bergmans.et.al.2021}, each source code file for a given language was stripped of comments and then archived together using the standard ``\texttt{tar}'' command available on Linux. Each archive file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
+\item[Conciseness:] Using a method identical to Bergmans, et al~\cite{bergmans}, each source code file for a given language was stripped of comments and then archived together using the standard ``\texttt{tar}'' command available on Linux. Each archive file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
 \end{description}
 
 \subsubsection{Source Lines of Code}
