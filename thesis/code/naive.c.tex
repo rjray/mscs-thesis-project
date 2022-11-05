@@ -8,7 +8,8 @@ int match(const char *pattern, const char *string, int **matches) {
   for (int i = 0; i <= n - m; i++) {
     if (!strncmp((const char *)(string + i), pattern, m)) {
       found_matches++;
-      saved_matches = realloc(saved_matches, found_matches * sizeof(int));
+      saved_matches = realloc(saved_matches,
+                              found_matches * sizeof(int));
       saved_matches[found_matches - 1] = i;
     }
   }
