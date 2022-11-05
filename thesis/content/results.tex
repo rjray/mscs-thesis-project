@@ -10,14 +10,21 @@ The format chosen for the file of results was YAML\footnote{YAML: \texttt{https:
 \subsection{Results from the Experiments}
 \label{subsec:results}
 
-% TODO: Fix date
-The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw data is named ``\texttt{experiments-data-YYYYMMDD.yml}''.
+The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw experiments data is named ``\texttt{experiments-data-20221104.yml}''.
 
 \subsubsection{Scope of the Experiments}
 
-% TODO: Correct num of data points and num of programs
-% TODO: Table of runs indexed by language and algorithm
-The final run of the experiments generated a total of 1,160 data-points taken from runs of the 25 programs. Table~X shows the number of runs on a per-language, per-algorithm basis.
+The final run of the experiments generated a total of 1,190 data-points taken from runs of the 27 programs. Table~\ref{table:iterations} shows the number of runs on a per-language, per-algorithm basis.
+
+\begin{table}[h!]
+\begin{center}
+\input{tables/iterations}
+\caption{Experiment iterations by language and algorithm}
+\label{table:iterations}
+\end{center}
+\end{table}
+
+For all numbers greater than or equal to 10, there was an additional ``priming'' run (as described above) to ensure that disk cache status did not play into the values for full run-time or package-level energy usage. Note also that the DFA-Gap and Regexp-Gap columns are stand-ins for 5 such columns each (for the values of $k$ from 1 to 5). Each value of $k$ was run the same number of iterations.
 
 \subsubsection{Outliers and the Interpreted Languages}
 
@@ -30,23 +37,57 @@ For the DFA-Gap algorithm, both compiled and interpreted languages had to be red
 \subsection{Performance Comparisons}
 \label{subsec:perf_comp}
 
-The following collection of tables show the comparative performance of the languages on each of the algorithms. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
+The collection of sub-tables in table~\ref{table:runtime:comparative-algorithm} shows the comparative performance of the languages on each of the algorithms. The time measurements are based on the algorithm run-time as opposed to the total run-time. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
+
+\begin{table}[!htb]
+\input{tables/runtimes}
+\caption{Comparative run-times by algorithm}
+\label{table:runtime:comparative-algorithm}
+\end{table}
+
+The DFA-Gap algorithm is shown for all values of $k$ that were used, as it is interesting to see the subtle differences in the ranking of languages for different values of $k$.
 
 \subsection{Energy Usage Comparisons}
 \label{subsec:energy_comp}
 
-In this section the energy usage results are examined. The following tables show the comparative usage over time (Joules per second) for each algorithm with the same scaling method applied as was used for the performance tables. The tables here use the ``Package'' and ``DRAM'' energy values combined together, divided by total run-time.
+In this section the energy usage results are examined. Table~\ref{table:energy:comparative-algorithm} shows the comparative energy usage over time (Joules per second) for each algorithm with the same scaling methodology applied as was used for the performance tables. The tables here use the ``Package'' and ``DRAM'' energy values combined together, divided by total run-time.
+
+\begin{table}[!htb]
+\input{tables/energy}
+\caption{Comparative energy usage over time by algorithm}
+\label{table:energy:comparative-algorithm}
+\end{table}
+
+The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap algorithm is again represented for all values of $k$, as the ranking of languages varies with $k$.
 
 \subsection{Expressiveness Comparisons}
 \label{subsec:expr_comp}
 
-In comparing expressiveness, it is useful to look at all three of the chosen comparative measures in an aggregated fashion. First, the individual numbers will be examined. As with the previous two bases, tables will show the numbers comparing the languages. Unlike the previous sections, the numbers shown will be for the combined files of all algorithm modules, runner modules, and input modules. For each language the source code was combined in a way that facilitated each of the metrics:
+In comparing expressiveness, it is useful to look at all three of the chosen comparative measures in an aggregated fashion. First, the individual numbers will be examined. As with the previous two bases, tables will show the numbers comparing the languages. Unlike the previous sections, the numbers shown will be for the combined files of all algorithm modules, as well as runner modules and input modules. For each language the source code was combined in a way that facilitated each of the metrics:
 
 \begin{description}
 \item[SLOC:] Total SLOC values for each language's files were combined. In the case of C and C++, this includes relevant lines from the header files for the runner and input modules.
 \item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Any function whose value was exactly 1 was discarded so as to not artificially lower the average complexity for the module. Each module's function-level scores were then averaged, and all modules' averages for a given language were summed together.
 \item[Conciseness:] Using a method identical to Bergmans, et al~\cite{bergmans.et.al.2021}, each source code file for a given language was stripped of comments and then archived together using the standard ``\texttt{tar}'' command available on Linux. Each archive file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
 \end{description}
+
+\subsubsection{Source Lines of Code}
+
+\begin{table}[!htb]
+\input{tables/sloc}
+\caption{Comparison of SLOC by language}
+\label{table:expr:sloc}
+\end{table}
+
+\subsubsection{Cyclomatic Complexity}
+
+\subsubsection{Conciseness}
+
+\begin{table}[!htb]
+\input{tables/compression}
+\caption{Comparison of compressibility}
+\label{table:expr:compression}
+\end{table}
 
 \subsection{Combined Bases}
 \label{subsec:combined}
