@@ -276,7 +276,6 @@ TSWLatexianTemp*
 *.lpz
 
 thesis.pdf
-ACM-Reference-Format.*
 
 .DS_Store
 .vscode
