@@ -1,0 +1,3024 @@
+---
+name: Rust/common/src/lib.rs
+start_line: 1
+end_line: 9
+kind: unit
+spaces: []
+metrics:
+  nargs:
+    sum: 0.0
+    average: .nan
+  nexits:
+    sum: 0.0
+    average: .nan
+  cognitive:
+    sum: 0.0
+    average: .nan
+  cyclomatic:
+    sum: 1.0
+    average: 1.0
+  halstead:
+    n1: 1.0
+    N1: 2.0
+    n2: 2.0
+    N2: 2.0
+    length: 4.0
+    estimated_program_length: 2.0
+    purity_ratio: 0.5
+    vocabulary: 3.0
+    volume: 6.339850002884624
+    difficulty: 0.5
+    level: 2.0
+    effort: 3.169925001442312
+    time: 0.1761069445245729
+    bugs: 0.000719302224519915
+  loc:
+    sloc: 9.0
+    ploc: 2.0
+    lloc: 0.0
+    cloc: 6.0
+    blank: 1.0
+  nom:
+    functions: 0.0
+    closures: 0.0
+    total: 0.0
+  mi:
+    mi_original: 125.57131527869835
+    mi_sei: 153.2411187222203
+    mi_visual_studio: 73.43351770684115
+
+---
+name: Rust/kmp/src/main.rs
+start_line: 1
+end_line: 109
+kind: unit
+spaces:
+  - name: build_next_table
+    start_line: 19
+    end_line: 39
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 8.0
+        average: 8.0
+      cyclomatic:
+        sum: 6.0
+        average: 6.0
+      halstead:
+        n1: 22.0
+        N1: 73.0
+        n2: 9.0
+        N2: 44.0
+        length: 117.0
+        estimated_program_length: 126.63682062300134
+        purity_ratio: 1.0823659882307808
+        vocabulary: 31.0
+        volume: 579.6409683152643
+        difficulty: 53.77777777777778
+        level: 0.01859504132231405
+        effort: 31171.803184954217
+        time: 1731.7668436085676
+        bugs: 0.3301566345717038
+      loc:
+        sloc: 21.0
+        ploc: 19.0
+        lloc: 12.0
+        cloc: 0.0
+        blank: 2.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 87.21421027192463
+        mi_sei: 50.73357581876695
+        mi_visual_studio: 51.00246214732434
+  - name: init_kmp
+    start_line: 41
+    end_line: 59
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 1.0
+        average: 1.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 15.0
+        N1: 50.0
+        n2: 15.0
+        N2: 27.0
+        length: 77.0
+        estimated_program_length: 117.20671786825557
+        purity_ratio: 1.5221651671202022
+        vocabulary: 30.0
+        volume: 377.83057586185597
+        difficulty: 13.5
+        level: 0.07407407407407407
+        effort: 5100.712774135055
+        time: 283.37293189639197
+        bugs: 0.09877172935925323
+      loc:
+        sloc: 19.0
+        ploc: 11.0
+        lloc: 8.0
+        cloc: 4.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 92.21096994519185
+        mi_sei: 90.05599632215902
+        mi_visual_studio: 53.92454382759757
+  - name: kmp
+    start_line: 65
+    end_line: 100
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 8.0
+        average: 8.0
+      cyclomatic:
+        sum: 9.0
+        average: 9.0
+      halstead:
+        n1: 25.0
+        N1: 95.0
+        n2: 21.0
+        N2: 57.0
+        length: 152.0
+        estimated_program_length: 208.33507062272208
+        purity_ratio: 1.3706254646231715
+        vocabulary: 46.0
+        volume: 839.581417320666
+        difficulty: 33.92857142857143
+        level: 0.029473684210526316
+        effort: 28485.798087665455
+        time: 1582.5443382036365
+        bugs: 0.31090736235358126
+      loc:
+        sloc: 36.0
+        ploc: 27.0
+        lloc: 15.0
+        cloc: 5.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 75.86589523140195
+        mi_sei: 61.95715829923476
+        mi_visual_studio: 44.366020603159039
+  - name: main
+    start_line: 106
+    end_line: 109
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 11.0
+        N1: 19.0
+        n2: 9.0
+        N2: 10.0
+        length: 29.0
+        estimated_program_length: 66.58307281799108
+        purity_ratio: 2.295968028206589
+        vocabulary: 20.0
+        volume: 125.33591475173351
+        difficulty: 6.111111111111111
+        level: 0.16363636363636364
+        effort: 765.9417012605936
+        time: 42.552316736699648
+        bugs: 0.027904605602197067
+      loc:
+        sloc: 4.0
+        ploc: 4.0
+        lloc: 2.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 123.19084460500574
+        mi_sei: 102.12778846195639
+        mi_visual_studio: 72.0414295935706
+metrics:
+  nargs:
+    sum: 5.0
+    average: 1.25
+  nexits:
+    sum: 3.0
+    average: 0.75
+  cognitive:
+    sum: 16.0
+    average: 4.0
+  cyclomatic:
+    sum: 18.0
+    average: 3.6
+  halstead:
+    n1: 26.0
+    N1: 242.0
+    n2: 41.0
+    N2: 147.0
+    length: 389.0
+    estimated_program_length: 341.8710648610098
+    purity_ratio: 0.8788459250925702
+    vocabulary: 67.0
+    volume: 2359.7086950880736
+    difficulty: 46.609756097560978
+    level: 0.021454735740450028
+    effort: 109985.44673934899
+    time: 6110.3025966304999
+    bugs: 0.7651893098740676
+  loc:
+    sloc: 109.0
+    ploc: 64.0
+    lloc: 37.0
+    cloc: 30.0
+    blank: 15.0
+  nom:
+    functions: 4.0
+    closures: 0.0
+    total: 4.0
+  mi:
+    mi_original: 50.4754383360831
+    mi_sei: 35.261341782998567
+    mi_visual_studio: 29.517800196539825
+
+---
+name: Rust/shift_or/src/main.rs
+start_line: 1
+end_line: 107
+kind: unit
+spaces:
+  - name: calc_s_positions
+    start_line: 29
+    end_line: 47
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 3.0
+        average: 3.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 1.0
+        average: 1.0
+      cyclomatic:
+        sum: 2.0
+        average: 2.0
+      halstead:
+        n1: 19.0
+        N1: 40.0
+        n2: 9.0
+        N2: 23.0
+        length: 63.0
+        estimated_program_length: 109.23994776840893
+        purity_ratio: 1.7339674248953799
+        vocabulary: 28.0
+        volume: 302.86336008962908
+        difficulty: 24.27777777777778
+        level: 0.041189931350114419
+        effort: 7352.849353287105
+        time: 408.4916307381725
+        bugs: 0.12604216587833284
+      loc:
+        sloc: 19.0
+        ploc: 15.0
+        lloc: 7.0
+        cloc: 1.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 93.13102345311477
+        mi_sei: 76.26116040588089
+        mi_visual_studio: 54.46258681468699
+  - name: init_shift_or
+    start_line: 49
+    end_line: 66
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 1.0
+        average: 1.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 1.0
+        average: 1.0
+      cyclomatic:
+        sum: 2.0
+        average: 2.0
+      halstead:
+        n1: 17.0
+        N1: 51.0
+        n2: 19.0
+        N2: 31.0
+        length: 82.0
+        estimated_program_length: 150.19749105668388
+        purity_ratio: 1.8316767202034619
+        vocabulary: 36.0
+        volume: 423.9338501182696
+        difficulty: 13.868421052631579
+        level: 0.07210626185958255
+        effort: 5879.2931319033709
+        time: 326.6273962168539
+        bugs: 0.10858307953790075
+      loc:
+        sloc: 18.0
+        ploc: 12.0
+        lloc: 8.0
+        cloc: 2.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 92.25817489030182
+        mi_sei: 82.29074136285783
+        mi_visual_studio: 53.95214905865603
+  - name: shift_or
+    start_line: 72
+    end_line: 98
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 5.0
+        average: 5.0
+      cyclomatic:
+        sum: 7.0
+        average: 7.0
+      halstead:
+        n1: 24.0
+        N1: 71.0
+        n2: 20.0
+        N2: 43.0
+        length: 114.0
+        estimated_program_length: 196.477661915055
+        purity_ratio: 1.7234882624127633
+        vocabulary: 44.0
+        volume: 622.3752045246519
+        difficulty: 25.8
+        level: 0.03875968992248062
+        effort: 16057.280276736019
+        time: 892.0711264853344
+        bugs: 0.21215832139829034
+      loc:
+        sloc: 27.0
+        ploc: 20.0
+        lloc: 9.0
+        cloc: 3.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 82.54301847610378
+        mi_sei: 68.78383267965606
+        mi_visual_studio: 48.27077103865719
+  - name: main
+    start_line: 104
+    end_line: 107
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 11.0
+        N1: 19.0
+        n2: 9.0
+        N2: 10.0
+        length: 29.0
+        estimated_program_length: 66.58307281799108
+        purity_ratio: 2.295968028206589
+        vocabulary: 20.0
+        volume: 125.33591475173351
+        difficulty: 6.111111111111111
+        level: 0.16363636363636364
+        effort: 765.9417012605936
+        time: 42.552316736699648
+        bugs: 0.027904605602197067
+      loc:
+        sloc: 4.0
+        ploc: 4.0
+        lloc: 2.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 123.19084460500574
+        mi_sei: 102.12778846195639
+        mi_visual_studio: 72.0414295935706
+metrics:
+  nargs:
+    sum: 6.0
+    average: 1.5
+  nexits:
+    sum: 3.0
+    average: 0.75
+  cognitive:
+    sum: 7.0
+    average: 1.75
+  cyclomatic:
+    sum: 13.0
+    average: 2.6
+  halstead:
+    n1: 29.0
+    N1: 193.0
+    n2: 46.0
+    N2: 121.0
+    length: 314.0
+    estimated_program_length: 394.96529883732219
+    purity_ratio: 1.2578512701825547
+    vocabulary: 75.0
+    volume: 1955.8490688157065
+    difficulty: 38.141304347826089
+    level: 0.0262182958107723
+    effort: 74598.63459211211
+    time: 4144.368588450673
+    bugs: 0.5906986762418391
+  loc:
+    sloc: 107.0
+    ploc: 56.0
+    lloc: 26.0
+    cloc: 33.0
+    blank: 18.0
+  nom:
+    functions: 4.0
+    closures: 0.0
+    total: 4.0
+  mi:
+    mi_original: 52.90155852265316
+    mi_sei: 39.84687761536554
+    mi_visual_studio: 30.936583931376118
+
+---
+name: Rust/common/src/input.rs
+start_line: 1
+end_line: 138
+kind: unit
+spaces:
+  - name: read_header
+    start_line: 14
+    end_line: 30
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 26
+        end_line: 26
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 6.0
+            N1: 9.0
+            n2: 1.0
+            N2: 2.0
+            length: 11.0
+            estimated_program_length: 15.509775004326937
+            purity_ratio: 1.4099795458479035
+            vocabulary: 7.0
+            volume: 30.880904142633648
+            difficulty: 6.0
+            level: 0.16666666666666667
+            effort: 185.28542485580187
+            time: 10.293634714211216
+            bugs: 0.010833603008565786
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 152.9332823794168
+            mi_sei: 145.03705594304783
+            mi_visual_studio: 89.43466805813847
+    metrics:
+      nargs:
+        sum: 5.0
+        average: 2.5
+      nexits:
+        sum: 1.0
+        average: 0.5
+      cognitive:
+        sum: 1.0
+        average: 0.5
+      cyclomatic:
+        sum: 4.0
+        average: 2.0
+      halstead:
+        n1: 18.0
+        N1: 57.0
+        n2: 16.0
+        N2: 23.0
+        length: 80.0
+        estimated_program_length: 139.0586500259616
+        purity_ratio: 1.7382331253245203
+        vocabulary: 34.0
+        volume: 406.9970273000271
+        difficulty: 12.9375
+        level: 0.07729468599033816
+        effort: 5265.524040694101
+        time: 292.5291133718945
+        bugs: 0.10088806951372888
+      loc:
+        sloc: 17.0
+        ploc: 13.0
+        lloc: 5.0
+        cloc: 2.0
+        blank: 2.0
+      nom:
+        functions: 1.0
+        closures: 1.0
+        total: 2.0
+      mi:
+        mi_original: 92.93615324256845
+        mi_sei: 84.12065438713332
+        mi_visual_studio: 54.348627627233017
+  - name: read_sequences
+    start_line: 40
+    end_line: 66
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 58
+        end_line: 58
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+    metrics:
+      nargs:
+        sum: 4.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 0.5
+      cognitive:
+        sum: 2.0
+        average: 1.0
+      cyclomatic:
+        sum: 5.0
+        average: 2.5
+      halstead:
+        n1: 21.0
+        N1: 67.0
+        n2: 22.0
+        N2: 40.0
+        length: 107.0
+        estimated_program_length: 190.3461614883745
+        purity_ratio: 1.7789360886763972
+        vocabulary: 43.0
+        volume: 580.6103287531245
+        difficulty: 19.09090909090909
+        level: 0.05238095238095238
+        effort: 11084.379003468739
+        time: 615.7988335260411
+        bugs: 0.1657116302827169
+      loc:
+        sloc: 27.0
+        ploc: 17.0
+        lloc: 9.0
+        cloc: 6.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 1.0
+        total: 2.0
+      mi:
+        mi_original: 83.36422759636455
+        mi_sei: 78.43194160484917
+        mi_visual_studio: 48.751010290271668
+  - name: read_patterns
+    start_line: 72
+    end_line: 74
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 1.0
+        average: 1.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 7.0
+        N1: 8.0
+        n2: 3.0
+        N2: 4.0
+        length: 12.0
+        estimated_program_length: 24.406371956566696
+        purity_ratio: 2.033864329713891
+        vocabulary: 10.0
+        volume: 39.86313713864835
+        difficulty: 4.666666666666667
+        level: 0.21428571428571428
+        effort: 186.0279733136923
+        time: 10.33488740631624
+        bugs: 0.010862528153285397
+      loc:
+        sloc: 3.0
+        ploc: 3.0
+        lloc: 1.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 133.808130442365
+        mi_sei: 117.44529408721525
+        mi_visual_studio: 78.25036867974562
+  - name: read_answers
+    start_line: 82
+    end_line: 138
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 101
+        end_line: 101
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+      - name: "<anonymous>"
+        start_line: 112
+        end_line: 135
+        kind: function
+        spaces:
+          - name: "<anonymous>"
+            start_line: 117
+            end_line: 117
+            kind: function
+            spaces: []
+            metrics:
+              nargs:
+                sum: 3.0
+                average: 3.0
+              nexits:
+                sum: 0.0
+                average: 0.0
+              cognitive:
+                sum: 0.0
+                average: 0.0
+              cyclomatic:
+                sum: 1.0
+                average: 1.0
+              halstead:
+                n1: 6.0
+                N1: 7.0
+                n2: 1.0
+                N2: 2.0
+                length: 9.0
+                estimated_program_length: 15.509775004326937
+                purity_ratio: 1.723308333814104
+                vocabulary: 7.0
+                volume: 25.26619429851844
+                difficulty: 6.0
+                level: 0.16666666666666667
+                effort: 151.59716579111064
+                time: 8.422064766172813
+                bugs: 0.009477041882051136
+              loc:
+                sloc: 1.0
+                ploc: 1.0
+                lloc: 0.0
+                cloc: 0.0
+                blank: 0.0
+              nom:
+                functions: 0.0
+                closures: 1.0
+                total: 1.0
+              mi:
+                mi_original: 153.97676999581999
+                mi_sei: 146.54249035246174
+                mi_visual_studio: 90.04489473439765
+          - name: "<anonymous>"
+            start_line: 118
+            end_line: 118
+            kind: function
+            spaces:
+              - name: "<anonymous>"
+                start_line: 118
+                end_line: 118
+                kind: function
+                spaces: []
+                metrics:
+                  nargs:
+                    sum: 3.0
+                    average: 3.0
+                  nexits:
+                    sum: 0.0
+                    average: 0.0
+                  cognitive:
+                    sum: 0.0
+                    average: 0.0
+                  cyclomatic:
+                    sum: 1.0
+                    average: 1.0
+                  halstead:
+                    n1: 3.0
+                    N1: 4.0
+                    n2: 2.0
+                    N2: 3.0
+                    length: 7.0
+                    estimated_program_length: 6.754887502163468
+                    purity_ratio: 0.9649839288804955
+                    vocabulary: 5.0
+                    volume: 16.253496664211537
+                    difficulty: 2.25
+                    level: 0.4444444444444444
+                    effort: 36.57036749447595
+                    time: 2.031687083026442
+                    bugs: 0.003672526698142297
+                  loc:
+                    sloc: 1.0
+                    ploc: 1.0
+                    lloc: 0.0
+                    cloc: 0.0
+                    blank: 0.0
+                  nom:
+                    functions: 0.0
+                    closures: 1.0
+                    total: 1.0
+                  mi:
+                    mi_original: 156.27079806218675
+                    mi_sei: 149.85207326746917
+                    mi_visual_studio: 91.3864316153139
+            metrics:
+              nargs:
+                sum: 6.0
+                average: 3.0
+              nexits:
+                sum: 0.0
+                average: 0.0
+              cognitive:
+                sum: 0.0
+                average: 0.0
+              cyclomatic:
+                sum: 2.0
+                average: 1.0
+              halstead:
+                n1: 3.0
+                N1: 10.0
+                n2: 3.0
+                N2: 5.0
+                length: 15.0
+                estimated_program_length: 9.509775004326937
+                purity_ratio: 0.6339850002884624
+                vocabulary: 6.0
+                volume: 38.77443751081734
+                difficulty: 2.5
+                level: 0.4
+                effort: 96.93609377704336
+                time: 5.385338543169075
+                bugs: 0.007034000939089884
+              loc:
+                sloc: 1.0
+                ploc: 1.0
+                lloc: 0.0
+                cloc: 0.0
+                blank: 0.0
+              nom:
+                functions: 0.0
+                closures: 2.0
+                total: 2.0
+              mi:
+                mi_original: 151.519641747174
+                mi_sei: 143.0994234727165
+                mi_visual_studio: 88.60797762992633
+        metrics:
+          nargs:
+            sum: 12.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 4.0
+            average: 1.0
+          cyclomatic:
+            sum: 6.0
+            average: 1.5
+          halstead:
+            n1: 16.0
+            N1: 63.0
+            n2: 17.0
+            N2: 30.0
+            length: 93.0
+            estimated_program_length: 133.48686830125576
+            purity_ratio: 1.435342669905976
+            vocabulary: 33.0
+            volume: 469.1286531003362
+            difficulty: 14.117647058823529
+            level: 0.07083333333333333
+            effort: 6622.992749651805
+            time: 367.9440416473225
+            bugs: 0.11755693787097399
+          loc:
+            sloc: 24.0
+            ploc: 22.0
+            lloc: 8.0
+            cloc: 0.0
+            blank: 2.0
+          nom:
+            functions: 0.0
+            closures: 4.0
+            total: 4.0
+          mi:
+            mi_original: 86.15096731708838
+            mi_sei: 49.1996404805646
+            mi_visual_studio: 50.38068264157215
+    metrics:
+      nargs:
+        sum: 16.0
+        average: 2.6666666666666667
+      nexits:
+        sum: 1.0
+        average: 0.16666666666666667
+      cognitive:
+        sum: 6.0
+        average: 1.0
+      cyclomatic:
+        sum: 11.0
+        average: 1.8333333333333333
+      halstead:
+        n1: 22.0
+        N1: 154.0
+        n2: 34.0
+        N2: 74.0
+        length: 228.0
+        estimated_program_length: 271.0812322125321
+        purity_ratio: 1.1889527728619829
+        vocabulary: 56.0
+        volume: 1324.0769222291338
+        difficulty: 23.941176470588237
+        level: 0.04176904176904177
+        effort: 31699.959255721027
+        time: 1761.108847540057
+        bugs: 0.3338754973425088
+      loc:
+        sloc: 57.0
+        ploc: 41.0
+        lloc: 20.0
+        cloc: 10.0
+        blank: 6.0
+      nom:
+        functions: 1.0
+        closures: 5.0
+        total: 6.0
+      mi:
+        mi_original: 65.59252112859794
+        mi_sei: 50.26411849768498
+        mi_visual_studio: 38.35819949040815
+metrics:
+  nargs:
+    sum: 26.0
+    average: 2.3636363636363639
+  nexits:
+    sum: 4.0
+    average: 0.36363636363636367
+  cognitive:
+    sum: 9.0
+    average: 0.8181818181818182
+  cyclomatic:
+    sum: 22.0
+    average: 1.8333333333333333
+  halstead:
+    n1: 22.0
+    N1: 292.0
+    n2: 50.0
+    N2: 152.0
+    length: 444.0
+    estimated_program_length: 380.3003050987567
+    purity_ratio: 0.8565322186908936
+    vocabulary: 72.0
+    volume: 2739.4467006403867
+    difficulty: 33.44
+    level: 0.029904306220095698
+    effort: 91607.09766941452
+    time: 5089.283203856362
+    bugs: 0.6773786349407208
+  loc:
+    sloc: 138.0
+    ploc: 77.0
+    lloc: 35.0
+    cloc: 44.0
+    blank: 17.0
+  nom:
+    functions: 4.0
+    closures: 7.0
+    total: 11.0
+  mi:
+    mi_original: 44.957831826880539
+    mi_sei: 29.769333991873269
+    mi_visual_studio: 26.29112972332195
+
+---
+name: Rust/dfa_gap/src/main.rs
+start_line: 1
+end_line: 143
+kind: unit
+spaces:
+  - name: create_dfa
+    start_line: 26
+    end_line: 81
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 4.0
+        average: 4.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 11.0
+        average: 11.0
+      cyclomatic:
+        sum: 6.0
+        average: 6.0
+      halstead:
+        n1: 26.0
+        N1: 112.0
+        n2: 19.0
+        N2: 66.0
+        length: 178.0
+        estimated_program_length: 202.9220554270965
+        purity_ratio: 1.1400115473432389
+        vocabulary: 45.0
+        volume: 977.5498511466822
+        difficulty: 45.1578947368421
+        level: 0.022144522144522149
+        effort: 44144.09327809754
+        time: 2452.4496265609748
+        bugs: 0.4163518312421392
+      loc:
+        sloc: 56.0
+        ploc: 33.0
+        lloc: 19.0
+        cloc: 18.0
+        blank: 5.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 68.6070463063823
+        mi_sei: 62.37216440273229
+        mi_visual_studio: 40.12107971133468
+  - name: init_dfa_gap
+    start_line: 83
+    end_line: 97
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 15.0
+        N1: 54.0
+        n2: 15.0
+        N2: 31.0
+        length: 85.0
+        estimated_program_length: 117.20671786825557
+        purity_ratio: 1.378902563155948
+        vocabulary: 30.0
+        volume: 417.0857006267241
+        difficulty: 15.5
+        level: 0.06451612903225806
+        effort: 6464.828359714224
+        time: 359.15713109523468
+        bugs: 0.11567781529438739
+      loc:
+        sloc: 15.0
+        ploc: 10.0
+        lloc: 7.0
+        cloc: 2.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 95.5264698097219
+        mi_sei: 89.01626175017104
+        mi_visual_studio: 55.86343263726427
+  - name: dfa_gap
+    start_line: 99
+    end_line: 135
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 9.0
+        average: 9.0
+      cyclomatic:
+        sum: 11.0
+        average: 11.0
+      halstead:
+        n1: 28.0
+        N1: 107.0
+        n2: 25.0
+        N2: 69.0
+        length: 176.0
+        estimated_program_length: 250.70234256198104
+        purity_ratio: 1.4244451281930742
+        vocabulary: 53.0
+        volume: 1008.114000003123
+        difficulty: 38.64
+        level: 0.02587991718426501
+        effort: 38953.524960120674
+        time: 2164.084720006704
+        bugs: 0.38303922888136468
+      loc:
+        sloc: 37.0
+        ploc: 29.0
+        lloc: 14.0
+        cloc: 3.0
+        blank: 5.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 74.0107798202794
+        mi_sei: 53.54217412944112
+        mi_visual_studio: 43.28115778963707
+  - name: main
+    start_line: 140
+    end_line: 143
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 11.0
+        N1: 19.0
+        n2: 9.0
+        N2: 10.0
+        length: 29.0
+        estimated_program_length: 66.58307281799108
+        purity_ratio: 2.295968028206589
+        vocabulary: 20.0
+        volume: 125.33591475173351
+        difficulty: 6.111111111111111
+        level: 0.16363636363636364
+        effort: 765.9417012605936
+        time: 42.552316736699648
+        bugs: 0.027904605602197067
+      loc:
+        sloc: 4.0
+        ploc: 4.0
+        lloc: 2.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 123.19084460500574
+        mi_sei: 102.12778846195639
+        mi_visual_studio: 72.0414295935706
+metrics:
+  nargs:
+    sum: 8.0
+    average: 2.0
+  nexits:
+    sum: 3.0
+    average: 0.75
+  cognitive:
+    sum: 20.0
+    average: 5.0
+  cyclomatic:
+    sum: 20.0
+    average: 4.0
+  halstead:
+    n1: 31.0
+    N1: 314.0
+    n2: 57.0
+    N2: 194.0
+    length: 508.0
+    estimated_program_length: 486.0548164293834
+    purity_ratio: 0.9568008197428807
+    vocabulary: 88.0
+    volume: 3281.391262267747
+    difficulty: 52.75438596491228
+    level: 0.018955769870302627
+    effort: 173107.78115156343
+    time: 9617.098952864635
+    bugs: 1.0353562395512992
+  loc:
+    sloc: 143.0
+    ploc: 82.0
+    lloc: 42.0
+    cloc: 40.0
+    blank: 21.0
+  nom:
+    functions: 4.0
+    closures: 0.0
+    total: 4.0
+  mi:
+    mi_original: 43.90259855058011
+    mi_sei: 26.208598183261679
+    mi_visual_studio: 25.674034240105326
+
+---
+name: Rust/boyer_moore/src/main.rs
+start_line: 1
+end_line: 177
+kind: unit
+spaces:
+  - name: calc_bad_char
+    start_line: 21
+    end_line: 29
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 1.0
+        average: 1.0
+      cyclomatic:
+        sum: 2.0
+        average: 2.0
+      halstead:
+        n1: 18.0
+        N1: 36.0
+        n2: 9.0
+        N2: 18.0
+        length: 54.0
+        estimated_program_length: 103.58797503894242
+        purity_ratio: 1.9182958340544892
+        vocabulary: 27.0
+        volume: 256.7639251168273
+        difficulty: 18.0
+        level: 0.05555555555555555
+        effort: 4621.750652102892
+        time: 256.7639251168273
+        bugs: 0.09248750973876428
+      loc:
+        sloc: 9.0
+        ploc: 7.0
+        lloc: 3.0
+        cloc: 0.0
+        blank: 2.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 106.09454501331335
+        mi_sei: 77.56486168287425
+        mi_visual_studio: 62.04359357503704
+  - name: calc_suffixes
+    start_line: 34
+    end_line: 65
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 12.0
+        average: 12.0
+      cyclomatic:
+        sum: 7.0
+        average: 7.0
+      halstead:
+        n1: 23.0
+        N1: 102.0
+        n2: 11.0
+        N2: 63.0
+        length: 165.0
+        estimated_program_length: 142.09567279432157
+        purity_ratio: 0.861185895723161
+        vocabulary: 34.0
+        volume: 839.431368806306
+        difficulty: 65.86363636363636
+        level: 0.01518288474810214
+        effort: 55288.002427288055
+        time: 3071.5556904048919
+        bugs: 0.4837630324507592
+      loc:
+        sloc: 32.0
+        ploc: 28.0
+        lloc: 17.0
+        cloc: 0.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 78.2349098269447
+        mi_sei: 37.88100345554686
+        mi_visual_studio: 45.75140925552322
+  - name: calc_good_suffix
+    start_line: 70
+    end_line: 95
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 12.0
+        average: 12.0
+      cyclomatic:
+        sum: 7.0
+        average: 7.0
+      halstead:
+        n1: 26.0
+        N1: 94.0
+        n2: 12.0
+        N2: 55.0
+        length: 149.0
+        estimated_program_length: 165.23098268032227
+        purity_ratio: 1.1089327696665923
+        vocabulary: 38.0
+        volume: 781.9411995030941
+        difficulty: 59.583333333333339
+        level: 0.016783216783216784
+        effort: 46590.66313705936
+        time: 2588.3701742810756
+        bugs: 0.4315965918394013
+      loc:
+        sloc: 26.0
+        ploc: 23.0
+        lloc: 15.0
+        cloc: 0.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 81.96758244866393
+        mi_sei: 43.266111736163228
+        mi_visual_studio: 47.93425874190873
+  - name: init_boyer_moore
+    start_line: 97
+    end_line: 117
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 1.0
+        average: 1.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 15.0
+        N1: 65.0
+        n2: 17.0
+        N2: 35.0
+        length: 100.0
+        estimated_program_length: 128.09022723538357
+        purity_ratio: 1.2809022723538358
+        vocabulary: 32.0
+        volume: 500.0
+        difficulty: 15.441176470588236
+        level: 0.06476190476190476
+        effort: 7720.588235294118
+        time: 428.921568627451
+        bugs: 0.13021039981341657
+      loc:
+        sloc: 21.0
+        ploc: 13.0
+        lloc: 10.0
+        cloc: 4.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 89.13277439708517
+        mi_sei: 84.28107803893926
+        mi_visual_studio: 52.12442947197964
+  - name: boyer_moore
+    start_line: 123
+    end_line: 168
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 10.0
+        average: 10.0
+      cyclomatic:
+        sum: 11.0
+        average: 11.0
+      halstead:
+        n1: 27.0
+        N1: 126.0
+        n2: 25.0
+        N2: 78.0
+        length: 204.0
+        estimated_program_length: 244.47836730278176
+        purity_ratio: 1.1984233691312832
+        vocabulary: 52.0
+        volume: 1162.8897025007828
+        difficulty: 42.12
+        level: 0.023741690408357078
+        effort: 48980.91426933296
+        time: 2721.161903851831
+        bugs: 0.44623469801239748
+      loc:
+        sloc: 46.0
+        ploc: 36.0
+        lloc: 18.0
+        cloc: 7.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 69.74096016881392
+        mi_sei: 54.44473740581529
+        mi_visual_studio: 40.784187233224518
+  - name: main
+    start_line: 174
+    end_line: 177
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 11.0
+        N1: 19.0
+        n2: 9.0
+        N2: 10.0
+        length: 29.0
+        estimated_program_length: 66.58307281799108
+        purity_ratio: 2.295968028206589
+        vocabulary: 20.0
+        volume: 125.33591475173351
+        difficulty: 6.111111111111111
+        level: 0.16363636363636364
+        effort: 765.9417012605936
+        time: 42.552316736699648
+        bugs: 0.027904605602197067
+      loc:
+        sloc: 4.0
+        ploc: 4.0
+        lloc: 2.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 123.19084460500574
+        mi_sei: 102.12778846195639
+        mi_visual_studio: 72.0414295935706
+metrics:
+  nargs:
+    sum: 9.0
+    average: 1.5
+  nexits:
+    sum: 5.0
+    average: 0.8333333333333334
+  cognitive:
+    sum: 35.0
+    average: 5.833333333333333
+  cyclomatic:
+    sum: 30.0
+    average: 4.285714285714286
+  halstead:
+    n1: 32.0
+    N1: 451.0
+    n2: 54.0
+    N2: 273.0
+    length: 724.0
+    estimated_program_length: 470.7639251168273
+    purity_ratio: 0.65022641590722
+    vocabulary: 86.0
+    volume: 4652.615682404319
+    difficulty: 80.88888888888889
+    level: 0.012362637362637364
+    effort: 376344.9129767049
+    time: 20908.050720928048
+    bugs: 1.7375452039388435
+  loc:
+    sloc: 177.0
+    ploc: 116.0
+    lloc: 65.0
+    cloc: 37.0
+    blank: 25.0
+  nom:
+    functions: 6.0
+    closures: 0.0
+    total: 6.0
+  mi:
+    mi_original: 36.33141309787058
+    mi_sei: 12.2962355350584
+    mi_visual_studio: 21.24644040811145
+
+---
+name: Rust/aho_corasick/src/main.rs
+start_line: 1
+end_line: 304
+kind: unit
+spaces:
+  - name: Set
+    start_line: 35
+    end_line: 61
+    kind: impl
+    spaces:
+      - name: new
+        start_line: 36
+        end_line: 40
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 0.0
+            average: 0.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 5.0
+            N1: 7.0
+            n2: 4.0
+            N2: 4.0
+            length: 11.0
+            estimated_program_length: 19.60964047443681
+            purity_ratio: 1.7826945885851644
+            vocabulary: 9.0
+            volume: 34.86917501586544
+            difficulty: 2.5
+            level: 0.4
+            effort: 87.1729375396636
+            time: 4.842940974425755
+            bugs: 0.006553397824358721
+          loc:
+            sloc: 5.0
+            ploc: 5.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 126.22876917047285
+            mi_sei: 106.51058716715059
+            mi_visual_studio: 73.81799366694318
+      - name: insert
+        start_line: 42
+        end_line: 44
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 2.0
+            average: 2.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 9.0
+            N1: 11.0
+            n2: 3.0
+            N2: 5.0
+            length: 16.0
+            estimated_program_length: 33.284212515144279
+            purity_ratio: 2.0802632821965174
+            vocabulary: 12.0
+            volume: 57.3594000115385
+            difficulty: 7.5
+            level: 0.13333333333333334
+            effort: 430.19550008653877
+            time: 23.899750004807708
+            bugs: 0.018995729976268397
+          loc:
+            sloc: 3.0
+            ploc: 3.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 131.9159298954054
+            mi_sei: 114.71542574174927
+            mi_visual_studio: 77.14381865228387
+      - name: contains
+        start_line: 46
+        end_line: 48
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 2.0
+            average: 2.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 8.0
+            N1: 12.0
+            n2: 3.0
+            N2: 5.0
+            length: 17.0
+            estimated_program_length: 28.75488750216347
+            purity_ratio: 1.6914639707154982
+            vocabulary: 11.0
+            volume: 58.81033751683405
+            difficulty: 6.666666666666667
+            level: 0.15
+            effort: 392.0689167788937
+            time: 21.781606487716318
+            bugs: 0.017856116899411774
+          loc:
+            sloc: 3.0
+            ploc: 3.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 131.78602915625647
+            mi_sei: 114.52801858957128
+            mi_visual_studio: 77.06785330775232
+      - name: iter
+        start_line: 50
+        end_line: 52
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 1.0
+            average: 1.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 10.0
+            N1: 12.0
+            n2: 5.0
+            N2: 6.0
+            length: 18.0
+            estimated_program_length: 44.82892142331043
+            purity_ratio: 2.4904956346283577
+            vocabulary: 15.0
+            volume: 70.32403072095333
+            difficulty: 6.0
+            level: 0.16666666666666667
+            effort: 421.94418432572
+            time: 23.44134357365111
+            bugs: 0.018752049849923147
+          loc:
+            sloc: 3.0
+            ploc: 3.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 130.85629035214468
+            mi_sei: 113.18668902755712
+            mi_visual_studio: 76.52414640476296
+      - name: union
+        start_line: 54
+        end_line: 60
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 2.0
+            average: 2.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 3.0
+            average: 3.0
+          cyclomatic:
+            sum: 3.0
+            average: 3.0
+          halstead:
+            n1: 11.0
+            N1: 21.0
+            n2: 4.0
+            N2: 9.0
+            length: 30.0
+            estimated_program_length: 46.05374780501027
+            purity_ratio: 1.5351249268336756
+            vocabulary: 15.0
+            volume: 117.20671786825557
+            difficulty: 12.375
+            level: 0.08080808080808082
+            effort: 1450.4331336196627
+            time: 80.5796185344257
+            bugs: 0.04271140784069348
+          loc:
+            sloc: 7.0
+            ploc: 7.0
+            lloc: 3.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 114.01377177028883
+            mi_sei: 89.09171071224239
+            mi_visual_studio: 66.67472033350224
+    metrics:
+      nargs:
+        sum: 7.0
+        average: 1.4
+      nexits:
+        sum: 3.0
+        average: 0.6
+      cognitive:
+        sum: 3.0
+        average: 0.6
+      cyclomatic:
+        sum: 8.0
+        average: 1.3333333333333333
+      halstead:
+        n1: 15.0
+        N1: 64.0
+        n2: 14.0
+        N2: 29.0
+        length: 93.0
+        estimated_program_length: 111.90632784293425
+        purity_ratio: 1.2032938477734865
+        vocabulary: 29.0
+        volume: 451.79223254686419
+        difficulty: 15.535714285714287
+        level: 0.06436781609195402
+        effort: 7018.915041353069
+        time: 389.9397245196149
+        bugs: 0.12219649123649337
+      loc:
+        sloc: 27.0
+        ploc: 23.0
+        lloc: 7.0
+        cloc: 0.0
+        blank: 4.0
+      nom:
+        functions: 5.0
+        closures: 0.0
+        total: 5.0
+      mi:
+        mi_original: 83.97868623015975
+        mi_sei: 46.26934104784472
+        mi_visual_studio: 49.11034282465482
+  - name: Queue
+    start_line: 69
+    end_line: 93
+    kind: impl
+    spaces:
+      - name: new
+        start_line: 70
+        end_line: 75
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 0.0
+            average: 0.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 5.0
+            N1: 8.0
+            n2: 5.0
+            N2: 5.0
+            length: 13.0
+            estimated_program_length: 23.21928094887362
+            purity_ratio: 1.7860985345287402
+            vocabulary: 10.0
+            volume: 43.18506523353571
+            difficulty: 2.5
+            level: 0.4
+            effort: 107.96266308383928
+            time: 5.997925726879959
+            bugs: 0.0075577839187211119
+          loc:
+            sloc: 6.0
+            ploc: 6.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 122.16292403739149
+            mi_sei: 100.64481255663159
+            mi_visual_studio: 71.44030645461491
+      - name: is_empty
+        start_line: 77
+        end_line: 79
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 1.0
+            average: 1.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 8.0
+            N1: 11.0
+            n2: 2.0
+            N2: 4.0
+            length: 15.0
+            estimated_program_length: 26.0
+            purity_ratio: 1.7333333333333335
+            vocabulary: 10.0
+            volume: 49.82892142331043
+            difficulty: 8.0
+            level: 0.125
+            effort: 398.63137138648349
+            time: 22.146187299249083
+            bugs: 0.01805481576188668
+          loc:
+            sloc: 3.0
+            ploc: 3.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 132.6477839755311
+            mi_sei: 115.77126799380096
+            mi_visual_studio: 77.57180349446263
+      - name: enqueue
+        start_line: 81
+        end_line: 83
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 2.0
+            average: 2.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 9.0
+            N1: 11.0
+            n2: 3.0
+            N2: 5.0
+            length: 16.0
+            estimated_program_length: 33.284212515144279
+            purity_ratio: 2.0802632821965174
+            vocabulary: 12.0
+            volume: 57.3594000115385
+            difficulty: 7.5
+            level: 0.13333333333333334
+            effort: 430.19550008653877
+            time: 23.899750004807708
+            bugs: 0.018995729976268397
+          loc:
+            sloc: 3.0
+            ploc: 3.0
+            lloc: 1.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 131.9159298954054
+            mi_sei: 114.71542574174927
+            mi_visual_studio: 77.14381865228387
+      - name: dequeue
+        start_line: 85
+        end_line: 92
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 1.0
+            average: 1.0
+          nexits:
+            sum: 1.0
+            average: 1.0
+          cognitive:
+            sum: 1.0
+            average: 1.0
+          cyclomatic:
+            sum: 2.0
+            average: 2.0
+          halstead:
+            n1: 15.0
+            N1: 23.0
+            n2: 6.0
+            N2: 11.0
+            length: 34.0
+            estimated_program_length: 74.11313393845473
+            purity_ratio: 2.1797980570133745
+            vocabulary: 21.0
+            volume: 149.33879237447787
+            difficulty: 13.75
+            level: 0.07272727272727273
+            effort: 2053.4083951490708
+            time: 114.07824417494837
+            bugs: 0.053851230840706577
+          loc:
+            sloc: 8.0
+            ploc: 8.0
+            lloc: 4.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 1.0
+            closures: 0.0
+            total: 1.0
+          mi:
+            mi_original: 110.82071602916605
+            mi_sei: 84.38328516983808
+            mi_visual_studio: 64.80743627436611
+    metrics:
+      nargs:
+        sum: 4.0
+        average: 1.0
+      nexits:
+        sum: 3.0
+        average: 0.75
+      cognitive:
+        sum: 1.0
+        average: 0.25
+      cyclomatic:
+        sum: 6.0
+        average: 1.2
+      halstead:
+        n1: 17.0
+        N1: 54.0
+        n2: 14.0
+        N2: 25.0
+        length: 79.0
+        estimated_program_length: 122.78983721006222
+        purity_ratio: 1.5543017368362307
+        vocabulary: 31.0
+        volume: 391.3815085205631
+        difficulty: 15.178571428571429
+        level: 0.06588235294117648
+        effort: 5940.612182901405
+        time: 330.03401016118917
+        bugs: 0.10933676321494801
+      loc:
+        sloc: 25.0
+        ploc: 22.0
+        lloc: 7.0
+        cloc: 0.0
+        blank: 3.0
+      nom:
+        functions: 4.0
+        closures: 0.0
+        total: 4.0
+      mi:
+        mi_original: 86.43186102829906
+        mi_sei: 49.60488444474511
+        mi_visual_studio: 50.54494796976552
+  - name: create_new_state
+    start_line: 98
+    end_line: 101
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 12.0
+        N1: 12.0
+        n2: 5.0
+        N2: 6.0
+        length: 18.0
+        estimated_program_length: 54.62919048309068
+        purity_ratio: 3.034955026838371
+        vocabulary: 17.0
+        volume: 73.57433114250611
+        difficulty: 7.2
+        level: 0.1388888888888889
+        effort: 529.735184226044
+        time: 29.429732457002446
+        bugs: 0.021823176141813329
+      loc:
+        sloc: 4.0
+        ploc: 4.0
+        lloc: 1.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 125.96089109294423
+        mi_sei: 106.12412079313714
+        mi_visual_studio: 73.66133982043522
+  - name: enter_pattern
+    start_line: 112
+    end_line: 147
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 5.0
+        average: 5.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 2.0
+        average: 2.0
+      cyclomatic:
+        sum: 3.0
+        average: 3.0
+      halstead:
+        n1: 19.0
+        N1: 91.0
+        n2: 16.0
+        N2: 44.0
+        length: 135.0
+        estimated_program_length: 144.71062275542813
+        purity_ratio: 1.0719305389290972
+        vocabulary: 35.0
+        volume: 692.4532072875704
+        difficulty: 26.125
+        level: 0.03827751196172249
+        effort: 18090.34004038778
+        time: 1005.0188911326544
+        bugs: 0.22970823532367277
+      loc:
+        sloc: 36.0
+        ploc: 23.0
+        lloc: 13.0
+        cloc: 10.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 78.24774173862299
+        mi_sei: 73.92979859376135
+        mi_visual_studio: 45.758913297440347
+  - name: build_goto
+    start_line: 152
+    end_line: 177
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 3.0
+        average: 3.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 4.0
+        average: 4.0
+      cyclomatic:
+        sum: 4.0
+        average: 4.0
+      halstead:
+        n1: 18.0
+        N1: 63.0
+        n2: 14.0
+        N2: 31.0
+        length: 94.0
+        estimated_program_length: 128.36161893476808
+        purity_ratio: 1.3655491376039158
+        vocabulary: 32.0
+        volume: 470.0
+        difficulty: 19.928571428571428
+        level: 0.05017921146953405
+        effort: 9366.42857142857
+        time: 520.3571428571428
+        bugs: 0.14811354011812997
+      loc:
+        sloc: 26.0
+        ploc: 17.0
+        lloc: 8.0
+        cloc: 6.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 85.30462607159066
+        mi_sei: 81.6444738468343
+        mi_visual_studio: 49.88574624069629
+  - name: build_failure
+    start_line: 182
+    end_line: 227
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 12.0
+        average: 12.0
+      cyclomatic:
+        sum: 7.0
+        average: 7.0
+      halstead:
+        n1: 22.0
+        N1: 115.0
+        n2: 19.0
+        N2: 62.0
+        length: 177.0
+        estimated_program_length: 178.81811836544865
+        purity_ratio: 1.0102718551720263
+        vocabulary: 41.0
+        volume: 948.2867048174009
+        difficulty: 35.89473684210526
+        level: 0.027859237536656896
+        effort: 34038.50172028776
+        time: 1891.0278733493199
+        bugs: 0.35010020807798766
+      loc:
+        sloc: 46.0
+        ploc: 31.0
+        lloc: 22.0
+        cloc: 8.0
+        blank: 7.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 71.72179356045239
+        mi_sei: 58.58675166572297
+        mi_visual_studio: 41.94256933359788
+  - name: init_aho_corasick
+    start_line: 229
+    end_line: 244
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 1.0
+        average: 1.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 15.0
+        N1: 73.0
+        n2: 17.0
+        N2: 37.0
+        length: 110.0
+        estimated_program_length: 128.09022723538357
+        purity_ratio: 1.1644566112307598
+        vocabulary: 32.0
+        volume: 550.0
+        difficulty: 16.323529411764708
+        level: 0.06126126126126126
+        effort: 8977.94117647059
+        time: 498.7745098039216
+        bugs: 0.14398919896419785
+      loc:
+        sloc: 16.0
+        ploc: 12.0
+        lloc: 9.0
+        cloc: 1.0
+        blank: 3.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 93.04248765293768
+        mi_sei: 77.51731519030654
+        mi_visual_studio: 54.41081149294602
+  - name: aho_corasick
+    start_line: 254
+    end_line: 291
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 2.0
+        average: 2.0
+      nexits:
+        sum: 1.0
+        average: 1.0
+      cognitive:
+        sum: 9.0
+        average: 9.0
+      cyclomatic:
+        sum: 12.0
+        average: 12.0
+      halstead:
+        n1: 23.0
+        N1: 116.0
+        n2: 29.0
+        N2: 69.0
+        length: 185.0
+        estimated_program_length: 244.92337384801088
+        purity_ratio: 1.323910128908167
+        vocabulary: 52.0
+        volume: 1054.581347856102
+        difficulty: 27.362068965517243
+        level: 0.036546943919344678
+        effort: 28855.52756978679
+        time: 1603.084864988155
+        bugs: 0.3135918433158031
+      loc:
+        sloc: 38.0
+        ploc: 33.0
+        lloc: 12.0
+        cloc: 1.0
+        blank: 4.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 73.11442868195243
+        mi_sei: 43.43657465731229
+        mi_visual_studio: 42.75697583739908
+  - name: main
+    start_line: 296
+    end_line: 304
+    kind: function
+    spaces: []
+    metrics:
+      nargs:
+        sum: 0.0
+        average: 0.0
+      nexits:
+        sum: 0.0
+        average: 0.0
+      cognitive:
+        sum: 0.0
+        average: 0.0
+      cyclomatic:
+        sum: 1.0
+        average: 1.0
+      halstead:
+        n1: 11.0
+        N1: 20.0
+        n2: 9.0
+        N2: 10.0
+        length: 30.0
+        estimated_program_length: 66.58307281799108
+        purity_ratio: 2.2194357605997028
+        vocabulary: 20.0
+        volume: 129.65784284662088
+        difficulty: 6.111111111111111
+        level: 0.16363636363636364
+        effort: 792.353484062683
+        time: 44.01963800348239
+        bugs: 0.02854245948205359
+      loc:
+        sloc: 9.0
+        ploc: 9.0
+        lloc: 2.0
+        cloc: 0.0
+        blank: 0.0
+      nom:
+        functions: 1.0
+        closures: 0.0
+        total: 1.0
+      mi:
+        mi_original: 109.87748703358766
+        mi_sei: 82.92067351609002
+        mi_visual_studio: 64.2558403705191
+metrics:
+  nargs:
+    sum: 24.0
+    average: 1.5
+  nexits:
+    sum: 10.0
+    average: 0.625
+  cognitive:
+    sum: 31.0
+    average: 1.9375
+  cyclomatic:
+    sum: 44.0
+    average: 2.3157894736842108
+  halstead:
+    n1: 28.0
+    N1: 648.0
+    n2: 91.0
+    N2: 337.0
+    length: 985.0
+    estimated_program_length: 726.8152500756943
+    purity_ratio: 0.7378835026149181
+    vocabulary: 119.0
+    volume: 6791.395496858325
+    difficulty: 51.84615384615385
+    level: 0.019287833827893176
+    effort: 352107.73576019317
+    time: 19561.540875566287
+    bugs: 1.662120310026412
+  loc:
+    sloc: 304.0
+    ploc: 189.0
+    lloc: 81.0
+    cloc: 73.0
+    blank: 42.0
+  nom:
+    functions: 16.0
+    closures: 0.0
+    total: 16.0
+  mi:
+    mi_original: 22.38241028385447
+    mi_sei: -4.514362749523677
+    mi_visual_studio: 13.089128820967526
+
+---
+name: Rust/common/src/run.rs
+start_line: 1
+end_line: 327
+kind: unit
+spaces:
+  - name: run
+    start_line: 40
+    end_line: 120
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 83
+        end_line: 83
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+      - name: "<anonymous>"
+        start_line: 85
+        end_line: 85
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+    metrics:
+      nargs:
+        sum: 10.0
+        average: 3.3333333333333337
+      nexits:
+        sum: 4.0
+        average: 1.3333333333333333
+      cognitive:
+        sum: 19.0
+        average: 6.333333333333333
+      cyclomatic:
+        sum: 12.0
+        average: 4.0
+      halstead:
+        n1: 25.0
+        N1: 193.0
+        n2: 43.0
+        N2: 97.0
+        length: 290.0
+        estimated_program_length: 349.4257891965583
+        purity_ratio: 1.2049165144708907
+        vocabulary: 68.0
+        volume: 1765.3642239625984
+        difficulty: 28.197674418604654
+        level: 0.03546391752577319
+        effort: 49779.16561755001
+        time: 2765.5092009750007
+        bugs: 0.4510698719644409
+      loc:
+        sloc: 81.0
+        ploc: 56.0
+        lloc: 30.0
+        cloc: 13.0
+        blank: 12.0
+      nom:
+        functions: 1.0
+        closures: 2.0
+        total: 3.0
+      mi:
+        mi_original: 58.174139696534357
+        mi_sei: 38.52603618657391
+        mi_visual_studio: 34.01996473481541
+  - name: run_multi
+    start_line: 146
+    end_line: 221
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 185
+        end_line: 185
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+      - name: "<anonymous>"
+        start_line: 187
+        end_line: 187
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+    metrics:
+      nargs:
+        sum: 10.0
+        average: 3.3333333333333337
+      nexits:
+        sum: 1.0
+        average: 0.3333333333333333
+      cognitive:
+        sum: 16.0
+        average: 5.333333333333333
+      cyclomatic:
+        sum: 11.0
+        average: 3.6666666666666667
+      halstead:
+        n1: 24.0
+        N1: 187.0
+        n2: 43.0
+        N2: 94.0
+        length: 281.0
+        estimated_program_length: 343.36848446949798
+        purity_ratio: 1.2219519020266832
+        vocabulary: 67.0
+        volume: 1704.5710625186339
+        difficulty: 26.232558139534885
+        level: 0.038120567375886527
+        effort: 44715.25950048881
+        time: 2484.1810833604897
+        bugs: 0.4199354924721142
+      loc:
+        sloc: 76.0
+        ploc: 51.0
+        lloc: 26.0
+        cloc: 15.0
+        blank: 10.0
+      nom:
+        functions: 1.0
+        closures: 2.0
+        total: 3.0
+      mi:
+        mi_original: 59.618562221837098
+        mi_sei: 43.18978884006367
+        mi_visual_studio: 34.86465627008017
+  - name: run_approx
+    start_line: 241
+    end_line: 327
+    kind: function
+    spaces:
+      - name: "<anonymous>"
+        start_line: 290
+        end_line: 290
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+      - name: "<anonymous>"
+        start_line: 292
+        end_line: 292
+        kind: function
+        spaces: []
+        metrics:
+          nargs:
+            sum: 3.0
+            average: 3.0
+          nexits:
+            sum: 0.0
+            average: 0.0
+          cognitive:
+            sum: 0.0
+            average: 0.0
+          cyclomatic:
+            sum: 1.0
+            average: 1.0
+          halstead:
+            n1: 3.0
+            N1: 4.0
+            n2: 1.0
+            N2: 2.0
+            length: 6.0
+            estimated_program_length: 4.754887502163468
+            purity_ratio: 0.792481250360578
+            vocabulary: 4.0
+            volume: 12.0
+            difficulty: 3.0
+            level: 0.3333333333333333
+            effort: 36.0
+            time: 2.0
+            bugs: 0.0036342411856642787
+          loc:
+            sloc: 1.0
+            ploc: 1.0
+            lloc: 0.0
+            cloc: 0.0
+            blank: 0.0
+          nom:
+            functions: 0.0
+            closures: 1.0
+            total: 1.0
+          mi:
+            mi_original: 157.8484854211024
+            mi_sei: 152.12819499625
+            mi_visual_studio: 92.30905580181427
+    metrics:
+      nargs:
+        sum: 10.0
+        average: 3.3333333333333337
+      nexits:
+        sum: 4.0
+        average: 1.3333333333333333
+      cognitive:
+        sum: 19.0
+        average: 6.333333333333333
+      cyclomatic:
+        sum: 12.0
+        average: 4.0
+      halstead:
+        n1: 25.0
+        N1: 212.0
+        n2: 47.0
+        N2: 106.0
+        length: 318.0
+        estimated_program_length: 377.16208077321707
+        purity_ratio: 1.18604427916106
+        vocabulary: 72.0
+        volume: 1962.0361504586554
+        difficulty: 28.19148936170213
+        level: 0.03547169811320754
+        effort: 55312.72126293018
+        time: 3072.9289590516766
+        bugs: 0.4839072128332626
+      loc:
+        sloc: 87.0
+        ploc: 61.0
+        lloc: 32.0
+        cloc: 14.0
+        blank: 12.0
+      nom:
+        functions: 1.0
+        closures: 2.0
+        total: 3.0
+      mi:
+        mi_original: 56.467250538413669
+        mi_sei: 36.09696451175201
+        mi_visual_studio: 33.02178394059278
+metrics:
+  nargs:
+    sum: 30.0
+    average: 3.3333333333333337
+  nexits:
+    sum: 9.0
+    average: 1.0
+  cognitive:
+    sum: 54.0
+    average: 6.0
+  cyclomatic:
+    sum: 36.0
+    average: 3.6
+  halstead:
+    n1: 27.0
+    N1: 722.0
+    n2: 65.0
+    N2: 311.0
+    length: 1033.0
+    estimated_program_length: 519.8358704052632
+    purity_ratio: 0.5032293033932849
+    vocabulary: 92.0
+    volume: 6738.839500606894
+    difficulty: 64.5923076923077
+    level: 0.01548171966178397
+    effort: 435277.19451227769
+    time: 24182.066361793204
+    bugs: 1.9145028673008707
+  loc:
+    sloc: 327.0
+    ploc: 193.0
+    lloc: 88.0
+    cloc: 88.0
+    blank: 46.0
+  nom:
+    functions: 3.0
+    closures: 6.0
+    total: 9.0
+  mi:
+    mi_original: 23.08130158901868
+    mi_sei: -2.7409496368812329
+    mi_visual_studio: 13.497837186560633
+
