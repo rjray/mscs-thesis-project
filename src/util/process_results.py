@@ -550,10 +550,13 @@ def power_graph(
             dtype=float
         )
 
+    combined = {}
+    for lang in languages:
+        combined[lang] = package[lang] + dram[lang]
+
     if average:
         for lang in languages:
-            package[lang] /= runtimes[lang]
-            dram[lang] /= runtimes[lang]
+            combined[lang] /= runtimes[lang]
 
     if large:
         fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
@@ -561,9 +564,8 @@ def power_graph(
         fig, ax = plt.subplots()
 
     for idx, lang in enumerate(languages):
-        ax.bar(x + steps[idx], package[lang], step,
+        ax.bar(x + steps[idx], combined[lang], step,
                label=f"{LANGUAGE_LABELS[lang]}")
-        ax.bar(x + steps[idx], dram[lang], step, bottom=package[lang])
 
     ax.set_xticks(
         x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], algorithms)
