@@ -13,5 +13,5 @@ memcheck.txt
 # This dir will be used for the compression measurements
 compression/
 compression*.txt
-# JSON data, part of the cyclomatic complexity measurements
-*.json
+# The cyclomatic complexity measurements
+cyclomatic*.*
