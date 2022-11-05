@@ -418,9 +418,20 @@ def read_cyclomatic(filename):
     with open(csv_filename, "r", newline="") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
-            csv_data.append([row[6], row[7], row[1]])
+            csv_data.append([row[6], int(row[1])])
+    # Sort by file name. This includes the language name, too.
+    csv_data.sort(key=itemgetter(0))
+    tmpmap = {}
+    for file, count in csv_data:
+        if file not in tmpmap:
+            tmpmap[file] = []
+        tmpmap[file].append(count)
+    for name, values in tmpmap.items():
+        total = sum(values)
+        lang, file = name.split("/", maxsplit=1)
+        raw_data[lang][file] = [total, total / len(values)]
 
-    # Then the JSON. This is just for Perl.
+    # Process the Perl data, which is in JSON format.
     json_data = []
     with open(json_filename, "r") as jsonfile:
         data = json.load(jsonfile)
@@ -428,26 +439,33 @@ def read_cyclomatic(filename):
         # Discard the code outside of subs because Lizard did the same with
         # the other languages.
         if not record["name"].startswith("{"):
+            name = record["path"].split("/", maxsplit=1)[1]
             json_data.append(
-                [record["path"], record["name"], record["mccabe_complexity"]]
+                [name, record["mccabe_complexity"]]
             )
+    # Sort by file name.
+    json_data.sort(key=itemgetter(0))
+    tmpmap = {}
+    for file, count in json_data:
+        if file not in tmpmap:
+            tmpmap[file] = []
+        tmpmap[file].append(count)
+    for file, values in tmpmap.items():
+        total = sum(values)
+        raw_data["Perl"][file] = [total, total / len(values)]
 
-    # Then the YAML. This is just for Rust.
-    yaml_data = []
+    # Now process the Rust data, which is in YAML format.
     with open(yaml_filename, "r") as yamlfile:
         for record in yaml.safe_load_all(yamlfile):
-
-            yaml_data.append(record)
-
-    for record in csv_data + json_data:
-        lang, file = record[0].split("/", maxsplit=1)
-        if file not in raw_data[lang]:
-            raw_data[lang][file] = {}
-        raw_data[lang][file][record[1]] = record[2]
+            name = record["name"].split("/", maxsplit=1)[1]
+            total = int(record["metrics"]["cyclomatic"]["sum"])
+            average = record["metrics"]["cyclomatic"]["average"]
+            raw_data["Rust"][name] = [total, average]
 
     # These are not counted for the research:
     del raw_data["Perl"]["regexp.pl"]
     del raw_data["Python"]["regexp.py"]
+    del raw_data["Rust"]["common/src/lib.rs"]
 
     return raw_data
 
@@ -878,7 +896,104 @@ def create_sloc_tables(data, filename):
 
 # Create the row of three tables for the cyclomatic complexity data.
 def create_cyclomatic_tables(data, filename):
-    pass
+    length = len(UNIQUE_LANGUAGES)
+    algos_totals = [0] * length
+    algos_avgs = [0] * length
+    frame_totals = [0] * length
+    frame_avgs = [0] * length
+    all_totals = [0] * length
+    all_avgs = [0] * length
+
+    for idx, lang in enumerate(UNIQUE_LANGUAGES):
+        lang_data = data[lang]
+        for file, values in lang_data.items():
+            all_totals[idx] += values[0]
+            all_avgs[idx] += values[1]
+            # Do the values go in algos or frame?
+            if file.startswith("input") or file.startswith("run"):
+                # C/C++/Python
+                frame_totals[idx] += values[0]
+                frame_avgs[idx] += values[1]
+            elif file.startswith("Input") or file.startswith("Run"):
+                # Perl
+                frame_totals[idx] += values[0]
+                frame_avgs[idx] += values[1]
+            elif file.startswith("common"):
+                # Rust
+                frame_totals[idx] += values[0]
+                frame_avgs[idx] += values[1]
+            else:
+                # Goes in under algorithms
+                algos_totals[idx] += values[0]
+                algos_avgs[idx] += values[1]
+
+    # At this point, the three pairs should be completely filled in. Create the
+    # mappings.
+    all_map = list(range(length))
+    all_map.sort(key=lambda i: all_totals[i])
+    algos_map = list(range(length))
+    algos_map.sort(key=lambda i: algos_totals[i])
+    frame_map = list(range(length))
+    frame_map.sort(key=lambda i: frame_totals[i])
+
+    # Create tables.
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Comparative cyclomatic totals sub-tables", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        # First sub-table (algorithms without boilerplate):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & Total & Avg \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in algos_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(algos_totals[x]))
+            row.append(f"{algos_avgs[x]:.2f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Algorithms complexity}", file=f)
+        print("    \\label{table:cyclomatic:algorithm}", file=f)
+        print("\\end{subtable}%", file=f)
+        # Second sub-table (boilerplate only):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & Total & Avg \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in frame_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(frame_totals[x]))
+            row.append(f"{frame_avgs[x]:.2f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Framework complexity}", file=f)
+        print("    \\label{table:cyclomatic:framework}", file=f)
+        print("\\end{subtable}%", file=f)
+        # Third sub-table (all values):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & Total & Avg \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in all_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(all_totals[x]))
+            row.append(f"{all_avgs[x]:.2f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Total complexity}", file=f)
+        print("    \\label{table:cyclomatic:total}", file=f)
+        print("\\end{subtable}", file=f)
+
+    return
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -939,7 +1054,6 @@ def main():
         import pprint
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(analyzed)
-        pp.pprint(cyclomatic_data)
 
     print()
     print("##################################################################")
