@@ -84,8 +84,10 @@ XZ := xz
 # Commands and values for the cyclomatic complexity data:
 CYCLOMATIC_FILE_CSV := cyclomatic.csv
 CYCLOMATIC_FILE_JSON := cyclomatic.json
+CYCLOMATIC_FILE_YAML := cyclomatic.yaml
 LIZARD := lizard
 COUNTPERL := countperl
+RUST_CODE_ANALYSIS_CLI := rust-code-analysis-cli
 
 # The languages under inspection, and clean-targets for those that have them.
 LANGUAGES := C Cpp Rust Perl Python
@@ -185,8 +187,9 @@ compression-data:
 
 # Rule/actions for calculating the cyclomatic complexity data
 cyclomatic-data:
-	$(LIZARD) --csv C C++ Python Rust > $(CYCLOMATIC_FILE_CSV)
+	$(LIZARD) --csv C C++ Python > $(CYCLOMATIC_FILE_CSV)
 	$(COUNTPERL) --json Perl > $(CYCLOMATIC_FILE_JSON)
+	$(RUST_CODE_ANALYSIS_CLI) -m -O yaml -p Rust > $(CYCLOMATIC_FILE_YAML)
 
 # Rules relevant to the creation/cleaning of the data files:
 
