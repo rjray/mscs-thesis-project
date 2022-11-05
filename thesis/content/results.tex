@@ -58,12 +58,14 @@ In this section the energy usage results are examined. Table~\ref{table:energy:c
 \label{table:energy:comparative-algorithm}
 \end{table}
 
-The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap algorithm is again represented for all values of $k$, as the ranking of languages varies with $k$. These results are further illustrated by figure~\ref{fig:graph:power_per_sec}.
+The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap algorithm is again represented for all values of $k$, as the ranking of languages varies with $k$.
+
+These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap ($k=1$) instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 9 distinct groups of experiments.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.85\textwidth]{figures/power_per_sec.png}
-	\caption{Bar graphs of energy usage per second, by algorithm}
+	\caption{Bar charts of energy usage per second, by algorithm}
 	\label{fig:graph:power_per_sec}
 \end{figure}
 
