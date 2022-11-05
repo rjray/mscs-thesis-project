@@ -174,13 +174,13 @@ compression-data:
 	@echo Removing original files.
 	find compression -type f ! -name \*.nc -exec rm \{\} \;
 	@echo Done.
-	@echo Creating per-language tar archives.
+	@echo Creating per-language text files.
 	for lang in $(LANG_DIRS); do \
-		(cd $(COMPRESSION_DIR) ; tar cf $$lang.tar $$lang); \
+		(cd $(COMPRESSION_DIR) ; find $$lang -type f | xargs cat) > $(COMPRESSION_DIR)/$$lang.txt; \
 	done
-	@echo Archives complete.
+	@echo Text files complete.
 	@echo Compressing and saving statistics.
-	$(XZ) --lzma2=preset=9e,lc=4,pb=0 -k -v -f $(COMPRESSION_DIR)/*.tar 2>&1 | tee $(COMPRESSION_STATS)
+	$(XZ) --lzma2=preset=9e,lc=4,pb=0 -k -v -f $(COMPRESSION_DIR)/*.txt 2>&1 | tee $(COMPRESSION_STATS)
 	@echo Compression done.
 	@echo Removing directory.
 	$(RM) -r $(COMPRESSION_DIR)

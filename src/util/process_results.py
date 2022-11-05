@@ -333,7 +333,7 @@ def read_compression(filename):
     raw_data = {}
     with open(filename, "r") as f:
         for line in f:
-            m = re.search(r"compression/([\w+]+)[.]tar:.*= (\d+[.]\d+)", line)
+            m = re.search(r"compression/([\w+]+)[.]txt:.*= (\d+[.]\d+)", line)
             if m:
                 raw_data[m.group(1)] = float(m.group(2))
             else:
@@ -796,6 +796,7 @@ def create_energy_tables(data, languages, filename):
 # Create the single table of data for the compression stats.
 def create_compression_table(data, filename):
     vector = np.array([data[x] for x in UNIQUE_LANGUAGES])
+    vector = np.ones(len(UNIQUE_LANGUAGES)) - vector
     scaled = vector / vector.min()
     row_map = list(range(len(UNIQUE_LANGUAGES)))
     row_map.sort(key=lambda i: scaled[i])
@@ -1063,27 +1064,6 @@ def main():
     print("##################################################################")
 
     if not args.no_plots:
-        # print("\nCreating runtimes graph...")
-        # simple_graph(
-        #     "runtime", analyzed, args.runtimes, languages=target_languages
-        # )
-        # print("  Done.")
-        # if not args.no_scripts:
-        #     print("\nCreating script runtimes graph...")
-        #     simple_graph(
-        #         "runtime", analyzed, args.script_runtimes,
-        #         languages=SCRIPT_LANGUAGES
-        #     )
-        #     print("  Done.")
-        # print("\nCreating power usage graph...")
-        # power_graph(analyzed, args.power, languages=target_languages)
-        # print("  Done.")
-        # if not args.no_scripts:
-        #     print("\nCreating script power usage graph...")
-        #     power_graph(
-        #         analyzed, args.script_power, languages=SCRIPT_LANGUAGES
-        #     )
-        #     print("  Done.")
         print("\nCreating power-per-second usage graph...")
         power_graph(
             analyzed, args.power_per_sec, True, languages=all_languages,
