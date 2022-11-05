@@ -3,10 +3,13 @@
 # Process the results from running the full test harness.
 
 import argparse
+import csv
 import datetime
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 from operator import itemgetter
+import re
 from statistics import mean, median, stdev, variance
 import yaml
 
@@ -25,6 +28,14 @@ ALGORITHM_LABELS = {
     "shift_or": "Bitap",
     "aho_corasick": "Aho-Corasick",
     "combined": "Combined Data",
+}
+ALGORITHM_TABLE_HEADERS = {
+    "kmp": "Knuth-\\\\Morris-\\\\Pratt",
+    "boyer_moore": "Boyer-\\\\Moore",
+    "shift_or": "Bitap",
+    "aho_corasick": "Aho-\\\\Corasick",
+    "dfa_gap(1)": "DFA-\\\\Gap",
+    "regexp(1)": "Regexp-\\\\Gap",
 }
 for k in range(5):
     ALGORITHM_LABELS[APPROX_ALGORITHMS[k]] = f"DFA-Gap (k={k + 1})"
@@ -45,16 +56,24 @@ LANGUAGE_LABELS = {
     "perl": "Perl",
     "python": "Python",
 }
+UNIQUE_LANGUAGES = ["C", "C++", "Perl", "Python", "Rust"]
 
 DEFAULT_FILES = {
     "data": "experiments_data.yml",
+    "compression_data": "compression.txt",
+    "sloc_data": "sloc.csv",
+    "cyclomatic_data": "cyclomatic.%s",
     "runtimes_graph": "runtimes.png",
     "power_graph": "power.png",
     "pps_graph": "power_per_sec.png",
     "script_runtimes_graph": "runtimes-scripts.png",
     "script_power_graph": "power-scripts.png",
-    "basic_tables_file": "latex-tables.tex",
     "iterations_table_file": "iterations.tex",
+    "runtimes_table_file": "runtimes.tex",
+    "energy_table_file": "energy.tex",
+    "compression_table_file": "compression.tex",
+    "sloc_table_file": "sloc.tex",
+    "cyclomatic_table_file": "cyclomatic.tex",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -66,9 +85,6 @@ SIMPLE_GRAPH_PARAMS = {
     ],
 }
 
-# Tracker for the number of tables written:
-tables_written = 0
-
 
 # Grab command-line arguments for the script.
 def parse_command_line():
@@ -76,8 +92,28 @@ def parse_command_line():
 
     # Set up the arguments
     parser.add_argument(
-        "input", nargs="?", default=DEFAULT_FILES["data"],
+        "input",
+        nargs="?",
+        default=DEFAULT_FILES["data"],
         help="Input YAML data to process"
+    )
+    parser.add_argument(
+        "--compression-data",
+        type=str,
+        default=DEFAULT_FILES["compression_data"],
+        help="File to read compression data from"
+    )
+    parser.add_argument(
+        "--sloc-data",
+        type=str,
+        default=DEFAULT_FILES["sloc_data"],
+        help="File to read SLOC data from"
+    )
+    parser.add_argument(
+        "--cyclomatic-data",
+        type=str,
+        default=DEFAULT_FILES["cyclomatic_data"],
+        help="File to read cyclomatic data from (use '%s' for extensions)"
     )
     parser.add_argument(
         "--runtimes",
@@ -110,17 +146,40 @@ def parse_command_line():
         help="File to write the power-per-second usage graph to"
     )
     parser.add_argument(
-        "-t",
-        "--basic-tables",
-        type=str,
-        default=DEFAULT_FILES["basic_tables_file"],
-        help="File to write the basic LaTeX tables into"
-    )
-    parser.add_argument(
         "--iterations-table",
         type=str,
         default=DEFAULT_FILES["iterations_table_file"],
         help="File to write the iterations LaTeX table into"
+    )
+    parser.add_argument(
+        "--runtimes-table",
+        type=str,
+        default=DEFAULT_FILES["runtimes_table_file"],
+        help="File to write the runtimes LaTeX table into"
+    )
+    parser.add_argument(
+        "--energy-table",
+        type=str,
+        default=DEFAULT_FILES["energy_table_file"],
+        help="File to write the energy LaTeX table into"
+    )
+    parser.add_argument(
+        "--compression-table",
+        type=str,
+        default=DEFAULT_FILES["compression_table_file"],
+        help="File to write the compression LaTeX table into"
+    )
+    parser.add_argument(
+        "--sloc-table",
+        type=str,
+        default=DEFAULT_FILES["sloc_table_file"],
+        help="File to write the SLOC LaTeX table into"
+    )
+    parser.add_argument(
+        "--cyclomatic-table",
+        type=str,
+        default=DEFAULT_FILES["cyclomatic_table_file"],
+        help="File to write the cyclomatic LaTeX table into"
     )
     parser.add_argument(
         "-n",
@@ -215,7 +274,8 @@ def build_structure(data):
 
     for language in languages:
         for algorithm in algorithms:
-            struct[language][algorithm].sort(key=itemgetter("iteration"))
+            if algorithm in struct[language]:
+                struct[language][algorithm].sort(key=itemgetter("iteration"))
 
     return struct, languages, algorithms
 
@@ -229,6 +289,9 @@ def analyze_data(data, langs, algos):
             new_data[lang] = {"combined": {}}
 
         for algo in algos:
+            if algo not in data[lang]:
+                continue
+
             if algo not in new_data[lang]:
                 new_data[lang][algo] = {}
 
@@ -262,6 +325,131 @@ def analyze_data(data, langs, algos):
                     new_data[lang]["combined"].get(key, 0.0) + cell["mean"]
 
     return new_data
+
+
+# Read the compression stats from the given file. Return a dict indexed by the
+# elements of UNIQUE_LANGUAGES.
+def read_compression(filename):
+    raw_data = {}
+    with open(filename, "r") as f:
+        for line in f:
+            m = re.search(r"compression/([\w+]+)[.]tar:.*= (\d+[.]\d+)", line)
+            if m:
+                raw_data[m.group(1)] = float(m.group(2))
+            else:
+                print(f">>> Bad line read from {filename}: {line}")
+
+    return raw_data
+
+
+# Read the SLOC data (CSV format) and create a structure with two values for
+# each of UNIQUE_LANGUAGES: with and without input/runner modules.
+def read_sloc(filename):
+    raw_data = {}
+    for lang in UNIQUE_LANGUAGES:
+        raw_data[lang] = {}
+
+    with open(filename, "r", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            path = row["Path"]
+            lines = row["Source"]
+            lang, file = path.split("/", maxsplit=1)
+            raw_data[lang][file] = int(lines)
+
+    # Make the data we'll return
+    data = {}
+
+    # Process C, C++ and Python identically:
+    for lang in ["C", "C++", "Python"]:
+        data[lang] = [0, 0, 0]
+        for path, lines in raw_data[lang].items():
+            # Skip the regexp code for now:
+            if path.startswith("regexp"):
+                continue
+            # Index 0 is "all", index 1 is "without boilerplate", index 2 is
+            # for the boilerplate.
+            data[lang][0] += lines
+            if path.startswith("run.") or path.startswith("input."):
+                data[lang][2] += lines
+            else:
+                data[lang][1] += lines
+    # Process Perl mostly the same:
+    data["Perl"] = [0, 0, 0]
+    for path, lines in raw_data["Perl"].items():
+        # Skip the regexp code for now:
+        if path.startswith("regexp"):
+            continue
+        # Index 0 is "all", index 1 is "without boilerplate", index 2 is for
+        # the boilerplate.
+        data["Perl"][0] += lines
+        if path.startswith("Run") or path.startswith("Input"):
+            data["Perl"][2] += lines
+        else:
+            data["Perl"][1] += lines
+    # Rust is more unique:
+    data["Rust"] = [0, 0, 0]
+    for path, lines in raw_data["Rust"].items():
+        # Index 0 is "all", index 1 is "without boilerplate", index 2 is for
+        # the boilerplate.
+        data["Rust"][0] += lines
+        if path.startswith("common"):
+            data["Rust"][2] += lines
+        else:
+            data["Rust"][1] += lines
+
+    return data
+
+
+# Read the cyclomatic complexity data. This means reading two files: one CSV,
+# one JSON. The JSON data is for Perl only, and the CSV is for the others.
+# Merge the data into a single structure.
+#
+# `filename` should have a "%s" in it for the suffixes.
+def read_cyclomatic(filename):
+    csv_filename = filename % "csv"
+    json_filename = filename % "json"
+    yaml_filename = filename % "yaml"
+
+    raw_data = {lang: {} for lang in UNIQUE_LANGUAGES}
+
+    # First the CSV data. This covers C, C++, and Python.
+    csv_data = []
+    with open(csv_filename, "r", newline="") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            csv_data.append([row[6], row[7], row[1]])
+
+    # Then the JSON. This is just for Perl.
+    json_data = []
+    with open(json_filename, "r") as jsonfile:
+        data = json.load(jsonfile)
+    for record in data["subs"]:
+        # Discard the code outside of subs because Lizard did the same with
+        # the other languages.
+        if not record["name"].startswith("{"):
+            json_data.append(
+                [record["path"], record["name"], record["mccabe_complexity"]]
+            )
+
+    # Then the YAML. This is just for Rust.
+    yaml_data = []
+    with open(yaml_filename, "r") as yamlfile:
+        for record in yaml.safe_load_all(yamlfile):
+
+            yaml_data.append(record)
+
+    for record in csv_data + json_data:
+        lang, file = record[0].split("/", maxsplit=1)
+        if file not in raw_data[lang]:
+            raw_data[lang][file] = {}
+        raw_data[lang][file][record[1]] = record[2]
+
+    # These are not counted for the research:
+    del raw_data["Perl"]["regexp.pl"]
+    del raw_data["Python"]["regexp.py"]
+
+    return raw_data
 
 
 # Create a bar graph for run-times or memory usage by algorithm.
@@ -313,38 +501,40 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
 def power_graph(
     data, filename, average=False, *, languages=LANGUAGES, large=False
 ):
+    # Algorithms
+    algorithms = ALGORITHMS + [APPROX_ALGORITHMS[0]]
     # Total width of each algorithm's bars
     width = 0.8
     step = width / len(languages)
     step_off = (len(languages) - 1) / 2
     steps = list(map(lambda x: x * step, range(len(languages))))
-    x_len = len(ALGORITHMS)
+    x_len = len(algorithms)
     x = np.arange(x_len)
 
     runtimes = {}
     for lang in languages:
         runtimes[lang] = np.array(
-            [data[lang][algo]["total_runtime"]["mean"] for algo in ALGORITHMS],
+            [data[lang][algo]["total_runtime"]["mean"] for algo in algorithms],
             dtype=float
         )
 
-    pp0 = {}
+    package = {}
     for lang in languages:
-        pp0[lang] = np.array(
-            [data[lang][algo]["pp0"]["mean"] for algo in ALGORITHMS],
+        package[lang] = np.array(
+            [data[lang][algo]["package"]["mean"] for algo in algorithms],
             dtype=float
         )
 
     dram = {}
     for lang in languages:
         dram[lang] = np.array(
-            [data[lang][algo]["dram"]["mean"] for algo in ALGORITHMS],
+            [data[lang][algo]["dram"]["mean"] for algo in algorithms],
             dtype=float
         )
 
     if average:
         for lang in languages:
-            pp0[lang] /= runtimes[lang]
+            package[lang] /= runtimes[lang]
             dram[lang] /= runtimes[lang]
 
     if large:
@@ -353,19 +543,19 @@ def power_graph(
         fig, ax = plt.subplots()
 
     for idx, lang in enumerate(languages):
-        ax.bar(x + steps[idx], pp0[lang], step,
+        ax.bar(x + steps[idx], package[lang], step,
                label=f"{LANGUAGE_LABELS[lang]}")
-        ax.bar(x + steps[idx], dram[lang], step, bottom=pp0[lang])
+        ax.bar(x + steps[idx], dram[lang], step, bottom=package[lang])
 
     ax.set_xticks(
-        x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS)
+        x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], algorithms)
     )
     if average:
         ax.set_ylabel("Joules/Second")
-        ax.set_title("Energy Use (CPU + DRAM) by Algorithm (per second)")
+        ax.set_title("Energy Use (Package + DRAM) by Algorithm (per second)")
     else:
         ax.set_ylabel("Joules")
-        ax.set_title("Energy Use (CPU + DRAM) by Algorithm")
+        ax.set_title("Energy Use (Package + DRAM) by Algorithm")
     if average:
         ax.legend(loc="lower right")
     else:
@@ -381,113 +571,72 @@ def power_graph(
 # Create a single table whose content is computed from the `data` parameter and
 # write the LaTeX code to the open file `f`.
 def create_computed_table(
-    f, data, langs, algos, fields, *, axis="algorithms", caption=None,
-    label=None, divisor=None
+    f, data, langs, algorithm, fields, *, caption=None, label=None,
+    divisor=None
 ):
-    global tables_written
-
-    tables_written += 1
     if label:
-        print(f"  Creating table {label}")
+        print(f"    Creating table {label}")
     else:
-        print(f"  Creating table #{tables_written}")
+        print(f"    Creating table for {algorithm}")
 
     if type(langs) != list:
         langs = [langs]
-    if type(algos) != list:
-        algos = [algos]
     if type(fields) != list:
         fields = [fields]
     if divisor is not None:
         if type(divisor) != list:
             divisor = [divisor]
 
-    algo_labels = list(map(lambda a: ALGORITHM_LABELS[a], algos))
     lang_labels = list(map(lambda l: LANGUAGE_LABELS[l], langs))
 
-    if axis == "algorithms":
-        width = len(algos)
-        x_axis = algos
-        x_labels = algo_labels
-        height = len(langs)
-        y_axis = langs
-        y_labels = lang_labels
-        headers = ["Language"]
-    else:
-        width = len(langs)
-        x_axis = langs
-        x_labels = lang_labels
-        height = len(algos)
-        y_axis = algos
-        y_labels = algo_labels
-        headers = ["Algorithm"]
+    length = len(langs)
+    y_axis = langs
+    y_labels = lang_labels
 
-    colspec = ["l"]
-    for i in range(width):
-        colspec.append("r")
-        headers.append(x_labels[i])
-    colspec = "|".join(colspec)
-    headers = "&".join(headers)
+    colspec = "l|r"
+    headers = "Language & Score"
 
-    # Create the table of numbers for the data:
-    table_data = np.zeros((height, width))
-    # Create the table for the divisors (if any):
-    divisors = np.zeros((height, width))
+    # Create the vector of numbers for the data:
+    table_data = np.zeros(length)
+    # Create the vector for the divisors (if any):
+    divisors = np.zeros(length)
     for y_idx, y_str in enumerate(y_axis):
-        for x_idx, x_str in enumerate(x_axis):
-            if axis == "algorithms":
-                table_data[y_idx][x_idx] = \
-                    sum([data[y_str][x_str][key]["mean"] for key in fields])
-                if divisor:
-                    divisors[y_idx][x_idx] = \
-                        sum([data[y_str][x_str][key]["mean"]
-                            for key in divisor])
-            else:
-                table_data[y_idx][x_idx] = \
-                    sum([data[x_str][y_str][key]["mean"] for key in fields])
-                if divisor:
-                    divisors[y_idx][x_idx] = \
-                        sum([data[x_str][y_str][key]["mean"]
-                            for key in divisor])
+        table_data[y_idx] = \
+            sum([data[y_str][algorithm][key]["mean"] for key in fields])
+        if divisor:
+            divisors[y_idx] = \
+                sum([data[y_str][algorithm][key]["mean"] for key in divisor])
     # If divisor is set, divide across table_data:
     if divisor:
         table_data /= divisors
     # Normalize:
     table_data /= table_data.min()
-    # Figure out where the 1.0 is:
-    col = np.where(table_data == 1.0)
-    col = col[1][0]
 
-    # Now we need a map of the order to display rows in. We have to sort by the
-    # values in the column that holds the 1.0, but not sort table_data itself.
-    row_map = list(range(height))
-    row_map.sort(key=lambda i: table_data[i][col])
-
-    # Emit a newline before all subsequent tables:
-    if tables_written > 1:
-        print("", file=f)
+    # Now we need a map of the order to display rows in.
+    row_map = list(range(length))
+    row_map.sort(key=lambda i: table_data[i])
 
     # Emit the preamble:
-    print(f"%% Caption: {caption}", file=f)
-    print(f"%% Label: table:{label}", file=f)
-    print(f"%% Language(s): {langs}", file=f)
-    print(f"%% Algorithm(s): {algos}", file=f)
-    print(f"%% Field(s): {fields}", file=f)
+    print(f"    \\begin{{tabular}}{{|{colspec}|}}", file=f)
+    print(f"        %% Caption: {caption}", file=f)
+    print(f"        %% Label: table:{label}", file=f)
+    print(f"        %% Field(s): {fields}", file=f)
     if divisor:
-        print(f"%% Divisor(s): {divisor}", file=f)
-    print(f"\\begin{{tabular}}{{|{colspec}|}}", file=f)
-    print("\\hline", file=f)
-    print(f"{headers}\\\\", file=f)
-    print("\\hline", file=f)
+        print(f"        %% Divisor(s): {divisor}", file=f)
+    print("        \\hline", file=f)
+    print(f"        {headers} \\\\", file=f)
+    print("        \\hline", file=f)
 
     for y_idx in row_map:
         row = [y_labels[y_idx]]
-        for x_idx in range(width):
-            row.append(f"{table_data[y_idx][x_idx]:.4f}")
-        print("&".join(row) + "\\\\", file=f)
+        row.append(f"{table_data[y_idx]:.4f}")
+        print("        " + " & ".join(row) + " \\\\", file=f)
 
-    print("\\hline", file=f)
-    print("\\end{tabular}", file=f)
+    print("        \\hline", file=f)
+    print("    \\end{tabular}", file=f)
+    # Caption and label:
+    print(f"    \\caption{{{caption}}}", file=f)
+    print(f"    \\label{{table:{label}}}", file=f)
 
     return
 
@@ -534,14 +683,15 @@ def create_basic_tables(data, languages, filename):
     return
 
 
+# Create the table breaking down the iterations done for each combination of
+# language and algorithm.
 def create_iterations_table(data, languages, filename):
     algorithms = \
         ALGORITHMS + [APPROX_ALGORITHMS[0]] + [SCRIPT_ONLY_ALGORITHMS[0]]
-    algo_labels = [ALGORITHM_LABELS[a] for a in ALGORITHMS]
-    algo_labels.append("DFA-Gap")
-    algo_labels.append("Regexp-Gap")
-    algo_headings = "&".join(algo_labels)
-    colspec = "|".join(["c"] * len(algo_labels))
+    table_labels = [ALGORITHM_TABLE_HEADERS[a] for a in algorithms]
+    table_labels = list(map(lambda x: f"\\thead{{{x}}}", table_labels))
+    table_headings = " & ".join(table_labels)
+    colspec = "|".join(["c"] * len(table_labels))
 
     with open(filename, "w", encoding="utf-8") as f:
         # Print the preamble comments:
@@ -549,9 +699,9 @@ def create_iterations_table(data, languages, filename):
         print(f"% Generated: {datetime.datetime.now()}", file=f)
         # Start the table:
         print(f"\\begin{{tabular}}{{|c|{colspec}|}}", file=f)
-        print("\\hline", file=f)
-        print(f"Language&{algo_headings} \\\\", file=f)
-        print("\\hline", file=f)
+        print("    \\hline", file=f)
+        print(f"    \\thead{{Language}} & {table_headings} \\\\", file=f)
+        print("    \\hline", file=f)
         # Table data:
         for lang in languages:
             out = [LANGUAGE_LABELS[lang]]
@@ -560,12 +710,175 @@ def create_iterations_table(data, languages, filename):
                     out.append(str(data[lang][a]["runtime"]["samples"]))
                 else:
                     out.append("n/a")
-            print(f"{'&'.join(out)} \\\\", file=f)
+            print(f"    {' & '.join(out)} \\\\", file=f)
         # Finish out the table:
-        print("\\hline", file=f)
+        print("    \\hline", file=f)
         print("\\end{tabular}", file=f)
 
     return
+
+
+# Create the table-of-tables for the run-time scores of the different
+# languages on the various algorithms.
+def create_runtime_tables(data, languages, filename):
+    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Print the preamble comments:
+        print("% Table: Comparative runtimes sub-tables", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        for idx, algo in enumerate(algorithms):
+            # Start the sub-table:
+            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("    \\centering", file=f)
+            create_computed_table(
+                f, data, languages, algo, "runtime",
+                caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo}"
+            )
+            # End the sub-table:
+            print("\\end{subtable}", file=f, end="")
+            if idx % 3 == 2 or idx == len(algorithms) + 1:
+                print("", file=f)
+            else:
+                print("%", file=f)
+
+    return
+
+
+# Create the table-of-tables for the values of energy usage over time for the
+# languages on the various algorithms.
+def create_energy_tables(data, languages, filename):
+    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Print the preamble comments:
+        print("% Table: Comparative energy usage sub-tables", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        for idx, algo in enumerate(algorithms):
+            # Start the sub-table:
+            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("    \\centering", file=f)
+            create_computed_table(
+                f, data, languages, algo, ["package", "dram"],
+                caption=ALGORITHM_LABELS[algo], label=f"energy:{algo}",
+                divisor="total_runtime"
+            )
+            # End the sub-table:
+            print("\\end{subtable}", file=f, end="")
+            if idx % 3 == 2 or idx == len(algorithms) + 1:
+                print("", file=f)
+            else:
+                print("%", file=f)
+
+    return
+
+
+# Create the single table of data for the compression stats.
+def create_compression_table(data, filename):
+    vector = np.array([data[x] for x in UNIQUE_LANGUAGES])
+    scaled = vector / vector.min()
+    row_map = list(range(len(UNIQUE_LANGUAGES)))
+    row_map.sort(key=lambda i: scaled[i])
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Print the preamble comments:
+        print("% Table: Compression ratios table", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        print("\\centering", file=f)
+        print("\\begin{tabular}{|l|c|c|}", file=f)
+        print("    \\hline", file=f)
+        print("    Language & Ratio & Score \\\\", file=f)
+        print("    \\hline", file=f)
+        for x in row_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            ratio = vector[x] * 100
+            row.append(f"{ratio:.2f}\\%")
+            row.append(f"{scaled[x]:.4f}")
+            print("    " + " & ".join(row) + " \\\\", file=f)
+        print("    \\hline", file=f)
+        print("\\end{tabular}", file=f)
+
+    return
+
+
+# Create the row of three tables for the SLOC data.
+def create_sloc_tables(data, filename):
+    all = np.array([data[x][0] for x in UNIQUE_LANGUAGES])
+    all_scaled = all / all.min()
+    no_bp = np.array([data[x][1] for x in UNIQUE_LANGUAGES])
+    no_bp_scaled = no_bp / no_bp.min()
+    all_bp = np.array([data[x][2] for x in UNIQUE_LANGUAGES])
+    all_bp_scaled = all_bp / all_bp.min()
+
+    all_map = list(range(len(UNIQUE_LANGUAGES)))
+    all_map.sort(key=lambda i: all_scaled[i])
+    no_bp_map = list(range(len(UNIQUE_LANGUAGES)))
+    no_bp_map.sort(key=lambda i: no_bp_scaled[i])
+    all_bp_map = list(range(len(UNIQUE_LANGUAGES)))
+    all_bp_map.sort(key=lambda i: all_bp_scaled[i])
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Print preamble comments:
+        print("% Table: Comparative SLOC totals sub-tables", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        # First sub-table (without boilerplate):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & Code & Score \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in no_bp_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(no_bp[x]))
+            row.append(f"{no_bp_scaled[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Algorithm lines}", file=f)
+        print("    \\label{table:sloc:algorithm}", file=f)
+        print("\\end{subtable}%", file=f)
+        # Second sub-table (boilerplate only):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & Support & Score \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in all_bp_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(all_bp[x]))
+            row.append(f"{all_bp_scaled[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Framework lines}", file=f)
+        print("    \\label{table:sloc:framework}", file=f)
+        print("\\end{subtable}%", file=f)
+        # Third sub-table (all lines):
+        print("\\begin{subtable}{0.33\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\begin{tabular}{|c|r|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        Language & All & Score \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in all_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(all[x]))
+            row.append(f"{all_scaled[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("    \\caption{Total of lines}", file=f)
+        print("    \\label{table:sloc:all}", file=f)
+        print("\\end{subtable}", file=f)
+
+    return
+
+
+# Create the row of three tables for the cyclomatic complexity data.
+def create_cyclomatic_tables(data, filename):
+    pass
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -582,27 +895,43 @@ def main():
     else:
         all_languages = target_languages
 
-    print(f"Reading data from {args.input}...")
+    print("##################################################################")
+    print("# READING DATA")
+    print("##################################################################")
+
+    print(f"\nReading experiments data from {args.input}...")
     data = []
     with open(args.input, "r") as file:
         for record in yaml.safe_load_all(file):
             data.append(record)
     print(f"  {len(data)} experiment records read.")
 
-    print("Validating data...")
+    print("Validating experiments data...")
     if not validate(data):
         print("  Validation failed.")
         exit(1)
     print("  Data valid.")
 
-    print("Building structure...")
+    print("Building experiments data structure...")
     struct, languages, algorithms = build_structure(data)
     print("  Done.")
     print(f"\nLanguages detected: {languages}")
     print(f"\nAlgorithms detected: {algorithms}")
 
-    print("\nAnalysis of data...")
+    print("\nAnalysis of experiments data...")
     analyzed = analyze_data(struct, languages, algorithms)
+    print("  Done.")
+
+    print("\nReading compression data...")
+    compression_data = read_compression(args.compression_data)
+    print("  Done.")
+
+    print("\nReading SLOC data...")
+    sloc_data = read_sloc(args.sloc_data)
+    print("  Done.")
+
+    print("\nReading cyclomatic data...")
+    cyclomatic_data = read_cyclomatic(args.cyclomatic_data)
     print("  Done.")
 
     if args.dump:
@@ -610,29 +939,35 @@ def main():
         import pprint
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(analyzed)
+        pp.pprint(cyclomatic_data)
+
+    print()
+    print("##################################################################")
+    print("# CREATING PLOTS AND TABLES")
+    print("##################################################################")
 
     if not args.no_plots:
-        print("\nCreating runtimes graph...")
-        simple_graph(
-            "runtime", analyzed, args.runtimes, languages=target_languages
-        )
-        print("  Done.")
-        if not args.no_scripts:
-            print("\nCreating script runtimes graph...")
-            simple_graph(
-                "runtime", analyzed, args.script_runtimes,
-                languages=SCRIPT_LANGUAGES
-            )
-            print("  Done.")
-        print("\nCreating power usage graph...")
-        power_graph(analyzed, args.power, languages=target_languages)
-        print("  Done.")
-        if not args.no_scripts:
-            print("\nCreating script power usage graph...")
-            power_graph(
-                analyzed, args.script_power, languages=SCRIPT_LANGUAGES
-            )
-            print("  Done.")
+        # print("\nCreating runtimes graph...")
+        # simple_graph(
+        #     "runtime", analyzed, args.runtimes, languages=target_languages
+        # )
+        # print("  Done.")
+        # if not args.no_scripts:
+        #     print("\nCreating script runtimes graph...")
+        #     simple_graph(
+        #         "runtime", analyzed, args.script_runtimes,
+        #         languages=SCRIPT_LANGUAGES
+        #     )
+        #     print("  Done.")
+        # print("\nCreating power usage graph...")
+        # power_graph(analyzed, args.power, languages=target_languages)
+        # print("  Done.")
+        # if not args.no_scripts:
+        #     print("\nCreating script power usage graph...")
+        #     power_graph(
+        #         analyzed, args.script_power, languages=SCRIPT_LANGUAGES
+        #     )
+        #     print("  Done.")
         print("\nCreating power-per-second usage graph...")
         power_graph(
             analyzed, args.power_per_sec, True, languages=all_languages,
@@ -641,10 +976,20 @@ def main():
         print("  Done.")
 
     if not args.no_tables:
-        print("\nCreating basic tables...")
-        create_basic_tables(analyzed, all_languages, args.basic_tables)
-        print("Creating table of iteration counts...")
+        print("\nCreating tables from experiments data...")
+        print("  Creating table of iteration counts...")
         create_iterations_table(analyzed, all_languages, args.iterations_table)
+        print("  Creating runtime scores table-of-tables...")
+        create_runtime_tables(analyzed, all_languages, args.runtimes_table)
+        print("  Creating energy scores table-of-tables...")
+        create_energy_tables(analyzed, all_languages, args.energy_table)
+        print("\nCreating tables from static analysis data...")
+        print("  Creating compressibility measurements table...")
+        create_compression_table(compression_data, args.compression_table)
+        print("  Creating SLOC measurements tables...")
+        create_sloc_tables(sloc_data, args.sloc_table)
+        print("  Creating cyclomatic measurements tables...")
+        create_cyclomatic_tables(cyclomatic_data, args.cyclomatic_table)
 
     print("\nDone.")
 
