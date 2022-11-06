@@ -203,7 +203,7 @@ int run_approx(am_initializer init, am_algorithm code, std::string name,
   for (int pattern = 0; pattern < patterns_count; pattern++) {
     std::string pattern_str = patterns_data[pattern];
     // Pre-process the pattern before applying it to all sequences.
-    std::vector<MultiPatternData> pat_data = (*init)(pattern_str, k);
+    std::vector<ApproxPatternData> pat_data = (*init)(pattern_str, k);
 
     for (int sequence = 0; sequence < sequences_count; sequence++) {
       std::string sequence_str = sequences_data[sequence];

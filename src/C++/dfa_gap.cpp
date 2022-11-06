@@ -83,8 +83,8 @@ void create_dfa(std::string const &pattern, int m, int k,
   processing the pattern, the terminal state, and the pattern length m. The
   original pattern will not be needed for matching.
 */
-std::vector<MultiPatternData> init_dfa_gap(std::string const &pattern, int k) {
-  std::vector<MultiPatternData> return_val;
+std::vector<ApproxPatternData> init_dfa_gap(std::string const &pattern, int k) {
+  std::vector<ApproxPatternData> return_val;
   return_val.reserve(3);
 
   // Set up the DFA structure for the algorithm to use:
@@ -104,7 +104,7 @@ std::vector<MultiPatternData> init_dfa_gap(std::string const &pattern, int k) {
   Perform the DFA-Gap algorithm on the given (processed) pattern against the
   given sequence.
 */
-int dfa_gap(std::vector<MultiPatternData> const &pat_data,
+int dfa_gap(std::vector<ApproxPatternData> const &pat_data,
             std::string const &sequence) {
   // Unpack pat_data:
   auto const &dfa = std::get<std::vector<std::vector<int>>>(pat_data[0]);
