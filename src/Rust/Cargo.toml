@@ -7,4 +7,5 @@ members = [
     "shift_or",
     "aho_corasick",
     "dfa_gap",
+    "regexp",
 ]
