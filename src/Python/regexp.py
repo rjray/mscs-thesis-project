@@ -4,16 +4,12 @@ import re
 from run import run_approx_raw
 from sys import argv
 
-ALPHABET_SET = set(["A", "C", "G", "T"])
-
 
 def init_regexp(pattern, k):
     # Create the regular expression for this pattern
     regexp = pattern[0]
     for char in pattern[1:]:
-        regexp += "[%s]{0,%d}%s" % (
-            "".join(ALPHABET_SET - set(char)), k, char
-        )
+        regexp += f"[^{char}]{{0,{k}}}{char}"
     regexp = f"(?={regexp})"
 
     return [regexp]
