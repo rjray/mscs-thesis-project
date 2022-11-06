@@ -38,7 +38,7 @@ Adding the appropriate constant for the type of value that was anomalous dealt w
 
 The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
 
-As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple: comparison of the implementation of identical algorithms in different languages.
+As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple and restricted in scope: it will only be used as a comparison of the implementation of identical algorithms in different languages.
 
 For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{sloc: \texttt{https://github.com/flosse/sloc}}.
 
@@ -46,7 +46,7 @@ For the purpose of evaluating expressiveness, the SLOC measurements were limited
 
 In~\cite{bergmans}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater code-redundancy necessary to express the purposes of the program.
 
-Given that none of the experiment source files are of significant length, this metric was applied at the language level, looking at all files for each language in per-language archive files.
+Given that none of the experiment source files are of significant length, this metric was applied at the language level, looking at all files for each language in per-language archive files. It was also modified to accomodate the smaller sample size, as will be explained further in a later section.
 
 \subsubsection{Cyclomatic Complexity}
 
@@ -73,7 +73,7 @@ For each program comprising an experiment, the following data was gathered eithe
 
 The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
-Independent of the per-program metrics, a measurement of conciseness was made using the compression-based technique described in~\cite{bergmans}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
+Independent of the per-program metrics, an additional measurement of conciseness was made using a variation on the compression-based technique described in~\cite{bergmans}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other. This process is explained in more detail in section~\ref{subsubsec:conciseness}, along with the results.
 
 \subsection{Languages}
 \label{subsec:languages}
@@ -235,6 +235,15 @@ As was the case with some of the previous algorithms, the main differences betwe
 The Rust version of this algorithm is largely identical in structure to the C and C++ versions. In terms of SLOC, it comes in longer than either of those, due primarily to the number of lines used for pattern-matching in the processing of the pattern data structure created by the initialization routine.
 
 The Perl implementation suffered from some readability issues attributable to the ways in which Perl handles slicing arrays that have been passed by reference rather than by value. Perl also features a postfix-increment operator, allowing a savings of one line in the SLOC score. In contrast, the Python implementation once again gained conciseness and readability through its clear syntax around iterators and slightly cleaner syntax around treating strings as arrays and applying slicing operations to them.
+
+\subsubsection{Special Consideration for DFA}
+\label{subsubsec:dfa_regexp}
+
+The performance of the Perl and Python languages on the DFA-Gap algorithm led to some thinking about how this algorithm might actually be implemented in those languages in a real application. This, in turn, led to an extra experiment being written for each of these two languages.
+
+Both Perl and Python have native support for extended regular expressions as a part of the language\footnote{As of C++11, regular expressions are a part of the C++ standard library as well. However, this is not shared by C and Rust so the new experiments were kept to just Perl and Python.}. When this is taken into account, it is found to be preferable to use the implementation of the DFA as a regular expression. The regular expression engines in both Perl and Python are implemented in compiled code and are thus much faster than the hand-coded DFA implementations.
+
+As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the DFA-Gap algorithm.
 
 \subsection{Initial Observations on Complexity}
 

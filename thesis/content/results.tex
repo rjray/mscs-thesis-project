@@ -14,7 +14,7 @@ The automated suite of experiments was run numerous times over the course of thi
 
 \subsubsection{Scope of the Experiments}
 
-The final run of the experiments generated a total of 1,190 data-points taken from runs of the 27 programs. Table~\ref{table:iterations} shows the number of runs on a per-language, per-algorithm basis.
+The final run of the experiments generated a total of 1,190 data-points taken from runs of the 27 programs. The set of programs below includes the regular expression variants of the DFA-Gap algorithm for Perl and Python, as described in~\ref{subsubsec:dfa_regexp}. Table~\ref{table:iterations} shows the number of runs on a per-language, per-algorithm basis.
 
 \begin{table}[h!]
 \begin{center}
@@ -24,7 +24,7 @@ The final run of the experiments generated a total of 1,190 data-points taken fr
 \end{center}
 \end{table}
 
-For all numbers greater than or equal to 10, there was an additional ``priming'' run (as described above) to ensure that disk cache status did not play into the values for full run-time or package-level energy usage. Note also that the DFA-Gap and Regexp-Gap columns are stand-ins for 5 such columns each (for the values of $k$ from 1 to 5). Each value of $k$ was run the same number of iterations.
+For all numbers greater than or equal to 10, there was an additional ``priming'' run (as described above) to ensure that disk cache status did not play into the values for full run-time or package-level energy usage. Note also that the DFA-Gap and Regexp-Gap columns are stand-ins for 5 such columns each (for the values of $k$ from 1 to 5). Each value of $k$ was run for the same number of iterations.
 
 \subsubsection{Outliers and the Interpreted Languages}
 
@@ -37,7 +37,27 @@ For the DFA-Gap algorithm, both compiled and interpreted languages had to be red
 \subsection{Performance Comparisons}
 \label{subsec:perf_comp}
 
-The collection of sub-tables in table~\ref{table:runtime:comparative-algorithm} shows the comparative performance of the languages on each of the algorithms. The time measurements are based on the algorithm run-time as opposed to the total run-time. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
+The first of the three measures of the languages' suitability was chosen to be the overall performance. This was chosen for first consideration as this is the metric that most developers notice first: how long did it take the program to complete?
+
+\subsubsection{Special Casing Perl and Python}
+\label{subsubsec:results:perf_perl_python}
+
+Early examination of the performance results for Perl and Python (section~\ref{subsubsec:dfa_regexp}) had shown that the custom-built DFAs were strongly out-performed by using those languages' native support for regular expressions. Looking at these results separately from the rest of the experiments, the difference was considerable as is shown in figure~\ref{fig:graph:dfa_regexp_comp}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.85\textwidth]{figures/dfa_regexp_comp.png}
+	\caption{Bar charts of DFA vs. Regexp run-times for Perl and Python}
+	\label{fig:graph:dfa_regexp_comp}
+\end{figure}
+
+Not only were the run-times themselves higher for the DFA implementations, but the growth in run-time as $k$ increases was more pronounced for the DFA implementations than for the regular expression implementations. Note that while Perl's DFA was outperformed by Python's for the first three values of $k$, at $k=4$ it was effectively equal and was slightly better at $k=5$. However, in the regular expression implementation Python remained the better performer consistently.
+
+This led to a significant question regarding the measurement of performance for the algorithms: should the Perl and Python manually-coded DFA implementations be replaced by the regular expression implementations? It is highly unlikely that an experienced programmer in either of these two languages would choose to create the DFA manually when they could instead create a regular expression based on the pattern and a given value of $k$, in any case. When the performance is so drastically disparate it seems even less likely.
+
+\subsubsection{Collected Performance Results}
+
+After the decision was made on the regular expression question for Perl and Python, processing of the full performance results was done. The collection of sub-tables in table~\ref{table:runtime:comparative-algorithm} shows the comparative performance of the languages on each of the algorithms. The time measurements are based on the algorithm run-time as opposed to the total run-time. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
 
 \begin{table}[!htb]
 \input{tables/runtimes}
@@ -60,7 +80,7 @@ In this section the energy usage results are examined. Table~\ref{table:energy:c
 
 The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap algorithm is again represented for all values of $k$, as the ranking of languages varies with $k$.
 
-These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap ($k=1$) instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 9 distinct groups of experiments.
+These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 9 distinct groups of experiments.
 
 \begin{figure}
 	\centering
@@ -77,10 +97,12 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 \begin{description}
 \item[SLOC:] Total SLOC values for each language's files were combined. In the case of C and C++, this includes relevant lines from the header files for the runner and input modules.
 \item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Any function whose value was exactly 1 was discarded so as to not artificially lower the average complexity for the module. Each module's function-level scores were then averaged, and all modules' averages for a given language were summed together.
-\item[Conciseness:] Using a method identical to Bergmans, et al~\cite{bergmans}, each source code file for a given language was stripped of comments and then archived together using the standard ``\texttt{tar}'' command available on Linux. Each archive file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
+\item[Conciseness:] Using a method adapted from Bergmans, et al~\cite{bergmans}, each source code file for a given language was stripped of comments and then merged into a sort of ``archive'' using the standard ``\texttt{cat}'' command available on Linux. Each such resulting file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
 \end{description}
 
 \subsubsection{Source Lines of Code}
+
+In table~\ref{table:expr:sloc}, the SLOC totals are shown in three sub-tables: only the algorithm implementations, then the framework totals, and finally the combined totals of all lines.
 
 \begin{table}[!htb]
 \input{tables/sloc}
@@ -88,7 +110,19 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 \label{table:expr:sloc}
 \end{table}
 
+Here Python is the clear leader, with Perl being 40\% larger in table~\ref{table:sloc:all}. C++ maintains the third-place ranking across all three sub-tables, and Rust edges out C in both the framework measurement and the total lines measurement. Rust's score in table~\ref{table:sloc:algorithm} suffered from the necessary mechanism that was used to pass and unpack pattern representation between a given algorithm's initialization function and the algorithm function itself. Compare the listings, below.
+
+\input{code/unpack.c}
+
+\input{code/unpack.rs}
+
+In this area, C and C++ each needed only one line per element passed (listing~\ref{lst:c_unpack}), while Rust required four\footnote{One of which was a closing-brace with a semicolon and might not have been counted by the \texttt{sloc} tool} (listing~\ref{lst:rust_unpack}). This is a 12-line difference in just the Aho-Corasick implementation, so it can be understood how this would likely propagate through the other four algorithms.
+
+By further comparison: both Python and Perl, having the native ability to pass arrays of differing types, needed only one line to unpack the the pattern representations.
+
 \subsubsection{Cyclomatic Complexity}
+
+Table~\ref{table:expr:cyclomatic} shows a similar break-down of the cyclomatic complexity measurements: algorithms, framework, and combined total.
 
 \begin{table}[!htb]
 \input{tables/cyclomatic}
@@ -96,7 +130,29 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 \label{table:expr:cyclomatic}
 \end{table}
 
+Unlike the SLOC measurements, however, there is greater variation in the rankings of the languages. Here the contest between the first and second rankings was between Python and C++, with C++ just edging out Python in~\ref{table:cyclomatic:total} by virtue of the totaled average complexity values. Rust placed last in the measure of the algorithm code, possibly due to the same issue of excess lines around the unpacking of pattern data. Rust did rank third in the framework table~\ref{table:cyclomatic:framework} where it also had a significantly lower average value than C++ or Python. Even as Rust ended in the fourth rank in the total table, its totaled average complexity was still the lowest of the five.
+
+It is important here to note again that it was necessary to use different tools to calculate the complexity of the Perl and Rust code. The \texttt{lizard} tool did not support Perl at all, and examination of the Rust results showed some bugs in the handling of Rust. Because of this, it is not possible to say with certainty that the relative comparisons of complexity between the five languages are completely sound. For the purposes of this paper the values will be used as presented here. It is felt that this will be sufficient as these values will only contribute $\frac{1}{3}$ of the value of the final expressiveness value.
+
 \subsubsection{Conciseness}
+\label{subsubsec:conciseness}
+
+Conciseness was one of the harder concepts to quantify. The approach taken in~\cite{bergmans} was designed around a significantly larger database of source code, but as the results from that paper were compelling it led to the adaptation of a variation of that methodology here.
+
+The process of deriving this measurement was simple:
+
+\begin{enumerate}
+\item A clean copy of all source code was made into a series of directories named by language
+\item All comments and blank lines were removed by the \texttt{cloc} tool
+\item Each individual language directory had all text files concatenated into a single file
+\item Each of these text files were compressed with \texttt{xv} and the compression ratio recorded
+\end{enumerate}
+
+A key difference here is the limited scope of the data being analyzed; since there is essentially just one ``project'' being put to scrutiny, the results are sensitive to the fact that some of the collections of files were smaller in size to begin with. Initially the technique in~\cite{bergmans} was followed exactly, and involved using the standard \texttt{tar} utility to create the archives of each language. But when put into practice it was found that the metadata overhead of a \texttt{tar} archive was more than the size of the actual data in some cases.
+
+Further, in their paper, Bergmans and their team had removed most smaller examples of code for each language from the final measurements. This was not an option here given the limited size and number of the samples. For this reason the decision was made to focus the compression on the text content only, by applying concatenation to the stripped versions of the source files and compressing the results of this process.
+
+In table~\ref{table:expr:compression}, the results are shown.
 
 \begin{table}[!htb]
 \input{tables/compression}
@@ -104,5 +160,29 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 \label{table:expr:compression}
 \end{table}
 
-\subsection{Combined Bases}
+The ranking of Python and Perl as the first two is expected. However, the placing of C ahead of both Rust and C++ came as a surprise given the presence of highly-repetitive calls to library routines for the manual memory management. However, C and Rust both likely benefited from the need for additional support code in the Aho-Corasick algorithm which could have brought the compression ratio slightly further down. Lastly, as with the previous two metrics, it is likely that Rust was effectively penalized for the very verbose and redundant blocks necessary for passing the processed pattern data between initialization and algorithm functions.
+
+\subsubsection{Combining the Expressiveness Metrics}
+
+At this point it was necessary to derive a single measurement of expressiveness from the three measurements taken. For this, it would be needed to have ``score'' values for cyclomatic complexity in line with the scores computed for SLOC and conciseness. These values were computed from table~\ref{table:cyclomatic:total} and are shown in table~\ref{table:expr:cyclomatic-score}.
+
+\begin{table}[!htb]
+\input{tables/cyclomatic-score}
+\caption{Scoring of the cyclomatic complexity results}
+\label{table:expr:cyclomatic-score}
+\end{table}
+
+Here, the score shows a tie for first position between C++ and Python. This is because the score is based on the complexity for all files rather than the sum of averages.
+
+Now it would be possible to utilize the three expressiveness metrics to calculate a single value for each language. The following values would be combined into a 3-element vector for each language:
+
+\begin{itemize}
+\item The SLOC scores from table~\ref{table:sloc:all}, the total of lines
+\item The cyclomatic scores from table~\ref{table:expr:cyclomatic-score}
+\item The conciseness scores from table~\ref{table:expr:compression}
+\end{itemize}
+
+These vectors' lengths were then calculated, giving the values in table:
+
+\subsection{Combining the Bases}
 \label{subsec:combined}
