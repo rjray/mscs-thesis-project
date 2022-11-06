@@ -63,17 +63,15 @@ DEFAULT_FILES = {
     "compression_data": "compression.txt",
     "sloc_data": "sloc.csv",
     "cyclomatic_data": "cyclomatic.%s",
-    "runtimes_graph": "runtimes.png",
-    "power_graph": "power.png",
-    "pps_graph": "power_per_sec.png",
-    "script_runtimes_graph": "runtimes-scripts.png",
-    "script_power_graph": "power-scripts.png",
+    "pps_chart": "power_per_sec.png",
+    "dfa_regexp_chart": "dfa_regexp_comp.png",
     "iterations_table_file": "iterations.tex",
     "runtimes_table_file": "runtimes.tex",
     "energy_table_file": "energy.tex",
     "compression_table_file": "compression.tex",
     "sloc_table_file": "sloc.tex",
     "cyclomatic_table_file": "cyclomatic.tex",
+    "cyclomatic_score_file": "cyclomatic-score.tex",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -116,34 +114,16 @@ def parse_command_line():
         help="File to read cyclomatic data from (use '%s' for extensions)"
     )
     parser.add_argument(
-        "--runtimes",
-        type=str,
-        default=DEFAULT_FILES["runtimes_graph"],
-        help="File to write the run-times graph to"
-    )
-    parser.add_argument(
-        "--script-runtimes",
-        type=str,
-        default=DEFAULT_FILES["script_runtimes_graph"],
-        help="File to write the scripts run-times graph to"
-    )
-    parser.add_argument(
-        "--power",
-        type=str,
-        default=DEFAULT_FILES["power_graph"],
-        help="File to write the power usage graph to"
-    )
-    parser.add_argument(
-        "--script-power",
-        type=str,
-        default=DEFAULT_FILES["script_power_graph"],
-        help="File to write the scripts power usage graph to"
-    )
-    parser.add_argument(
         "--power-per-sec",
         type=str,
-        default=DEFAULT_FILES["pps_graph"],
-        help="File to write the power-per-second usage graph to"
+        default=DEFAULT_FILES["pps_chart"],
+        help="File to write the power-per-second usage charts to"
+    )
+    parser.add_argument(
+        "--dfa-regexp-chart",
+        type=str,
+        default=DEFAULT_FILES["dfa_regexp_chart"],
+        help="File to write the DFA vs. Regexp charts to"
     )
     parser.add_argument(
         "--iterations-table",
@@ -180,6 +160,12 @@ def parse_command_line():
         type=str,
         default=DEFAULT_FILES["cyclomatic_table_file"],
         help="File to write the cyclomatic LaTeX table into"
+    )
+    parser.add_argument(
+        "--cyclomatic-score-table",
+        type=str,
+        default=DEFAULT_FILES["cyclomatic_score_file"],
+        help="File to write the cyclomatic score LaTeX table into"
     )
     parser.add_argument(
         "-n",
@@ -515,9 +501,9 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
     return
 
 
-# Create a stacked bar graph for energy used by algorithm.
-def power_graph(
-    data, filename, average=False, *, languages=LANGUAGES, large=False
+# Create bar charts for energy used by each algorithm (Joules/second).
+def power_charts(
+    data, filename, *, languages=LANGUAGES, large=False
 ):
     # Algorithms
     algorithms = ALGORITHMS + [APPROX_ALGORITHMS[0]]
@@ -552,11 +538,7 @@ def power_graph(
 
     combined = {}
     for lang in languages:
-        combined[lang] = package[lang] + dram[lang]
-
-    if average:
-        for lang in languages:
-            combined[lang] /= runtimes[lang]
+        combined[lang] = (package[lang] + dram[lang]) / runtimes[lang]
 
     if large:
         fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
@@ -570,19 +552,57 @@ def power_graph(
     ax.set_xticks(
         x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], algorithms)
     )
-    if average:
-        ax.set_ylabel("Joules/Second")
-        ax.set_title("Energy Use (Package + DRAM) by Algorithm (per second)")
-    else:
-        ax.set_ylabel("Joules")
-        ax.set_title("Energy Use (Package + DRAM) by Algorithm")
-    if average:
-        ax.legend(loc="lower right")
-    else:
-        ax.legend()
+    ax.set_ylabel("Joules")
+    ax.set_title("Energy Use (Package + DRAM) by Algorithm")
+    ax.legend(loc="lower right")
 
     fig.tight_layout()
-    print(f"  Writing {filename}")
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create bar charts for comparing DFA to Regexp for Perl/Python.
+def dfa_regexp_charts(data, filename, *, large=False):
+    groups = ["perl.dfa_gap", "perl.regexp", "python.dfa_gap", "python.regexp"]
+    group_labels = [
+        "Perl (DFA)", "Perl (Regexp)", "Python (DFA)", "Python (Regexp)"
+    ]
+    # Total width of each group's bars
+    width = 0.8
+    step = width / len(groups)
+    step_off = (len(groups) - 1) / 2
+    steps = list(map(lambda x: x * step, range(len(groups))))
+    x_len = 5
+    x = np.arange(x_len)
+
+    combined = {key: np.zeros(x_len) for key in groups}
+    # Create the bar data
+    for k in range(x_len):
+        for lang in ["perl", "python"]:
+            for algo in ["dfa_gap", "regexp"]:
+                key = f"{lang}.{algo}"
+                value = data[lang][f"{algo}({k + 1})"]["runtime"]["mean"]
+                combined[key][k] = value
+
+    if large:
+        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
+    else:
+        fig, ax = plt.subplots()
+
+    for idx, group in enumerate(groups):
+        ax.bar(x + steps[idx], combined[group], step, label=group_labels[idx])
+
+    ax.set_xticks(
+        x + step * step_off, map(lambda k: f"k = {k + 1}", range(x_len))
+    )
+    ax.set_ylabel("Seconds")
+    ax.set_title("Comparison of DFA vs. Regexp in Perl/Python")
+    ax.legend(loc="upper left")
+
+    fig.tight_layout()
+    print(f"    Writing {filename}")
     fig.savefig(filename)
 
     return
@@ -819,7 +839,7 @@ def create_compression_table(data, filename):
         print("    \\hline", file=f)
         print("\\end{tabular}", file=f)
 
-    return
+    return scaled
 
 
 # Create the row of three tables for the SLOC data.
@@ -894,18 +914,19 @@ def create_sloc_tables(data, filename):
         print("    \\label{table:sloc:all}", file=f)
         print("\\end{subtable}", file=f)
 
-    return
+    return all_scaled
 
 
-# Create the row of three tables for the cyclomatic complexity data.
-def create_cyclomatic_tables(data, filename):
+# Create the row of three tables for the cyclomatic complexity data and the
+# second table-file for the scores from the "all" table.
+def create_cyclomatic_tables(data, filename, score_file):
     length = len(UNIQUE_LANGUAGES)
-    algos_totals = [0] * length
-    algos_avgs = [0] * length
-    frame_totals = [0] * length
-    frame_avgs = [0] * length
-    all_totals = [0] * length
-    all_avgs = [0] * length
+    algos_totals = np.zeros(length, dtype=int)
+    algos_avgs = np.zeros(length)
+    frame_totals = np.zeros(length, dtype=int)
+    frame_avgs = np.zeros(length)
+    all_totals = np.zeros(length, dtype=int)
+    all_avgs = np.zeros(length)
 
     for idx, lang in enumerate(UNIQUE_LANGUAGES):
         lang_data = data[lang]
@@ -931,7 +952,7 @@ def create_cyclomatic_tables(data, filename):
                 algos_avgs[idx] += values[1]
 
     # At this point, the three pairs should be completely filled in. Create the
-    # mappings.
+    # mappings and create a third column for "score".
     all_map = list(range(length))
     all_map.sort(key=lambda i: all_totals[i])
     algos_map = list(range(length))
@@ -940,6 +961,7 @@ def create_cyclomatic_tables(data, filename):
     frame_map.sort(key=lambda i: frame_totals[i])
 
     # Create tables.
+    print(f"    Creating {filename}")
     with open(filename, "w", encoding="utf-8") as f:
         # Preamble comments:
         print("% Table: Comparative cyclomatic totals sub-tables", file=f)
@@ -996,7 +1018,26 @@ def create_cyclomatic_tables(data, filename):
         print("    \\label{table:cyclomatic:total}", file=f)
         print("\\end{subtable}", file=f)
 
-    return
+    all_score = all_totals / all_totals.min()
+    print(f"    Creating {score_file}")
+    with open(score_file, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Cyclomatic scores for all files", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        print("\\centering", file=f)
+        print("\\begin{tabular}{|l|r|r|}", file=f)
+        print("    \\hline", file=f)
+        print("    Language & Total & Score \\\\", file=f)
+        print("    \\hline", file=f)
+        for x in all_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(str(all_totals[x]))
+            row.append(f"{all_score[x]:.4f}")
+            print("    " + " & ".join(row) + " \\\\", file=f)
+        print("    \\hline", file=f)
+        print("\\end{tabular}", file=f)
+
+    return all_score
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -1057,36 +1098,45 @@ def main():
         import pprint
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(analyzed)
+        return
 
     print()
     print("##################################################################")
     print("# CREATING PLOTS AND TABLES")
     print("##################################################################")
 
-    if not args.no_plots:
-        print("\nCreating power-per-second usage graph...")
-        power_graph(
-            analyzed, args.power_per_sec, True, languages=all_languages,
-            large=True
-        )
-        print("  Done.")
+    print("\nCreating tables from experiments data...")
+    print("  Creating table of iteration counts...")
+    create_iterations_table(analyzed, all_languages, args.iterations_table)
+    print("  Creating runtime scores table-of-tables...")
+    create_runtime_tables(analyzed, all_languages, args.runtimes_table)
+    print("  Creating energy scores table-of-tables...")
+    create_energy_tables(analyzed, all_languages, args.energy_table)
+    print("\nCreating tables from static analysis data...")
+    print("  Creating compressibility measurements table...")
+    conciseness_scores = create_compression_table(
+        compression_data, args.compression_table
+    )
+    print("  Creating SLOC measurements tables...")
+    sloc_scores = create_sloc_tables(sloc_data, args.sloc_table)
+    print("  Creating cyclomatic measurements tables...")
+    cyclomatic_scores = create_cyclomatic_tables(
+        cyclomatic_data, args.cyclomatic_table, args.cyclomatic_score_table
+    )
 
-    if not args.no_tables:
-        print("\nCreating tables from experiments data...")
-        print("  Creating table of iteration counts...")
-        create_iterations_table(analyzed, all_languages, args.iterations_table)
-        print("  Creating runtime scores table-of-tables...")
-        create_runtime_tables(analyzed, all_languages, args.runtimes_table)
-        print("  Creating energy scores table-of-tables...")
-        create_energy_tables(analyzed, all_languages, args.energy_table)
-        print("\nCreating tables from static analysis data...")
-        print("  Creating compressibility measurements table...")
-        create_compression_table(compression_data, args.compression_table)
-        print("  Creating SLOC measurements tables...")
-        create_sloc_tables(sloc_data, args.sloc_table)
-        print("  Creating cyclomatic measurements tables...")
-        create_cyclomatic_tables(cyclomatic_data, args.cyclomatic_table)
+    print("\nCreating plots/graphs from core analyzed data...")
+    print("  Creating power-per-second usage chart...")
+    power_charts(
+        analyzed, args.power_per_sec, languages=all_languages, large=True
+    )
+    print("  Done.")
+    print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
+    dfa_regexp_charts(analyzed, args.dfa_regexp_chart, large=True)
+    print("  Done.")
 
+    print("\nCreating elements from combined/post-processed data...")
+
+    # As in, done with everything...
     print("\nDone.")
 
     return
