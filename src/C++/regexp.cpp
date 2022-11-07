@@ -49,7 +49,7 @@ int regexp(std::vector<ApproxPatternData> const &pat_data,
   jp::RegexMatch matcher;
 
   size_t matches = matcher.setRegexObject(&re)
-                       .setSubject(sequence)
+                       .setSubject(&sequence)
                        .addModifier("g")
                        .setNumberedSubstringVector(&match_vec)
                        .match();
