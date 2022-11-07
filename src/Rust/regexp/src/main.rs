@@ -4,118 +4,53 @@
 */
 
 use common::run::{run_approx, ApproxPatternData};
+use std::cell::RefCell;
 use std::env;
 use std::process::exit;
+use std::str;
 
-fn create_dfa(
-    pattern: &[u8],
-    m: usize,
-    k: u32,
-    dfa: &mut Vec<Vec<i32>>,
-) -> usize {
-    // We know that the number of states will be 1 + m + k(m - 1).
-    let max_states: usize = 1 + m + k as usize * (m - 1);
+use pcre2::bytes::Regex;
 
-    // Allocate the DFA
-    for _ in 0..max_states {
-        dfa.push(vec![FAIL; ASIZE]);
-    }
+thread_local!(
+    static RE: RefCell<Regex> = RefCell::new(Regex::new("").unwrap())
+);
 
-    // First step: set dfa[0][pattern[0]] = state(1)
-    dfa[0][pattern[0] as usize] = 1;
-
-    // Start `state` and `new_state` both at 1
-    let mut state: usize = 1;
-    let mut new_state: usize = 1;
-
-    // Loop over remaining `pattern` (index 1 to the end). Because we know the
-    // size of the DFA, there is no need to initialize each new state, that's
-    // been done already.
-    for i in 1..m {
-        // Move `new_state` to the next place.
-        new_state += 1;
-        // The previous `state` maps to `new_state` on `pattern[i]`
-        dfa[state][pattern[i] as usize] = new_state as i32;
-        // `last_state` is used to control setting transitions for other values
-        let mut last_state = state;
-        for j in 1..=k {
-            // For each of 1..k, we start a new state for which `pattern[i]`
-            // maps to `new_state`.
-            dfa[(new_state + j as usize)][pattern[i] as usize] =
-                new_state as i32;
-            for n in ALPHABET {
-                if *n == pattern[i] as usize {
-                    continue;
-                }
-                // Every character that isn't `pattern[i]` needs to map
-                // `last_state` to this new state-value.
-                dfa[last_state][*n] = (new_state + j as usize) as i32;
-            }
-            // Shift `last_state` for the next iteration.
-            last_state = new_state + j as usize;
-        }
-        // Current `state` becomes the value of `new_state`.
-        state = new_state;
-        // And `new_state` advances by `k`.
-        new_state += k as usize;
-    }
-
-    // At completion, the value of `state` is our terminal.
-    state
-}
-
-fn init_dfa_gap(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
-    let mut pattern_data: Vec<ApproxPatternData> = Vec::with_capacity(3);
-
-    // Initialize the elements for the multi-patterns structure.
-    let mut dfa: Vec<Vec<i32>> = Vec::new();
+fn init_regexp(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
     let m = pattern.len();
-    let terminal = create_dfa(pattern, m, k, &mut dfa);
+    // Note that this algorithm doesn't use the `pattern_data` value.
+    let pattern_data: Vec<ApproxPatternData> = Vec::with_capacity(1);
+    let pat_str: &str = str::from_utf8(&pattern).unwrap();
+    let pat_chars: Vec<char> = pat_str.chars().collect();
+    // Start the `built_re` vector with the first character of pat:
+    let mut built_re: String = pat_chars[0].to_string();
 
-    // Pack the return structure.
-    pattern_data.push(ApproxPatternData::PatternIntVecVec(dfa));
-    pattern_data.push(ApproxPatternData::PatternUsize(terminal));
-    pattern_data.push(ApproxPatternData::PatternUsize(m));
+    for i in 1..m {
+        let ch = pat_chars[i];
+
+        built_re = format!("{}[^{}]{{0,{}}}{}", built_re, ch, k, ch);
+    }
+    built_re = format!("(?=({}))", built_re);
+
+    // Because adding the Regex type to the ApproxPattenData enum would require
+    // the all the tools to link with the regex crate, here we're using a
+    // "trick" global approach.
+    RE.with(|val| {
+        *val.borrow_mut() = Regex::new(&built_re).unwrap();
+    });
 
     pattern_data
 }
 
-fn dfa_gap(pat_data: &[ApproxPatternData], sequence: &[u8]) -> i32 {
-    // Unpack pat_data:
-    let dfa = match &pat_data[0] {
-        ApproxPatternData::PatternIntVecVec(val) => val,
-        _ => panic!("Incorrect value at pat_data slot 0"),
-    };
-    let terminal = match &pat_data[1] {
-        ApproxPatternData::PatternUsize(val) => val,
-        _ => panic!("Incorrect value at pat_data slot 1"),
-    };
-    let m = match &pat_data[2] {
-        ApproxPatternData::PatternUsize(val) => val,
-        _ => panic!("Incorrect value at pat_data slot 2"),
-    };
+fn regexp(_pat_data: &[ApproxPatternData], sequence: &[u8]) -> i32 {
+    let mut matches: usize = 0;
 
-    let mut matches = 0;
-    let n = sequence.len();
+    // Pull the pre-processed regex from the RE static global and apply it to
+    // `sequence`.
+    RE.with(|val| {
+        matches = val.borrow().captures_iter(sequence).count();
+    });
 
-    let end = n - m;
-    // Note that we have to examine from 0 to `end` inclusive, or we could miss
-    // an exact pattern match at the very end of `sequence`.
-    for i in 0..=end {
-        let mut state: usize = 0;
-        let mut ch: usize = 0;
-
-        while (i + ch) < n && dfa[state][sequence[i + ch] as usize] != FAIL {
-            state = dfa[state][sequence[i + ch] as usize] as usize;
-            ch += 1;
-        }
-
-        if state == *terminal {
-            matches += 1;
-        }
-    }
-
-    matches
+    matches as i32
 }
 
 /*
@@ -123,5 +58,5 @@ fn dfa_gap(pat_data: &[ApproxPatternData], sequence: &[u8]) -> i32 {
 */
 fn main() {
     let argv: Vec<String> = env::args().collect();
-    exit(run_approx(&init_dfa_gap, &dfa_gap, "dfa_gap", argv));
+    exit(run_approx(&init_regexp, &regexp, "regexp", argv));
 }
