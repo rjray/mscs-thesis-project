@@ -1,6 +1,5 @@
 include ../defines.mk
 
-APPROX_ALGORITHMS += regexp
 LONG_TARGETS := $(addprefix ./,$(addsuffix .py,$(LONG_ALGORITHMS)))
 SHORT_TARGETS := $(addprefix ./,$(addsuffix .py,$(SHORT_ALGORITHMS)))
 APPROX_TARGETS := $(addprefix ./,$(addsuffix .py,$(APPROX_ALGORITHMS)))
