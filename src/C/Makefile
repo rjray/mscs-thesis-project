@@ -95,6 +95,12 @@ dfa_gap-gcc.o: dfa_gap.c run.h
 dfa_gap-c-gcc: dfa_gap-gcc.o run-gcc.o input-gcc.o
 	$(GCC) $(CFLAGS) -o dfa_gap-c-gcc dfa_gap-gcc.o run-gcc.o input-gcc.o
 
+regexp-gcc.o: regexp.c run.h
+	$(GCC) $(CFLAGS) -c -o regexp-gcc.o regexp.c
+
+regexp-c-gcc: regexp-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CFLAGS) -o regexp-c-gcc regexp-gcc.o run-gcc.o input-gcc.o -lpcre2-8
+
 # Rules for building with LLVM:
 run-llvm.o: run.c run.h input.h
 	$(CLANG) $(CFLAGS) -c -o run-llvm.o run.c
@@ -132,6 +138,12 @@ dfa_gap-llvm.o: dfa_gap.c run.h
 dfa_gap-c-llvm: dfa_gap-llvm.o run-llvm.o input-llvm.o
 	$(CLANG) $(CFLAGS) -o dfa_gap-c-llvm dfa_gap-llvm.o run-llvm.o input-llvm.o
 
+regexp-llvm.o: regexp.c run.h
+	$(CLANG) $(CFLAGS) -c -o regexp-llvm.o regexp.c
+
+regexp-c-llvm: regexp-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CFLAGS) -o regexp-c-llvm regexp-llvm.o run-llvm.o input-llvm.o -lpcre2-8
+
 # Rules for building with Intel:
 run-intel.o: run.c run.h input.h
 	$(ICX) $(CFLAGS) -c -o run-intel.o run.c
@@ -168,6 +180,12 @@ dfa_gap-intel.o: dfa_gap.c run.h
 
 dfa_gap-c-intel: dfa_gap-intel.o run-intel.o input-intel.o
 	$(ICX) $(CFLAGS) -o dfa_gap-c-intel dfa_gap-intel.o run-intel.o input-intel.o
+
+regexp-intel.o: regexp.c run.h
+	$(ICX) $(CFLAGS) -c -o regexp-intel.o regexp.c
+
+regexp-c-intel: regexp-intel.o run-intel.o input-intel.o
+	$(ICX) $(CFLAGS) -o regexp-c-intel regexp-intel.o run-intel.o input-intel.o -lpcre2-8
 
 # Rules for running the experiments, broken down by toolchain.
 test-experiments-gcc:
