@@ -3,7 +3,7 @@
 ALGORITHMS := kmp boyer_moore shift_or aho_corasick
 LONG_ALGORITHMS := kmp boyer_moore shift_or
 SHORT_ALGORITHMS := aho_corasick
-APPROX_ALGORITHMS := dfa_gap
+APPROX_ALGORITHMS := dfa_gap regexp
 
 # Default the run-count values, in case they aren't explicitly passed in.
 ifeq ($(RUNCOUNT),)
