@@ -21,11 +21,11 @@ std::vector<ApproxPatternData> init_regexp(std::string const &pattern, int k) {
   return_val.reserve(1);
 
   std::ostringstream re;
-  re << "(?=" << pattern[0];
+  re << "(?=(" << pattern[0];
   for (unsigned int i = 1; i < pattern.length(); i++) {
     re << "[^" << pattern[i] << "]{0," << k << "}" << pattern[i];
   }
-  re << ")";
+  re << "))";
 
   std::regex regexp(re.str());
   return_val.push_back(regexp);
