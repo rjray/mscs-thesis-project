@@ -15,7 +15,7 @@ sub init_regexp {
     foreach my $char (@pattern) {
         $expr .= sprintf '[^%s]{0,%d}%s', $char, $k, $char;
     }
-    $expr = qr/(?=$expr)/;
+    $expr = qr/(?=($expr))/;
 
     return [ $expr ];
 }

@@ -10,7 +10,7 @@ def init_regexp(pattern, k):
     regexp = pattern[0]
     for char in pattern[1:]:
         regexp += f"[^{char}]{{0,{k}}}{char}"
-    regexp = f"(?={regexp})"
+    regexp = f"(?=({regexp}))"
 
     return [regexp]
 
@@ -18,7 +18,7 @@ def init_regexp(pattern, k):
 def regexp(pat_data, sequence):
     expr = pat_data[0]
 
-    matches = len(list(re.finditer(expr, sequence)))
+    matches = len(list(re.findall(expr, sequence)))
 
     return matches
 
