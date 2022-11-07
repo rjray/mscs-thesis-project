@@ -60,10 +60,10 @@ LONG_RUNCOUNT := 5
 # The default number of runs that each approximate-matching experiment will do,
 # when running for results. Note that the scripts (Perl and Python) override
 # this for the longer algorithms with APPROX_LONG_RUNCOUNT.
-APPROX_RUNCOUNT := 10
+APPROX_RUNCOUNT := 5
 # And finally, the default number of runs that each approximate-matching
 # experiment will make if they're known to be excessively-long (Perl and Python
-# in this case). Python's dfa_gap with k=5 takes 3 hours by itself.
+# in this case). Python's dfa_gap with k=5 takes over 2 hours by itself.
 APPROX_LONG_RUNCOUNT := 3
 
 # The file to write valgrind results to for the `memcheck` rule, and a def for

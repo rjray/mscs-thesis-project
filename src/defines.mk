@@ -38,7 +38,7 @@ define RUN_long_experiment
 
 endef
 define RUN_approx_experiment
-@$(HARNESS) -v -n $(APPROX_RUNCOUNT) -f $(EXPERIMENTS_FILE) $(1) $(2) $(SEQUENCES) $(PATTERNS) $(APPROX_ANSWERS)
+@$(HARNESS) -v -s -n $(APPROX_RUNCOUNT) -f $(EXPERIMENTS_FILE) $(1) $(2) $(SEQUENCES) $(PATTERNS) $(APPROX_ANSWERS)
 
 endef
 define RUN_long_approx_experiment
