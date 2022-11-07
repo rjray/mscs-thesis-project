@@ -3,13 +3,19 @@
   approximate string matching, regular expression version.
 */
 
-#include <iterator>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
 
+/*
+  This file comes from the GitHub repo: https://github.com/jpcre2/jpcre2
+*/
+#include "jpcre2.hpp"
 #include "run.hpp"
+typedef jpcre2::select<char> jp;
+
+jp::Regex re;
 
 /*
   Initialize the pattern given. Return a single-element vector of the regexp
@@ -20,34 +26,35 @@ std::vector<ApproxPatternData> init_regexp(std::string const &pattern, int k) {
   std::vector<ApproxPatternData> return_val;
   return_val.reserve(1);
 
-  std::ostringstream re;
-  re << "(?=(" << pattern[0];
+  std::ostringstream re_buf;
+  re_buf << "(?=(" << pattern[0];
   for (unsigned int i = 1; i < pattern.length(); i++) {
-    re << "[^" << pattern[i] << "]{0," << k << "}" << pattern[i];
+    re_buf << "[^" << pattern[i] << "]{0," << k << "}" << pattern[i];
   }
-  re << "))";
+  re_buf << "))";
 
-  std::regex regexp(re.str());
-  return_val.push_back(regexp);
+  re.setPattern(re_buf.str()).compile();
 
   return return_val;
 }
 
 /*
-  Perform the DFA-Gap algorithm on the given (processed) pattern against the
-  given sequence.
+  Perform the DFA-Gap-Regexp algorithm on the given (processed) pattern against
+  the given sequence.
 */
 int regexp(std::vector<ApproxPatternData> const &pat_data,
            std::string const &sequence) {
-  // Unpack pat_data:
-  auto const &re = std::get<std::regex>(pat_data[0]);
+  // The pat_data vector is not actually used in this instance.
+  jp::VecNum match_vec;
+  jp::RegexMatch matcher;
 
-  auto matches_begin =
-      std::sregex_iterator(sequence.begin(), sequence.end(), re);
-  auto matches_end = std::sregex_iterator();
-  int matches = std::distance(matches_begin, matches_end);
+  size_t matches = matcher.setRegexObject(&re)
+                       .setSubject(sequence)
+                       .addModifier("g")
+                       .setNumberedSubstringVector(&match_vec)
+                       .match();
 
-  return matches;
+  return (int)matches;
 }
 
 /*

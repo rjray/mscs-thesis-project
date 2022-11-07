@@ -98,7 +98,7 @@ regexp-gcc.o: regexp.cpp run.hpp
 	$(GCC) $(CPPFLAGS) -c -o regexp-gcc.o regexp.cpp
 
 regexp-cpp-gcc: regexp-gcc.o run-gcc.o input-gcc.o
-	$(GCC) $(CPPFLAGS) -o regexp-cpp-gcc regexp-gcc.o run-gcc.o input-gcc.o
+	$(GCC) $(CPPFLAGS) -o regexp-cpp-gcc regexp-gcc.o run-gcc.o input-gcc.o -lpcre2-8
 
 # Rules for building with LLVM:
 run-llvm.o: run.cpp run.hpp input.hpp
@@ -141,7 +141,7 @@ regexp-llvm.o: regexp.cpp run.hpp
 	$(CLANG) $(CPPFLAGS) -c -o regexp-llvm.o regexp.cpp
 
 regexp-cpp-llvm: regexp-llvm.o run-llvm.o input-llvm.o
-	$(CLANG) $(CPPFLAGS) -o regexp-cpp-llvm regexp-llvm.o run-llvm.o input-llvm.o
+	$(CLANG) $(CPPFLAGS) -o regexp-cpp-llvm regexp-llvm.o run-llvm.o input-llvm.o -lpcre2-8
 
 # Rules for building with Intel:
 run-intel.o: run.cpp run.hpp input.hpp
@@ -184,7 +184,7 @@ regexp-intel.o: regexp.cpp run.hpp
 	$(ICX) $(CPPFLAGS) -c -o regexp-intel.o regexp.cpp
 
 regexp-cpp-intel: regexp-intel.o run-intel.o input-intel.o
-	$(ICX) $(CPPFLAGS) -o regexp-cpp-intel regexp-intel.o run-intel.o input-intel.o
+	$(ICX) $(CPPFLAGS) -o regexp-cpp-intel regexp-intel.o run-intel.o input-intel.o -lpcre2-8
 
 # Rules for running the experiments, broken down by toolchain.
 test-experiments-gcc:
