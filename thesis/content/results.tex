@@ -110,15 +110,15 @@ In table~\ref{table:expr:sloc}, the SLOC totals are shown in three sub-tables: o
 \label{table:expr:sloc}
 \end{table}
 
-Here Python is the clear leader, with Perl being 40\% larger in table~\ref{table:sloc:all}. C++ maintains the third-place ranking across all three sub-tables, and Rust edges out C in both the framework measurement and the total lines measurement. Rust's score in table~\ref{table:sloc:algorithm} suffered from the necessary mechanism that was used to pass and unpack pattern representation between a given algorithm's initialization function and the algorithm function itself. Compare the listings, below.
+Here Python is the clear leader, with Perl being 40\% larger in table~\ref{table:sloc:all}. C++ maintains the third-place ranking across all three sub-tables, and Rust edges out C in both the framework measurement and the total lines measurement. Rust's score in table~\ref{table:sloc:algorithm} likely suffered from the necessary mechanism that was used to pass and unpack pattern representation between a given algorithm's initialization function and the algorithm function itself. Compare the listings, below.
 
 \input{code/unpack.c}
 
 \input{code/unpack.rs}
 
-In this area, C and C++ each needed only one line per element passed (listing~\ref{lst:c_unpack}), while Rust required four\footnote{One of which was a closing-brace with a semicolon and might not have been counted by the \texttt{sloc} tool} (listing~\ref{lst:rust_unpack}). This is a 12-line difference in just the Aho-Corasick implementation, so it can be understood how this would likely propagate through the other four algorithms.
+In this area, C and C++ each needed only one line per element passed (listing~\ref{lst:c_unpack}), while Rust required four\footnote{One of which was a closing-brace with a semicolon and might not have been counted by the \texttt{sloc} tool} (listing~\ref{lst:rust_unpack}). This is a 12-line difference in just the Aho-Corasick implementation, so it can be understood how this would likely propagate through the other five algorithm implementations.
 
-By further comparison: both Python and Perl, having the native ability to pass arrays of differing types, needed only one line to unpack the the pattern representations.
+By further comparison: both Python and Perl, having the native ability to pass arrays of differing types, needed only one line to unpack the pattern representations.
 
 \subsubsection{Cyclomatic Complexity}
 
@@ -130,16 +130,16 @@ Table~\ref{table:expr:cyclomatic} shows a similar break-down of the cyclomatic c
 \label{table:expr:cyclomatic}
 \end{table}
 
-Unlike the SLOC measurements, however, there is greater variation in the rankings of the languages. Here the contest between the first and second rankings was between Python and C++, with C++ just edging out Python in~\ref{table:cyclomatic:total} by virtue of the totaled average complexity values. Rust placed last in the measure of the algorithm code, possibly due to the same issue of excess lines around the unpacking of pattern data. Rust did rank third in the framework table~\ref{table:cyclomatic:framework} where it also had a significantly lower average value than C++ or Python. Even as Rust ended in the fourth rank in the total table, its totaled average complexity was still the lowest of the five.
+Unlike the SLOC measurements, however, there is greater variation in the rankings of the languages. Here the contest between the first and second rankings was between Python and C++. Rust placed last in the measure of the algorithm code, possibly due to the same issue of excess lines around the unpacking of pattern data. Rust did rank third in the framework table~\ref{table:cyclomatic:framework} where it also had a significantly lower average value than C++ or Python. Even as Rust ended tied for the fourth rank in the total table, its totaled average complexity was still the lowest of the five.
 
-It is important here to note again that it was necessary to use different tools to calculate the complexity of the Perl and Rust code. The \texttt{lizard} tool did not support Perl at all, and examination of the Rust results showed some bugs in the handling of Rust. Because of this, it is not possible to say with certainty that the relative comparisons of complexity between the five languages are completely sound. For the purposes of this paper the values will be used as presented here. It is felt that this will be sufficient as these values will only contribute $\frac{1}{3}$ of the value of the final expressiveness value.
+It is important here to note again that it was necessary to use different tools to calculate the complexity of the Perl and Rust code. The \texttt{lizard} tool did not support Perl at all, and examination of the Rust results showed some bugs in the handling of Rust. Because of this, it is not possible to say with certainty that the relative comparisons of complexity between the five languages are completely sound. For the purposes of this paper the total complexity values will be used as presented here. It is felt that this will be sufficient as these values will only contribute $\frac{1}{3}$ of the value of the final expressiveness value.
 
 \subsubsection{Conciseness}
 \label{subsubsec:conciseness}
 
-Conciseness was one of the harder concepts to quantify. The approach taken in~\cite{bergmans} was designed around a significantly larger database of source code, but as the results from that paper were compelling it led to the adaptation of a variation of that methodology here.
+Conciseness proved to be a difficult concept to quantify. The approach taken in~\cite{bergmans} was designed around a significantly larger database of source code, but as the results from that paper were compelling it led to the adaptation of a variation of that methodology here.
 
-The process of deriving this measurement was simple:
+The steps for deriving this measurement were:
 
 \begin{enumerate}
 \item A clean copy of all source code was made into a series of directories named by language
@@ -148,7 +148,7 @@ The process of deriving this measurement was simple:
 \item Each of these text files were compressed with \texttt{xv} and the compression ratio recorded
 \end{enumerate}
 
-A key difference here is the limited scope of the data being analyzed; since there is essentially just one ``project'' being put to scrutiny, the results are sensitive to the fact that some of the collections of files were smaller in size to begin with. Initially the technique in~\cite{bergmans} was followed exactly, and involved using the standard \texttt{tar} utility to create the archives of each language. But when put into practice it was found that the metadata overhead of a \texttt{tar} archive was more than the size of the actual data in some cases.
+A key difference between~\ref{bergmans} and here is the limited scope of the data being analyzed; since there is essentially just one ``project'' being put to scrutiny, the results are sensitive to the fact that some of the files were smaller in size to begin with. Initially the technique in~\cite{bergmans} was followed exactly, and involved using the standard \texttt{tar} utility to create the archives of each language. But when put into practice it was found that the metadata overhead of a \texttt{tar} archive was more than the size of the actual data in some cases.
 
 Further, in their paper, Bergmans and their team had removed most smaller examples of code for each language from the final measurements. This was not an option here given the limited size and number of the samples. For this reason the decision was made to focus the compression on the text content only, by applying concatenation to the stripped versions of the source files and compressing the results of this process.
 
@@ -160,11 +160,11 @@ In table~\ref{table:expr:compression}, the results are shown.
 \label{table:expr:compression}
 \end{table}
 
-The ranking of Python and Perl as the first two is expected. However, the placing of C ahead of both Rust and C++ came as a surprise given the presence of highly-repetitive calls to library routines for the manual memory management. However, C and Rust both likely benefited from the need for additional support code in the Aho-Corasick algorithm which could have brought the compression ratio slightly further down. Lastly, as with the previous two metrics, it is likely that Rust was effectively penalized for the very verbose and redundant blocks necessary for passing the processed pattern data between initialization and algorithm functions.
+The ranking of Python and Perl as the first two is expected. However, the placing of C ahead of both Rust and C++ came as a surprise given the presence of highly-repetitive calls to library routines for the manual memory management. However, C and Rust both likely benefited from the need for additional support code in the Aho-Corasick algorithm which could have brought the compression ratio slightly further down. Lastly, as with the previous two metrics, it is likely that Rust was effectively penalized for the very verbose and detailed blocks that were necessary for passing the processed pattern data between initialization and algorithm functions.
 
 \subsubsection{Combining the Expressiveness Metrics}
 
-At this point it was necessary to derive a single measurement of expressiveness from the three measurements taken. For this, it would be needed to have ``score'' values for cyclomatic complexity in line with the scores computed for SLOC and conciseness. These values were computed from table~\ref{table:cyclomatic:total} and are shown in table~\ref{table:expr:cyclomatic-score}.
+At this point the next step was to derive a single measurement of expressiveness from the three measurements taken. For this, it would be needed to have ``score'' values for cyclomatic complexity that were in line with the scores computed for SLOC and conciseness. These values were computed from table~\ref{table:cyclomatic:total} and are shown in table~\ref{table:expr:cyclomatic-score}.
 
 \begin{table}[!htb]
 \input{tables/cyclomatic-score}
@@ -172,9 +172,9 @@ At this point it was necessary to derive a single measurement of expressiveness 
 \label{table:expr:cyclomatic-score}
 \end{table}
 
-Here, the score shows a tie for first position between C++ and Python. This is because the score is based on the complexity for all files rather than the sum of averages.
+Here, the score shows a virtual tie for first position between C++ and Python. Their gap is just one point (less than 1\%), while the next gap is 43 (an increase of almost 35\%).
 
-Now it would be possible to utilize the three expressiveness metrics to calculate a single value for each language. The following values would be combined into a 3-element vector for each language:
+Now it would be possible to utilize the three expressiveness metrics to calculate a single value for each language. The following values would be combined into a series of 3-element vectors for each language:
 
 \begin{itemize}
 \item The SLOC scores from table~\ref{table:sloc:all}, the total of lines
@@ -182,7 +182,25 @@ Now it would be possible to utilize the three expressiveness metrics to calculat
 \item The conciseness scores from table~\ref{table:expr:compression}
 \end{itemize}
 
-These vectors' lengths were then calculated, giving the values in table:
+These vectors' lengths were calculated and scaled by the lowest value, giving the values in table~\ref{table:expr:expressiveness-score}:
+
+\begin{table}[!htb]
+\input{tables/expressiveness}
+\caption{Calculated expressiveness score}
+\label{table:expr:expressiveness-score}
+\end{table}
+
+It was not a surprise that Python ended up ranked as the most-expressive of the five contenders, as it had led the group in all three expressiveness metrics. The ranking of C++ ahead of Perl by just over 5 percentage points was more of a surprise, while the presence of C at the bottom was also not surprising.
+
+Because of the possibly-inconsistent nature of the complexity data, it was decided to derive a second score based on just the SLOC and compression scores. All other calculation steps were the same. This resulted in table~\ref{table:expr:expressiveness-score2}.
+
+\begin{table}[!htb]
+\input{tables/expressiveness2}
+\caption{Calculated expressiveness score, 2-axis}
+\label{table:expr:expressiveness-score2}
+\end{table}
+
+Here, the results more closely track with expectations: Python and Perl head the list while C++ and Rust take the next two places. As has been mentioned, it is possible that Rust most likely suffered in the SLOC measurement due to the data-unpacking mechanism required by the framework.
 
 \subsection{Combining the Bases}
 \label{subsec:combined}

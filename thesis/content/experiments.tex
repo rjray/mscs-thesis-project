@@ -132,7 +132,7 @@ Python's memory management is a combination of reference counting and a cycle-de
 
 \subsubsection{Rust}
 
-Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.64.0 and was released in September of 2022.
+Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness equal to or greater than C++, with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.65.0 and was released in November of 2022.
 
 An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
 
@@ -236,14 +236,24 @@ The Rust version of this algorithm is largely identical in structure to the C an
 
 The Perl implementation suffered from some readability issues attributable to the ways in which Perl handles slicing arrays that have been passed by reference rather than by value. Perl also features a postfix-increment operator, allowing a savings of one line in the SLOC score. In contrast, the Python implementation once again gained conciseness and readability through its clear syntax around iterators and slightly cleaner syntax around treating strings as arrays and applying slicing operations to them.
 
-\subsubsection{Special Consideration for DFA}
+\subsubsection{Regular Expressions Variant}
 \label{subsubsec:dfa_regexp}
 
-The performance of the Perl and Python languages on the DFA-Gap algorithm led to some thinking about how this algorithm might actually be implemented in those languages in a real application. This, in turn, led to an extra experiment being written for each of these two languages.
+The performance of the Perl and Python languages on the DFA-Gap algorithm led to some critical thinking about how this algorithm might actually be implemented in those languages in a real application. This, in turn, led to an extra experiment being written for each of these two languages.
 
-Both Perl and Python have native support for extended regular expressions as a part of the language\footnote{As of C++11, regular expressions are a part of the C++ standard library as well. However, this is not shared by C and Rust so the new experiments were kept to just Perl and Python.}. When this is taken into account, it is found to be preferable to use the implementation of the DFA as a regular expression. The regular expression engines in both Perl and Python are implemented in compiled code and are thus much faster than the hand-coded DFA implementations.
+Both Perl and Python have native support for extended regular expressions as a part of the language. When this is taken into account, it is found to be preferable to use the implementation of the DFA as a regular expression. The regular expression engines in both Perl and Python are implemented in compiled code and are thus much faster than the hand-coded DFA implementations.
 
-As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the DFA-Gap algorithm.
+As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the DFA-Gap algorithm for those two languages.
+
+The key to meeting the four requirements in section~\ref{subsec:regexp_variant}, particularly the fourth requirement, was a mechanism called \textit{positive-lookahead}. This mechanism allows the engine to match the pattern as a sequence ahead of the current point, without actually consuming any of the matched characters. This was critical to finding overlapping matches.
+
+Once this had been undertaken in Python and Perl, it was necessary to implement similar experiments for the compiled languages. In the case of C++, a class for regular expressions had been part of the C++ Standard Library since the adoption of the C++11 standard. C, as well, offered regular expression support in the form of the POSIX regular expressions functions included as part of the C standard library. Rust, though, does not have built-in regular expression support.
+
+It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension} that was available for Rust, while using the native regular expression support in C and C++. This quickly proved to be a problem: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
+
+The solution came in the form of the Perl-Compatible Regular Expressions engine\footnote{PCRE: \texttt{https://www.pcre.org/}, available in most Linux distributions}. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++\footnote{\texttt{https://github.com/jpcre2/jpcre2}} and Rust\footnote{\texttt{https://crates.io/crates/pcre2}} through wrapper libraries.
+
+As the results will show, the effectiveness of regular expressions varied.
 
 \subsection{Initial Observations on Complexity}
 
@@ -348,7 +358,7 @@ The development software (see next section) was then installed. This included th
 
 \subsubsection{Compilers and Other Tools}
 
-Table~\ref{table:software_specs} lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the Python details indicates that the remaining tools were used on the development machine only, not on the NUC. These tools were used in the testing and evaluation of the experiments code separately from running experiments on the NUC.
+Table~\ref{table:software_specs} lists the primary software tools and packages that were used in the creation and execution of the experiments, with the source from which they were obtained. The double line after the Python details indicates that the remaining tools were used on the development machine only, not on the experiments platform. These tools were used in the testing and evaluation of the experiments code separately from running experiments on the NUC.
 
 \begin{table}[h!]
 \begin{center}

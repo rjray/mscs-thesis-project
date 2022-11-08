@@ -5,6 +5,8 @@ Five algorithms in total were chosen to be used in providing the basis for evalu
 
 In this section, these algorithms are introduced and the first four briefly explained. The fifth algorithm will receive a more in-depth treatment due to it being a new approach. An understanding of the underlying mechanics of the algorithms will be helpful when later evaluating their implementations.
 
+During the process of running experiments and analyzing the results, it was decided to add a variation of the fifth algorithm to the existing set. As a variation, it is not covered in the same depth as the fifth and original algorithm is. Instead, it is dealt with in greater detail in section~\ref{subsubsec:dfa_regexp}.
+
 \subsection{Knuth, Morris, and Pratt}
 
 The Knuth-Morris-Pratt~\cite{knuth} algorithm is one of the foundational algorithms in the area of string matching and text searching. It is still used in the present day, with implementations as recent as the Rust-Bio project~\cite{rust}. This was chosen primarily for historical significance, but also for ease of implementation.
@@ -305,7 +307,7 @@ The second part of the process is to use the DFA in the matching process. This i
   \BlankLine
   \Matches $\leftarrow$ \textit{empty list}\;
   ($q_0$, A, $\delta$) $\leftarrow$ \CreateDFA{$P$,$\Sigma$,$k$}\;
-  \End $\leftarrow$ |$S$| - |$P$|\;
+  \End $\leftarrow$ length($S$) - length($P$)\;
   \For{$i \leftarrow 0$ \KwTo \End}{
     \State $\leftarrow q_0$\;
     \Ch $\leftarrow 0$\;
@@ -359,3 +361,25 @@ Following algorithm~\ref{alg:find_pattern_with_gaps}, the following steps take p
 \end{enumerate}
 
 At this point the loop would resume with $i=2$, but this sufficiently illustrates the process. A total of 9 state transitions were made, resulting in the location of a match 5 characters in size. At the reading of each state transition only one character look-up was required since the $\delta$ function initializes each new state to default all transitions to the failure value.
+
+\subsection{A Regular Expression Variant}
+\label{subsec:regexp_variant}
+
+Experimentation with the DFA-Gap algorithm led to some speculation as to whether the performance might be better if the search were performed by means of an actual regular expression in place of a specialized DFA. The general focus of the algorithm remained the same, the only difference being the use of a regular expression engine in place of the automatically-generated automaton.
+
+The requirements of using a regular expression were summarized as:
+
+\begin{enumerate}
+\item The complexity of generating the regular expression should not exceed the complexity of generating the DFA
+\item The regular expression must process the target sequence in a single pass through, as does the DFA-Gap algorithm
+\item The regular expression must be capable of identifying both the starting position of each match and either the length or the content of the matching substring
+\item The regular expression must find all matching substrings, including overlapping matches
+\end{enumerate}
+
+The first requirement could be further expressed as constraining the time-complexity of the set-up to O($m$), linear in the length of the pattern. The DFA creation stage of the original algorithm required $k$ additional steps for $m-1$ instances of the main loop. Because $k$ is a constant in this algorithm, the complexity of that part of the original algorithm was only bounded by O($2m$) rather than being polynomial. A complexity of O($m$) would, therefore, hint at a simpler variation of the algorithm.
+
+The second requirement might be mistaken for constraining the time-complexity of search to O($n$), but this is not the case. As an approximate-matching algorithm, there would necessarily be some back-tracking through the target sequence when it has been determined that a candidate position is not the start of a matching substring after all. Instead, the goal was to try to keep the complexity close to O($(m+k)n$).
+
+Requirement 3 dictated the need for the chosen regular expression engines to either capture and return matches, or to positively identify the ending-point as well as the starting-point of each match. This was simple to achieve, as match-capturing is a standard feature of regular expression engines.
+
+The last requirement proved the most critical of the set. Because of the second requirement constraining the search process to a single pass, it would be necessary to construct an expression that could match parts of the target string without consuming them and removing them from future consideration. This is covered in greater detail in section~\ref{subsubsec:dfa_regexp}, but this requirement ended up disqualifying two different engines (one for C/C++, the other for Rust) from usage during the implementation and testing of the algorithm.
