@@ -42,9 +42,9 @@ for k in range(5):
     ALGORITHM_LABELS[SCRIPT_ONLY_ALGORITHMS[k]] = f"Regexp (k={k + 1})"
 
 LANGUAGES = [
-    "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust"
+    "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust",
+    "perl", "python"
 ]
-SCRIPT_LANGUAGES = ["perl", "python"]
 LANGUAGE_LABELS = {
     "c-gcc": "C (GCC)",
     "c-llvm": "C (LLVM)",
@@ -58,20 +58,23 @@ LANGUAGE_LABELS = {
 }
 UNIQUE_LANGUAGES = ["C", "C++", "Perl", "Python", "Rust"]
 
-DEFAULT_FILES = {
+FILES = {
     "data": "experiments_data.yml",
     "compression_data": "compression.txt",
     "sloc_data": "sloc.csv",
     "cyclomatic_data": "cyclomatic.%s",
     "pps_chart": "power_per_sec.png",
     "dfa_regexp_chart": "dfa_regexp_comp.png",
-    "iterations_table_file": "iterations.tex",
-    "runtimes_table_file": "runtimes.tex",
-    "energy_table_file": "energy.tex",
-    "compression_table_file": "compression.tex",
-    "sloc_table_file": "sloc.tex",
-    "cyclomatic_table_file": "cyclomatic.tex",
-    "cyclomatic_score_file": "cyclomatic-score.tex",
+    "iterations_table": "iterations.tex",
+    "runtimes_table": "runtimes.tex",
+    "energy_table": "energy.tex",
+    "compression_table": "compression.tex",
+    "sloc_table": "sloc.tex",
+    "cyclomatic_table": "cyclomatic.tex",
+    "cyclomatic_score_table": "cyclomatic-score.tex",
+    "expressiveness_table": "expressiveness.tex",
+    "expr2_table": "expressiveness2.tex",
+    "expressiveness_graph": "expressiveness_arrows.png",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -92,102 +95,26 @@ def parse_command_line():
     parser.add_argument(
         "input",
         nargs="?",
-        default=DEFAULT_FILES["data"],
+        default=FILES["data"],
         help="Input YAML data to process"
     )
     parser.add_argument(
         "--compression-data",
         type=str,
-        default=DEFAULT_FILES["compression_data"],
+        default=FILES["compression_data"],
         help="File to read compression data from"
     )
     parser.add_argument(
         "--sloc-data",
         type=str,
-        default=DEFAULT_FILES["sloc_data"],
+        default=FILES["sloc_data"],
         help="File to read SLOC data from"
     )
     parser.add_argument(
         "--cyclomatic-data",
         type=str,
-        default=DEFAULT_FILES["cyclomatic_data"],
+        default=FILES["cyclomatic_data"],
         help="File to read cyclomatic data from (use '%s' for extensions)"
-    )
-    parser.add_argument(
-        "--power-per-sec",
-        type=str,
-        default=DEFAULT_FILES["pps_chart"],
-        help="File to write the power-per-second usage charts to"
-    )
-    parser.add_argument(
-        "--dfa-regexp-chart",
-        type=str,
-        default=DEFAULT_FILES["dfa_regexp_chart"],
-        help="File to write the DFA vs. Regexp charts to"
-    )
-    parser.add_argument(
-        "--iterations-table",
-        type=str,
-        default=DEFAULT_FILES["iterations_table_file"],
-        help="File to write the iterations LaTeX table into"
-    )
-    parser.add_argument(
-        "--runtimes-table",
-        type=str,
-        default=DEFAULT_FILES["runtimes_table_file"],
-        help="File to write the runtimes LaTeX table into"
-    )
-    parser.add_argument(
-        "--energy-table",
-        type=str,
-        default=DEFAULT_FILES["energy_table_file"],
-        help="File to write the energy LaTeX table into"
-    )
-    parser.add_argument(
-        "--compression-table",
-        type=str,
-        default=DEFAULT_FILES["compression_table_file"],
-        help="File to write the compression LaTeX table into"
-    )
-    parser.add_argument(
-        "--sloc-table",
-        type=str,
-        default=DEFAULT_FILES["sloc_table_file"],
-        help="File to write the SLOC LaTeX table into"
-    )
-    parser.add_argument(
-        "--cyclomatic-table",
-        type=str,
-        default=DEFAULT_FILES["cyclomatic_table_file"],
-        help="File to write the cyclomatic LaTeX table into"
-    )
-    parser.add_argument(
-        "--cyclomatic-score-table",
-        type=str,
-        default=DEFAULT_FILES["cyclomatic_score_file"],
-        help="File to write the cyclomatic score LaTeX table into"
-    )
-    parser.add_argument(
-        "-n",
-        "--no-plots",
-        action="store_true",
-        help="Suppress generation of plots"
-    )
-    parser.add_argument(
-        "-N",
-        "--no-tables",
-        action="store_true",
-        help="Suppress generation of tables"
-    )
-    parser.add_argument(
-        "--no-intel",
-        action="store_true",
-        help="Do not include Intel compiler results if present in data"
-    )
-    parser.add_argument(
-        "--no-scripts",
-        action="store_true",
-        help="Do not include any results from scripting languages"
     )
     parser.add_argument(
         "-d",
@@ -199,11 +126,20 @@ def parse_command_line():
     return parser.parse_args()
 
 
+# Return a list with the indicies of from_list sorted by the values of
+# from_list. The input list is unchanged.
+def make_map(from_list):
+    new_map = list(range(len(from_list)))
+    new_map.sort(key=lambda i: from_list[i])
+
+    return new_map
+
+
 # Validate the data. Data validation here means:
 #
 #   1. No iterations of any language/algorithm pair failed
 #   2. Any iteration that has a negative value for any of the numerical keys
-#      is suitably noted and adjusted back into range.
+#      is adjusted back into range.
 def validate(data):
     good = True
 
@@ -350,8 +286,8 @@ def read_sloc(filename):
     for lang in ["C", "C++", "Python"]:
         data[lang] = [0, 0, 0]
         for path, lines in raw_data[lang].items():
-            # Skip the regexp code for now:
-            if path.startswith("regexp"):
+            # Skip the jpcre2.hpp file for C++:
+            if path.startswith("jpcre2"):
                 continue
             # Index 0 is "all", index 1 is "without boilerplate", index 2 is
             # for the boilerplate.
@@ -363,9 +299,6 @@ def read_sloc(filename):
     # Process Perl mostly the same:
     data["Perl"] = [0, 0, 0]
     for path, lines in raw_data["Perl"].items():
-        # Skip the regexp code for now:
-        if path.startswith("regexp"):
-            continue
         # Index 0 is "all", index 1 is "without boilerplate", index 2 is for
         # the boilerplate.
         data["Perl"][0] += lines
@@ -449,8 +382,7 @@ def read_cyclomatic(filename):
             raw_data["Rust"][name] = [total, average]
 
     # These are not counted for the research:
-    del raw_data["Perl"]["regexp.pl"]
-    del raw_data["Python"]["regexp.py"]
+    del raw_data["C++"]["jpcre2.hpp"]
     del raw_data["Rust"]["common/src/lib.rs"]
 
     return raw_data
@@ -604,6 +536,29 @@ def dfa_regexp_charts(data, filename, *, large=False):
     fig.tight_layout()
     print(f"    Writing {filename}")
     fig.savefig(filename)
+
+    return
+
+
+# Create a 3-D graph of arrows coming out from the origin.
+def arrow_graph(data, labels, filename):
+    ax = plt.figure().add_subplot(projection='3d')
+
+    ax.set(
+        xlim=(0, 1),
+        ylim=(0, 1),
+        zlim=(0, 1),
+        xlabel="SLOC",
+        ylabel="Complexity",
+        zlabel="Compression"
+    )
+
+    z = np.zeros(5)
+    u, v, w = data.transpose()
+    ax.quiver(z, z, z, u, v, w, label=labels)
+
+    print(f"    Writing {filename}")
+    plt.savefig(filename)
 
     return
 
@@ -1040,19 +995,79 @@ def create_cyclomatic_tables(data, filename, score_file):
     return all_score
 
 
+def create_expressiveness_tables(
+    sloc, cyclomatic, compression, expressiveness, expr2, filename, filename2
+):
+    expr_map = make_map(expressiveness)
+    headings = ["SLOC", "Complexity", "Compression", "Score"]
+    headings = list(map(lambda x: f"\\thead{{{x}}}", headings))
+    headings = " & ".join(headings)
+
+    print(f"    Writing {filename}")
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Calculated expressiveness score", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        print("\\centering", file=f)
+        print("\\begin{tabular}{|l|r|r|r|r|}", file=f)
+        print("    \\hline", file=f)
+        print(f"    \\thead{{Language}} & {headings} \\\\", file=f)
+        print("    \\hline", file=f)
+        for x in expr_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(f"{sloc[x]:.4f}")
+            row.append(f"{cyclomatic[x]:.4f}")
+            row.append(f"{compression[x]:.4f}")
+            row.append(f"{expressiveness[x]:.4f}")
+            print("    " + " & ".join(row) + " \\\\", file=f)
+        print("    \\hline", file=f)
+        print("\\end{tabular}", file=f)
+
+    expr_map = make_map(expr2)
+    headings = ["SLOC", "Compression", "Score"]
+    headings = list(map(lambda x: f"\\thead{{{x}}}", headings))
+    headings = " & ".join(headings)
+
+    print(f"    Writing {filename2}")
+    with open(filename2, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Calculated expressiveness score (2-axis)", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        print("\\centering", file=f)
+        print("\\begin{tabular}{|l|r|r|r|}", file=f)
+        print("    \\hline", file=f)
+        print(f"    \\thead{{Language}} & {headings} \\\\", file=f)
+        print("    \\hline", file=f)
+        for x in expr_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(f"{sloc[x]:.4f}")
+            row.append(f"{compression[x]:.4f}")
+            row.append(f"{expr2[x]:.4f}")
+            print("    " + " & ".join(row) + " \\\\", file=f)
+        print("    \\hline", file=f)
+        print("\\end{tabular}", file=f)
+
+    return
+
+
+def combine_axes(*axes):
+    # Make each of them into unit vectors:
+    axes = list(map(lambda x: x / np.linalg.norm(x), axes))
+
+    combined_axes = map(np.array, zip(*axes))
+    return np.array(list(combined_axes))
+
+
+def calculate_lengths(axes):
+    return np.array(list(map(np.linalg.norm, axes)))
+
+
 # Main loop. Read the data, validate it, turn it into useful structure.
 def main():
     args = parse_command_line()
 
     target_languages = LANGUAGES
-    if args.no_intel:
-        target_languages = list(
-            filter(lambda x: not x.endswith("-intel"), target_languages)
-        )
-    if not args.no_scripts:
-        all_languages = target_languages + SCRIPT_LANGUAGES
-    else:
-        all_languages = target_languages
+    all_languages = target_languages
 
     print("##################################################################")
     print("# READING DATA")
@@ -1107,34 +1122,57 @@ def main():
 
     print("\nCreating tables from experiments data...")
     print("  Creating table of iteration counts...")
-    create_iterations_table(analyzed, all_languages, args.iterations_table)
+    create_iterations_table(analyzed, all_languages, FILES["iterations_table"])
     print("  Creating runtime scores table-of-tables...")
-    create_runtime_tables(analyzed, all_languages, args.runtimes_table)
+    create_runtime_tables(analyzed, all_languages, FILES["runtimes_table"])
     print("  Creating energy scores table-of-tables...")
-    create_energy_tables(analyzed, all_languages, args.energy_table)
+    create_energy_tables(analyzed, all_languages, FILES["energy_table"])
     print("\nCreating tables from static analysis data...")
     print("  Creating compressibility measurements table...")
     conciseness_scores = create_compression_table(
-        compression_data, args.compression_table
+        compression_data, FILES["compression_table"]
     )
     print("  Creating SLOC measurements tables...")
-    sloc_scores = create_sloc_tables(sloc_data, args.sloc_table)
+    sloc_scores = create_sloc_tables(sloc_data, FILES["sloc_table"])
     print("  Creating cyclomatic measurements tables...")
     cyclomatic_scores = create_cyclomatic_tables(
-        cyclomatic_data, args.cyclomatic_table, args.cyclomatic_score_table
+        cyclomatic_data, FILES["cyclomatic_table"],
+        FILES["cyclomatic_score_table"]
     )
 
     print("\nCreating plots/graphs from core analyzed data...")
     print("  Creating power-per-second usage chart...")
     power_charts(
-        analyzed, args.power_per_sec, languages=all_languages, large=True
+        analyzed, FILES["pps_chart"], languages=all_languages, large=True
     )
     print("  Done.")
     print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
-    dfa_regexp_charts(analyzed, args.dfa_regexp_chart, large=True)
+    dfa_regexp_charts(analyzed, FILES["dfa_regexp_chart"], large=True)
     print("  Done.")
 
     print("\nCreating elements from combined/post-processed data...")
+    print("  Calculating compound expressiveness scores...")
+    expressiveness_axes = combine_axes(
+        sloc_scores, cyclomatic_scores, conciseness_scores
+    )
+    expressiveness_lengths = calculate_lengths(expressiveness_axes)
+    expressiveness_scores = \
+        expressiveness_lengths / expressiveness_lengths.min()
+    expr2_axes = combine_axes(sloc_scores, conciseness_scores)
+    expr2_lengths = calculate_lengths(expr2_axes)
+    expr2_scores = expr2_lengths / expr2_lengths.min()
+    print("  Creating expressiveness tables...")
+    create_expressiveness_tables(
+        sloc_scores, cyclomatic_scores, conciseness_scores,
+        expressiveness_scores, expr2_scores, FILES["expressiveness_table"],
+        FILES["expr2_table"]
+    )
+    print("  Done.")
+    # print("  Creating expressiveness arrow graph...")
+    # arrow_graph(
+    #     expressiveness_axes, UNIQUE_LANGUAGES, FILES["expressiveness_graph"]
+    # )
+    # print("  Done.")
 
     # As in, done with everything...
     print("\nDone.")
