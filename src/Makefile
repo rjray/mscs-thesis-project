@@ -168,6 +168,9 @@ compression-data:
 		-name \*.[ch] -o -name \*.[ch]pp -o -name \*.p[lm] -o -name \*.py -o \
 		-name \*.rs | xargs tar cf - | (cd $(COMPRESSION_DIR) ; tar xf -)
 	@echo Copying complete.
+	@echo Removing external elements.
+	$(RM) $(COMPRESSION_DIR)/C++/jpcre2.hpp
+	@echo Done.
 	@echo Stripping comments.
 	$(CLOC) --original-dir --strip-comments=nc --report-file=/dev/null $(COMPRESSION_DIR)
 	@echo Comment-removal done.
