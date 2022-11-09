@@ -1,7 +1,7 @@
 \section{Details of the Experiments}
 \label{sec:experiments}
 
-To gather the desired measurements a range of experiments were executed in the chosen languages (C, C++, Rust, Perl, Python), with the algorithm implementations being run under a ``harness'' application that measured various memory, performance, and energy metrics. Additional tools were used to examine the programs for memory leaks, as well as measure aspects of the source code itself.
+To gather the desired measurements the experiments were executed in the chosen languages (C, C++, Rust, Perl, Python), with the algorithm implementations being run under a ``harness'' application that measured various memory, performance, and energy metrics. Additional tools were used to examine the programs for memory leaks, as well as measure aspects of the source code itself.
 
 \subsection{Definitions and Measurements}
 
@@ -74,6 +74,13 @@ For each program comprising an experiment, the following data was gathered eithe
 The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
 Independent of the per-program metrics, an additional measurement of conciseness was made using a variation on the compression-based technique described in~\cite{bergmans}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other. This process is explained in more detail in section~\ref{subsubsec:conciseness}, along with the results.
+
+\subsection{Experiment Harness}
+\label{subsec:harness}
+
+The harness that was developed for managing the execution of the experiment programs was based on the code developed by Pereira et al~\cite{pereira} and made available via their GitHub repository\footnote{\texttt{https://github.com/greensoftwarelab/Energy-Languages}}. Their code was adapted and heavily modified to allow for some command-line options controlling features such as the number of iterations each experiment would be run, verbosity of output, etc. It was enhanced to record maximum memory usage and to work with the specific computer selected to be the testing platform.
+
+The full source code for the modified harness is included in this project's repository~\cite{github}.
 
 \subsection{Languages}
 \label{subsec:languages}
@@ -245,7 +252,7 @@ Both Perl and Python have native support for extended regular expressions as a p
 
 As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the DFA-Gap algorithm for those two languages.
 
-The key to meeting the four requirements in section~\ref{subsec:regexp_variant}, particularly the fourth requirement, was a mechanism called \textit{positive-lookahead}. This mechanism allows the engine to match the pattern as a sequence ahead of the current point, without actually consuming any of the matched characters. This was critical to finding overlapping matches.
+The key to meeting the four requirements in section~\ref{subsec:regexp_variant}, particularly the fourth requirement, was a mechanism called \textit{positive-lookahead}. This mechanism allows the engine to match the pattern as a sequence ahead of the current point, without actually consuming any of the matched characters. This was instrumental in finding overlapping matches.
 
 Once this had been undertaken in Python and Perl, it was necessary to implement similar experiments for the compiled languages. In the case of C++, a class for regular expressions had been part of the C++ Standard Library since the adoption of the C++11 standard. C, as well, offered regular expression support in the form of the POSIX regular expressions functions included as part of the C standard library. Rust, though, does not have built-in regular expression support.
 
@@ -253,7 +260,7 @@ It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the t
 
 The solution came in the form of the Perl-Compatible Regular Expressions engine\footnote{PCRE: \texttt{https://www.pcre.org/}, available in most Linux distributions}. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++\footnote{\texttt{https://github.com/jpcre2/jpcre2}} and Rust\footnote{\texttt{https://crates.io/crates/pcre2}} through wrapper libraries.
 
-As the results will show, the effectiveness of regular expressions varied.
+As the results will show, the effectiveness of regular expressions varied across the languages.
 
 \subsection{Initial Observations on Complexity}
 

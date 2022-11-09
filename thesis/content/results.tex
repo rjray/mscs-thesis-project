@@ -39,7 +39,7 @@ For the DFA-Gap algorithm, both compiled and interpreted languages had to be red
 
 The first of the three measures of the languages' suitability was chosen to be the overall performance. This was chosen for first consideration as this is the metric that most developers notice first: how long did it take the program to complete?
 
-\subsubsection{Special Casing Perl and Python}
+\subsubsection{Special Casing for Perl and Python}
 \label{subsubsec:results:perf_perl_python}
 
 Early examination of the performance results for Perl and Python (section~\ref{subsubsec:dfa_regexp}) had shown that the custom-built DFAs were strongly out-performed by using those languages' native support for regular expressions. Looking at these results separately from the rest of the experiments, the difference was considerable as is shown in figure~\ref{fig:graph:dfa_regexp_comp}.
@@ -54,6 +54,8 @@ Early examination of the performance results for Perl and Python (section~\ref{s
 Not only were the run-times themselves higher for the DFA implementations, but the growth in run-time as $k$ increases was more pronounced for the DFA implementations than for the regular expression implementations. Note that while Perl's DFA was outperformed by Python's for the first three values of $k$, at $k=4$ it was effectively equal and was slightly better at $k=5$. However, in the regular expression implementation Python remained the better performer consistently.
 
 This led to a significant question regarding the measurement of performance for the algorithms: should the Perl and Python manually-coded DFA implementations be replaced by the regular expression implementations? It is highly unlikely that an experienced programmer in either of these two languages would choose to create the DFA manually when they could instead create a regular expression based on the pattern and a given value of $k$, in any case. When the performance is so drastically disparate it seems even less likely.
+
+It was decided instead to implement the regular expression version of the algorithm for the remaining three languages and include this in the final results and analysis.
 
 \subsubsection{Collected Performance Results}
 
