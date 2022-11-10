@@ -21,13 +21,12 @@ FIX_CONST = 2**32 * 0.00006104
 
 ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
 APPROX_ALGORITHMS = [f"dfa_gap({k + 1})" for k in range(5)]
-SCRIPT_ONLY_ALGORITHMS = [f"regexp({k + 1})" for k in range(5)]
+APPROX_ALGORITHMS += [f"regexp({k + 1})" for k in range(5)]
 ALGORITHM_LABELS = {
     "kmp": "Knuth-Morris-Pratt",
     "boyer_moore": "Boyer-Moore",
     "shift_or": "Bitap",
     "aho_corasick": "Aho-Corasick",
-    "combined": "Combined Data",
 }
 ALGORITHM_TABLE_HEADERS = {
     "kmp": "Knuth-\\\\Morris-\\\\Pratt",
@@ -39,7 +38,7 @@ ALGORITHM_TABLE_HEADERS = {
 }
 for k in range(5):
     ALGORITHM_LABELS[APPROX_ALGORITHMS[k]] = f"DFA-Gap (k={k + 1})"
-    ALGORITHM_LABELS[SCRIPT_ONLY_ALGORITHMS[k]] = f"Regexp (k={k + 1})"
+    ALGORITHM_LABELS[APPROX_ALGORITHMS[k + 5]] = f"Regexp-Gap (k={k + 1})"
 
 LANGUAGES = [
     "c-gcc", "c-llvm", "c-intel", "cpp-gcc", "cpp-llvm", "cpp-intel", "rust",
@@ -63,11 +62,18 @@ FILES = {
     "compression_data": "compression.txt",
     "sloc_data": "sloc.csv",
     "cyclomatic_data": "cyclomatic.%s",
+    "total_power_chart": "total_power_usage.png",
     "pps_chart": "power_per_sec.png",
     "dfa_regexp_chart": "dfa_regexp_comp.png",
     "iterations_table": "iterations.tex",
     "runtimes_table": "runtimes.tex",
+    "runtimes_appendix_tables": [
+        "runtimes_app_dfa.tex", "runtimes_app_regexp.tex"
+    ],
     "energy_table": "energy.tex",
+    "energy_appendix_tables": [
+        "energy_app_dfa.tex", "energy_app_regexp.tex"
+    ],
     "compression_table": "compression.tex",
     "sloc_table": "sloc.tex",
     "cyclomatic_table": "cyclomatic.tex",
@@ -208,7 +214,7 @@ def analyze_data(data, langs, algos):
 
     for lang in langs:
         if lang not in new_data:
-            new_data[lang] = {"combined": {}}
+            new_data[lang] = {}
 
         for algo in algos:
             if algo not in data[lang]:
@@ -242,9 +248,6 @@ def analyze_data(data, langs, algos):
                 cell["stdev"] = stdev(values)
                 cell["variance"] = variance(values)
                 new_data[lang][algo][key] = cell
-                # Add to the running combined value:
-                new_data[lang]["combined"][key] = \
-                    new_data[lang]["combined"].get(key, 0.0) + cell["mean"]
 
     return new_data
 
@@ -433,12 +436,51 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
     return
 
 
-# Create bar charts for energy used by each algorithm (Joules/second).
-def power_charts(
+def total_power_usage_chart(
     data, filename, *, languages=LANGUAGES, large=False
 ):
     # Algorithms
-    algorithms = ALGORITHMS + [APPROX_ALGORITHMS[0]]
+    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+
+    # Filter out Perl/Python
+    languages = list(filter(lambda x: not x.startswith("p"), languages))
+
+    # Language labels
+    labels = [LANGUAGE_LABELS[x] for x in languages]
+
+    # Get the totaled energy usage
+    totals = np.zeros(len(languages))
+    for idx, lang in enumerate(languages):
+        for algo in algorithms:
+            totals[idx] += data[lang][algo]["package"]["mean"]
+            totals[idx] += data[lang][algo]["dram"]["mean"]
+    # Apply a base-10 logarithm to it, because of Perl/Python:
+    # totals = np.log10(totals)
+
+    if large:
+        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
+    else:
+        fig, ax = plt.subplots()
+
+    ax.bar(labels, totals)
+    ax.set_ylabel("Joules")
+    ax.set_ylim(15000)
+    ax.set_title("Total Energy (Package + DRAM) by Language (Compiled Only)")
+    ax.axes.tick_params(axis="x", labelrotation=17, labelsize="large")
+    ax.axes.axhline(totals.min(), color="r")
+
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create bar charts for energy used by each algorithm (Joules/second).
+def power_per_second_chart(
+    data, filename, *, languages=LANGUAGES, large=False
+):
+    # Algorithms
+    algorithms = ALGORITHMS + [APPROX_ALGORITHMS[0], APPROX_ALGORITHMS[5]]
     # Total width of each algorithm's bars
     width = 0.8
     step = width / len(languages)
@@ -484,8 +526,9 @@ def power_charts(
     ax.set_xticks(
         x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], algorithms)
     )
-    ax.set_ylabel("Joules")
-    ax.set_title("Energy Use (Package + DRAM) by Algorithm")
+    ax.axes.tick_params(axis="x", labelrotation=17, labelsize="large")
+    ax.set_ylabel("Joules/second")
+    ax.set_title("Energy Use (Package + DRAM) by Algorithm (per second)")
     ax.legend(loc="lower right")
 
     fig.tight_layout()
@@ -608,9 +651,11 @@ def create_computed_table(
     table_data /= table_data.min()
 
     # Now we need a map of the order to display rows in.
-    row_map = list(range(length))
-    row_map.sort(key=lambda i: table_data[i])
+    row_map = make_map(table_data)
 
+    # Caption and label:
+    print(f"    \\caption{{{caption}}}", file=f)
+    print(f"    \\label{{table:{label}}}", file=f)
     # Emit the preamble:
     print(f"    \\begin{{tabular}}{{|{colspec}|}}", file=f)
     print(f"        %% Caption: {caption}", file=f)
@@ -629,60 +674,15 @@ def create_computed_table(
 
     print("        \\hline", file=f)
     print("    \\end{tabular}", file=f)
-    # Caption and label:
-    print(f"    \\caption{{{caption}}}", file=f)
-    print(f"    \\label{{table:{label}}}", file=f)
-
-    return
-
-
-# Create all the basic tables, using `data` and the `filename` given.
-def create_basic_tables(data, languages, filename):
-    with open(filename, "w", encoding="utf-8") as f:
-        # Create each table individually.
-
-        # Create a run-time table for each algorithm:
-        for algo in ALGORITHMS + APPROX_ALGORITHMS:
-            create_computed_table(
-                f, data, languages, algo, "runtime",
-                caption=f"{ALGORITHM_LABELS[algo]} run-times",
-                label=f"runtime:{algo}"
-            )
-
-        # Create a pp0/dram energy-usage table for each algorithm:
-        for algo in ALGORITHMS + APPROX_ALGORITHMS:
-            create_computed_table(
-                f, data, languages, algo, ["pp0", "dram"],
-                caption=f"{ALGORITHM_LABELS[algo]} PP0/DRAM energy usage",
-                label=f"energy:{algo}"
-            )
-
-        # Create a package+dram energy-usage-per-second table per algorithm:
-        for algo in ALGORITHMS + APPROX_ALGORITHMS:
-            caption = f"{ALGORITHM_LABELS[algo]} energy usage over run-time"
-            create_computed_table(
-                f, data, languages, algo, ["package", "dram"],
-                caption=caption, label=f"energy_runtime:{algo}",
-                divisor="total_runtime"
-            )
-
-        # Create a max-memory table for each algorithm:
-        for algo in ALGORITHMS + APPROX_ALGORITHMS:
-            caption = \
-                f"{ALGORITHM_LABELS[algo]} total memory usage"
-            create_computed_table(
-                f, data, languages, algo, "max_memory",
-                caption=caption, label=f"memory:{algo}"
-            )
 
     return
 
 
 # Create the table breaking down the iterations done for each combination of
 # language and algorithm.
-def create_iterations_table(data, languages, filename):
+def create_iterations_table(data, filename):
     algorithms = \
-        ALGORITHMS + [APPROX_ALGORITHMS[0]] + [SCRIPT_ONLY_ALGORITHMS[0]]
+        ALGORITHMS + [APPROX_ALGORITHMS[0], APPROX_ALGORITHMS[5]]
     table_labels = [ALGORITHM_TABLE_HEADERS[a] for a in algorithms]
     table_labels = list(map(lambda x: f"\\thead{{{x}}}", table_labels))
     table_headings = " & ".join(table_labels)
@@ -698,7 +698,7 @@ def create_iterations_table(data, languages, filename):
         print(f"    \\thead{{Language}} & {table_headings} \\\\", file=f)
         print("    \\hline", file=f)
         # Table data:
-        for lang in languages:
+        for lang in LANGUAGES:
             out = [LANGUAGE_LABELS[lang]]
             for a in algorithms:
                 if a in data[lang]:
@@ -715,8 +715,9 @@ def create_iterations_table(data, languages, filename):
 
 # Create the table-of-tables for the run-time scores of the different
 # languages on the various algorithms.
-def create_runtime_tables(data, languages, filename):
-    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+def create_runtime_tables(data, filename):
+    # Rather than show all 5 instances of DFA and Regexp, show just for k = 3.
+    algorithms = ALGORITHMS + [APPROX_ALGORITHMS[2], APPROX_ALGORITHMS[7]]
 
     with open(filename, "w", encoding="utf-8") as f:
         # Print the preamble comments:
@@ -727,12 +728,12 @@ def create_runtime_tables(data, languages, filename):
             print("\\begin{subtable}{0.33\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
-                f, data, languages, algo, "runtime",
+                f, data, LANGUAGES, algo, "runtime",
                 caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo}"
             )
             # End the sub-table:
             print("\\end{subtable}", file=f, end="")
-            if idx % 3 == 2 or idx == len(algorithms) + 1:
+            if idx % 3 == 2 or idx == len(algorithms) - 1:
                 print("", file=f)
             else:
                 print("%", file=f)
@@ -740,10 +741,76 @@ def create_runtime_tables(data, languages, filename):
     return
 
 
+def create_runtime_appendix_tables(data, filenames):
+    algo_names = ["DFA-Gap", "Regexp"]
+    algo_labels = ["dfa_gap", "regexp"]
+
+    for which, filename in enumerate(filenames):
+        algorithms = APPROX_ALGORITHMS[(which * 5):(which * 5 + 5)]
+        name = algo_names[which]
+        a_label = algo_labels[which]
+
+        with open(filename, "w", encoding="utf-8") as f:
+            # Print the preamble comments:
+            print(f"% Table: Comparative {name} runtimes sub-tables", file=f)
+            print(f"% Generated: {datetime.datetime.now()}", file=f)
+            for idx, algo in enumerate(algorithms):
+                # Start the sub-table:
+                print("\\begin{subtable}{0.33\\textwidth}", file=f)
+                print("    \\centering", file=f)
+                create_computed_table(
+                    f, data, LANGUAGES, algo, "runtime",
+                    caption=f"$k={idx + 1}$", label=f"runtime:{algo}"
+                )
+                # End the sub-table:
+                print("\\end{subtable}", file=f, end="")
+                if idx % 3 == 2:
+                    print("", file=f)
+                else:
+                    print("%", file=f)
+
+            # Now the combined table:
+            print(f"    Creating combined runtimes table for {name}")
+            lang_labels = list(map(lambda l: LANGUAGE_LABELS[l], LANGUAGES))
+            combined = np.zeros(len(LANGUAGES))
+            for idx, lang in enumerate(LANGUAGES):
+                for algo in algorithms:
+                    combined[idx] += data[lang][algo]["runtime"]["mean"]
+            combined /= combined.min()
+            combined_map = make_map(combined)
+            caption = "Combined $k$"
+            label = f"runtime:{a_label}:combined"
+
+            # Start the sub-table
+            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("    \\centering", file=f)
+            # Caption and label:
+            print(f"    \\caption{{{caption}}}", file=f)
+            print(f"    \\label{{table:{label}}}", file=f)
+            # Sub-table
+            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("        \\hline", file=f)
+            print("        Language & Score \\\\", file=f)
+            print("        \\hline", file=f)
+
+            for idx in combined_map:
+                row = [lang_labels[idx]]
+                row.append(f"{combined[idx]:.4f}")
+                print("        " + " & ".join(row) + " \\\\", file=f)
+
+            print("        \\hline", file=f)
+            print("    \\end{tabular}", file=f)
+            # End the sub-table:
+            print("\\end{subtable}", file=f, end="")
+
+    return
+
+
 # Create the table-of-tables for the values of energy usage over time for the
 # languages on the various algorithms.
-def create_energy_tables(data, languages, filename):
-    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+def create_energy_tables(data, filename):
+    # Rather than show all 5 instances of DFA and Regexp, show just for k = 3.
+    algorithms = ALGORITHMS + [APPROX_ALGORITHMS[2], APPROX_ALGORITHMS[7]]
 
     with open(filename, "w", encoding="utf-8") as f:
         # Print the preamble comments:
@@ -754,16 +821,84 @@ def create_energy_tables(data, languages, filename):
             print("\\begin{subtable}{0.33\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
-                f, data, languages, algo, ["package", "dram"],
+                f, data, LANGUAGES, algo, ["package", "dram"],
                 caption=ALGORITHM_LABELS[algo], label=f"energy:{algo}",
                 divisor="total_runtime"
             )
             # End the sub-table:
             print("\\end{subtable}", file=f, end="")
-            if idx % 3 == 2 or idx == len(algorithms) + 1:
+            if idx % 3 == 2 or idx == len(algorithms) - 1:
                 print("", file=f)
             else:
                 print("%", file=f)
+
+    return
+
+
+def create_energy_appendix_tables(data, filenames):
+    algo_names = ["DFA-Gap", "Regexp-Gap"]
+    algo_labels = ["dfa_gap", "regexp"]
+
+    for which, filename in enumerate(filenames):
+        algorithms = APPROX_ALGORITHMS[(which * 5):(which * 5 + 5)]
+        name = algo_names[which]
+        a_label = algo_labels[which]
+
+        with open(filename, "w", encoding="utf-8") as f:
+            # Print the preamble comments:
+            print(f"% Table: Comparative {name} energy sub-tables", file=f)
+            print(f"% Generated: {datetime.datetime.now()}", file=f)
+            for idx, algo in enumerate(algorithms):
+                # Start the sub-table:
+                print("\\begin{subtable}{0.33\\textwidth}", file=f)
+                print("    \\centering", file=f)
+                create_computed_table(
+                    f, data, LANGUAGES, algo, ["package", "dram"],
+                    caption=f"$k={idx + 1}$", label=f"energy:{algo}",
+                    divisor="total_runtime"
+                )
+                # End the sub-table:
+                print("\\end{subtable}", file=f, end="")
+                if idx % 3 == 2:
+                    print("", file=f)
+                else:
+                    print("%", file=f)
+
+            # Now the combined table:
+            print(f"    Creating combined runtimes table for {name}")
+            lang_labels = list(map(lambda l: LANGUAGE_LABELS[l], LANGUAGES))
+            combined = np.zeros(len(LANGUAGES))
+            for idx, lang in enumerate(LANGUAGES):
+                for algo in algorithms:
+                    combined[idx] += data[lang][algo]["package"]["mean"]
+                    combined[idx] += data[lang][algo]["dram"]["mean"]
+                    combined[idx] /= data[lang][algo]["total_runtime"]["mean"]
+            combined /= combined.min()
+            combined_map = make_map(combined)
+            caption = "Combined $k$"
+            label = f"energy:{a_label}:combined"
+
+            # Start the sub-table
+            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("    \\centering", file=f)
+            # Caption and label:
+            print(f"    \\caption{{{caption}}}", file=f)
+            print(f"    \\label{{table:{label}}}", file=f)
+            # Sub-table
+            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("        \\hline", file=f)
+            print("        Language & Score \\\\", file=f)
+            print("        \\hline", file=f)
+
+            for idx in combined_map:
+                row = [lang_labels[idx]]
+                row.append(f"{combined[idx]:.4f}")
+                print("        " + " & ".join(row) + " \\\\", file=f)
+
+            print("        \\hline", file=f)
+            print("    \\end{tabular}", file=f)
+            # End the sub-table:
+            print("\\end{subtable}", file=f, end="")
 
     return
 
@@ -773,8 +908,7 @@ def create_compression_table(data, filename):
     vector = np.array([data[x] for x in UNIQUE_LANGUAGES])
     vector = np.ones(len(UNIQUE_LANGUAGES)) - vector
     scaled = vector / vector.min()
-    row_map = list(range(len(UNIQUE_LANGUAGES)))
-    row_map.sort(key=lambda i: scaled[i])
+    row_map = make_map(scaled)
 
     with open(filename, "w", encoding="utf-8") as f:
         # Print the preamble comments:
@@ -806,12 +940,9 @@ def create_sloc_tables(data, filename):
     all_bp = np.array([data[x][2] for x in UNIQUE_LANGUAGES])
     all_bp_scaled = all_bp / all_bp.min()
 
-    all_map = list(range(len(UNIQUE_LANGUAGES)))
-    all_map.sort(key=lambda i: all_scaled[i])
-    no_bp_map = list(range(len(UNIQUE_LANGUAGES)))
-    no_bp_map.sort(key=lambda i: no_bp_scaled[i])
-    all_bp_map = list(range(len(UNIQUE_LANGUAGES)))
-    all_bp_map.sort(key=lambda i: all_bp_scaled[i])
+    all_map = make_map(all_scaled)
+    no_bp_map = make_map(no_bp_scaled)
+    all_bp_map = make_map(all_bp_scaled)
 
     with open(filename, "w", encoding="utf-8") as f:
         # Print preamble comments:
@@ -908,12 +1039,9 @@ def create_cyclomatic_tables(data, filename, score_file):
 
     # At this point, the three pairs should be completely filled in. Create the
     # mappings and create a third column for "score".
-    all_map = list(range(length))
-    all_map.sort(key=lambda i: all_totals[i])
-    algos_map = list(range(length))
-    algos_map.sort(key=lambda i: algos_totals[i])
-    frame_map = list(range(length))
-    frame_map.sort(key=lambda i: frame_totals[i])
+    all_map = make_map(all_totals)
+    algos_map = make_map(algos_totals)
+    frame_map = make_map(frame_totals)
 
     # Create tables.
     print(f"    Creating {filename}")
@@ -1066,9 +1194,6 @@ def calculate_lengths(axes):
 def main():
     args = parse_command_line()
 
-    target_languages = LANGUAGES
-    all_languages = target_languages
-
     print("##################################################################")
     print("# READING DATA")
     print("##################################################################")
@@ -1122,11 +1247,15 @@ def main():
 
     print("\nCreating tables from experiments data...")
     print("  Creating table of iteration counts...")
-    create_iterations_table(analyzed, all_languages, FILES["iterations_table"])
+    create_iterations_table(analyzed, FILES["iterations_table"])
     print("  Creating runtime scores table-of-tables...")
-    create_runtime_tables(analyzed, all_languages, FILES["runtimes_table"])
+    create_runtime_tables(analyzed, FILES["runtimes_table"])
+    print("  Creating runtime scores tables for appendix...")
+    create_runtime_appendix_tables(analyzed, FILES["runtimes_appendix_tables"])
     print("  Creating energy scores table-of-tables...")
-    create_energy_tables(analyzed, all_languages, FILES["energy_table"])
+    create_energy_tables(analyzed, FILES["energy_table"])
+    print("  Creating energy scores tables for appendix...")
+    create_energy_appendix_tables(analyzed, FILES["energy_appendix_tables"])
     print("\nCreating tables from static analysis data...")
     print("  Creating compressibility measurements table...")
     conciseness_scores = create_compression_table(
@@ -1141,10 +1270,10 @@ def main():
     )
 
     print("\nCreating plots/graphs from core analyzed data...")
+    print("  Creating total power usage chart...")
+    total_power_usage_chart(analyzed, FILES["total_power_chart"])
     print("  Creating power-per-second usage chart...")
-    power_charts(
-        analyzed, FILES["pps_chart"], languages=all_languages, large=True
-    )
+    power_per_second_chart(analyzed, FILES["pps_chart"])
     print("  Done.")
     print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
     dfa_regexp_charts(analyzed, FILES["dfa_regexp_chart"], large=True)
