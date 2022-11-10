@@ -44,21 +44,21 @@ For the purpose of evaluating expressiveness, the SLOC measurements were limited
 
 \subsubsection{Language Conciseness Through Compression}
 
-In~\cite{bergmans}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater code-redundancy necessary to express the purposes of the program.
+In~\cite{bergmans}, Bergmans, et al describe a technique of measuring the conciseness of programming languages through a process of pre-processing and compressing the source code of a large number of multi-language projects of differing sizes. The higher the compression ratio of the files in a given language, the less concise it is considered to be. The authors hypothesized that this is because a higher compression ratio implies a greater degree of code-redundancy necessary to express the purposes of the program.
 
 Given that none of the experiment source files are of significant length, this metric was applied at the language level, looking at all files for each language in per-language archive files. It was also modified to accomodate the smaller sample size, as will be explained further in a later section.
 
 \subsubsection{Cyclomatic Complexity}
 
-Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to a ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
+Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
 
 Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard}\footnote{lizard: \texttt{https://github.com/terryyin/lizard}} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}\footnote{From the Perl-Metrics-Simple package for Perl, \texttt{https://metacpan.org/dist/Perl-Metrics-Simple}}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli}\footnote{rust-code-analysis-cli: \texttt{https://github.com/mozilla/rust-code-analysis/}} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
 
-It is not clear if the techniques for measuring Perl and Rust were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{sec:results}.
+It is not clear if the techniques for measuring Perl and Rust were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{subsubsec:complexity}.
 
 \subsubsection{Summary of Metrics}
 
-For each program comprising an experiment, the following data was gathered either dynamically (from executions of the program) or statically (through non-execution analysis of program source code).
+For each execution of a program comprising an experiment, the following data was gathered:
 
 \begin{description}
 \item[Total Program Run-time:] The complete run-time of the program, as measured by the harness program. Unlike the next metric, this would include program initialization time, the input/output operations of loading the data to be processed, etc. This is measured in floating-point seconds with micro-second resolution.
@@ -67,13 +67,19 @@ For each program comprising an experiment, the following data was gathered eithe
 \item[Power-Plane 0 (CPU) Energy Usage:] The energy consumed by the CPU cores during the execution of the program. Measured over the full lifespan of the program, not just the algorithm itself. Measured in Joules.
 \item[DRAM Energy Usage:] The energy consumed by the DRAM during the full lifespan of the program. Measured in Joules.
 \item[Full (Package) Energy Usage:] The energy consumed by the full (socketed) package, which includes the CPU cores' energy but not the DRAM energy. Also measured in Joules.
-\item[Source Lines Of Code:] The measured lines of code in the implementation of the program, using a tool (\texttt{sloc}) designed to measure these values using consistent standards across the different programming languages.
-\item[Cyclomatic Complexity:] The measured complexity of the code, including both the average complexity for the file and specific complexities for those functions that directly correspond to each other across the different implementations.
 \end{description}
 
 The Power-Plane 1 (GPU) RAPL values were excluded because the testing machine's package did not have an integrated GPU. Additionally, the Psys values were excluded because they were deemed unnecessary in the context of having the package, CPU and DRAM values.
 
-Independent of the per-program metrics, an additional measurement of conciseness was made using a variation on the compression-based technique described in~\cite{bergmans}. Using the same tools as were used in that research (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other. This process is explained in more detail in section~\ref{subsubsec:conciseness}, along with the results.
+Independent of the per-program metrics, additional measurements of code expressiveness were made on each of the source files:
+
+\begin{description}
+\item[Source Lines Of Code:] The measured lines of code in the implementation of the program, using a tool (\texttt{sloc}) designed to measure these values using consistent standards across the different programming languages.
+\item[Cyclomatic Complexity:] The measured complexity of the code, including both the average complexity for the file and specific complexities for those functions that directly correspond to each other across the different implementations.
+\item[Conciseness Through Compression:] Using the same tools as were used in the research in~\cite{bergmans} (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
+\end{description}
+
+These processes are explained in more detail in section~\ref{subsubsec:conciseness}, along with the results.
 
 \subsection{Experiment Harness}
 \label{subsec:harness}
@@ -199,13 +205,13 @@ The C implementation of Knuth-Morris-Pratt was adapted from~\cite[Chapter 7]{han
 
 This being the first of the algorithms implemented, it is also where the means of passing generic data from the initialization routines to the algorithm routines was developed. The differences in these methods, particularly between the compiled languages, spoke strongly to their relative expressiveness.
 
-In the C implementation it was necessary to use a memory pointer of the type, \texttt{void **}. This defines a dynamic list of dynamic pointers, but provides no information about each individual pointer. It is left to the code to properly type-cast the values from this block of memory. If the program is incorrect (such as getting the order of elements wrong) the resulting typed pointers will likely trigger memory faults when dereferenced. This was also the most-flexible of the compiled solutions and required no difference in implementation between the different algorithms.
+In the C implementation it was necessary to use a memory pointer of the type, \texttt{void~**}. This defines a dynamic list of dynamic pointers, but provides no information about each individual pointer. It is left to the code to properly type-cast the values from this block of memory. If the program is incorrect (such as getting the order of elements wrong) the resulting typed pointers will likely trigger memory faults when dereferenced. This was also the most-flexible of the compiled solutions and required no difference in implementation between the different algorithms.
 
-In C++ it was initially attempted to reuse the \texttt{void **} approach that had been used in C. This proved to be extremely difficult under the stricter compiler rules, and the decision was made to use the \texttt{std::variant} class instead, which represents a type-safe union in the C++ language. While the same variant type definition could have been used for both the single-pattern and multi-pattern algorithms, it was decided to distinguish them for the sake of readability. The type definitions were made in the file \texttt{run.hpp}, the header-file for the runner module of C++. Unpacking a vector of the variant types brought further type-safety in the form of a generically-typed function \texttt{get<>} in the standard library that was used to extract the values to new objects of the correct type.
+In C++ it was initially attempted to reuse the \texttt{void~**} approach that had been used in C. This proved to be extremely difficult under the stricter compiler rules, and the decision was made to use the \texttt{std::variant} class instead, which represents a type-safe union in the C++ language. While the same variant type definition could have been used for both the single-pattern and multi-pattern algorithms, it was decided to distinguish them for the sake of readability. The type definitions were made in the file \texttt{run.hpp}, the header-file for the runner module of C++. Unpacking a vector of the variant types brought further type-safety in the form of a generically-typed function \texttt{get<>} in the standard library that was used to extract the values to new objects of the correct type.
 
 Rust had the language features that seemed the most clear and expressive in implementation: enumeration and pattern-matching. In Rust, an enumeration type (\texttt{enum}) can optionally assign data types to the elements of the enumeration. When an enumeration element is instantiated it is provided an instance of that data when applicable. This lead to a system for the Rust programs in which the initialization function for an algorithm created and returned a vector of the enumeration type. The algorithm routines that received these types would extract them from the vector using a pattern-matching\footnote{In the computer language sense, not to be confused with pattern-matching in strings} construct that ensured the types of each individual element of the vector received from the initialization function. The program would raise a run-time exception if the given vector element was not of the expected type. In contrast, Rust required the least-expressive approach to appending the sentinel value onto the pattern string for the sake of creating the ``next'' table.
 
-Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void **} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar value would have caused a run-time exception in either program.
+Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void~**} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar value would have caused a run-time exception in either program.
 
 \subsubsection{Boyer and Moore}
 

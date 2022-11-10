@@ -25,9 +25,11 @@ As an example, consider a search for the pattern ``CTAGC'' in a sequence that st
 \caption{Knuth-Morris-Pratt next-table}
 \label{fig:kmp_next}
 \end{figure}
+\onehalfspacing
 
 With the table in hand, the process moves to matching. The matching algorithm goes through the following steps:
 
+\singlespacing
 \begin{enumerate}
 \item $i$ and $j$ both initialize to 0
 \item $p_0 = s_0$, so $next$ is not consulted
@@ -42,6 +44,7 @@ With the table in hand, the process moves to matching. The matching algorithm go
 \item $i$ and $j$ increment
 \item $p_i$ continues to match $s_j$ as both variables increment. When $i = 5$, the algorithm detects a match.
 \end{enumerate}
+\onehalfspacing
 
 Here, the Knuth-Morris-Pratt algorithm has found the match in 10 character comparisons, 5 of which were required to verify the full match.
 
@@ -198,13 +201,13 @@ The basis of the algorithm is the notion that such an approximate match as descr
 Using the third construct and the ``CTAGC'' pattern, an example regular expression for a value of $k = 3$ could look like:
 
 \begin{center}
-\texttt{C.$\lbrace ,3 \rbrace$T.$\lbrace ,3 \rbrace$A.$\lbrace ,3 \rbrace$G.$\lbrace ,3 \rbrace$C}
+\texttt{C.$\lbrace 0,3 \rbrace$T.$\lbrace 0,3 \rbrace$A.$\lbrace 0,3 \rbrace$G.$\lbrace 0,3 \rbrace$C}
 \end{center}
 
 However, this not correct because the dot (``\texttt{.}'') matches all characters. This is not desirable, as any ``T'' encountered after the initial ``C'' should move to that part of the pattern rather than possibly being subsumed by the dot. Additionally, in a general regular expression engine the dot will match \textit{all} characters, including those not part of the DNA alphabet. Restricting the counting-states to just the alphabet of the problem, and eliminating the target letter from the gap consideration gives us:
 
 \begin{center}
-\texttt{C[ACG]$\lbrace ,3 \rbrace$T[CGT]$\lbrace ,3 \rbrace$A[ACT]$\lbrace ,3 \rbrace$G[AGT]$\lbrace ,3 \rbrace$C}
+\texttt{C[ACG]$\lbrace 0,3 \rbrace$T[CGT]$\lbrace 0,3 \rbrace$A[ACT]$\lbrace 0,3 \rbrace$G[AGT]$\lbrace 0,3 \rbrace$C}
 \end{center}
 
 This, given that $k$ is known at the time of the construction, can be readily transformed into a DFA.

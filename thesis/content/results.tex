@@ -3,18 +3,19 @@
 
 After the completion of the experiment programs' development, an automation mechanism was developed based on the GNU Make tool. This mechanism allowed for the repeated running of the experiments suite while also providing control over aspects such as the number of repetitions and grouping of the algorithms.
 
-The basis for the mechanism was a series of additional rules added to the already-present ``Makefile'' files that had been developed for the building of each language's set of programs. A single target-rule, ``\texttt{experiments}'', would recursively descend into each language-specific directory and trigger all algorithms in sequence. Each algorithm ran a specified number of times, and in most cases the initial run was discarded. This was to prevent the possibility of the data input files being in the disk device's cache skewing the timing and energy readings with regards to later runs. All non-error output from the experiments was captured by the harness program and streamed to a single text file.
+The basis for the mechanism was a series of additional rules added to the already-present ``Makefile'' files that had been developed for the building of each language's set of programs. A single target-rule, ``\texttt{experiments}'', would recursively descend into each language-specific directory and trigger all algorithms in sequence. Each algorithm ran a specified number of times, and in most cases the initial run was discarded. This was to prevent the possibility of the data input files being in the disk device's cache, skewing the timing and energy readings with regards to later runs. All non-error output from the experiments was captured by the harness program and streamed to a single text file.
 
 The format chosen for the file of results was YAML\footnote{YAML: \texttt{https://yaml.org/}}, due to the ready availability of parsing libraries. YAML had an advantage over other formats such as CSV (comma-separated values) in that it allowed the flexibility of complex nested data were it to be necessary, while also being emitted in a streaming fashion. This greatly reduced the potential for output to be corrupted between algorithm executions.
 
 \subsection{Results from the Experiments}
 \label{subsec:results}
 
+% TODO: Ensure correct data on file reference below
 The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw experiments data is named ``\texttt{experiments-data-20221104.yml}''.
 
 \subsubsection{Scope of the Experiments}
 
-The final run of the experiments generated a total of 1,190 data-points taken from runs of the 27 programs. The set of programs below includes the regular expression variants of the DFA-Gap algorithm for Perl and Python, as described in~\ref{subsubsec:dfa_regexp}. Table~\ref{table:iterations} shows the number of runs on a per-language, per-algorithm basis.
+The final run of the experiments generated a total of 1,190 data-points taken from runs of the 30 programs. The set of programs below includes the regular expression variant of the DFA-Gap algorithm, as described in~\ref{subsubsec:dfa_regexp}. Table~\ref{table:iterations} shows the number of runs on a per-language, per-algorithm basis.
 
 \begin{table}[h!]
 \begin{center}
@@ -55,7 +56,7 @@ Not only were the run-times themselves higher for the DFA implementations, but t
 
 This led to a significant question regarding the measurement of performance for the algorithms: should the Perl and Python manually-coded DFA implementations be replaced by the regular expression implementations? It is highly unlikely that an experienced programmer in either of these two languages would choose to create the DFA manually when they could instead create a regular expression based on the pattern and a given value of $k$, in any case. When the performance is so drastically disparate it seems even less likely.
 
-It was decided instead to implement the regular expression version of the algorithm for the remaining three languages and include this in the final results and analysis.
+It was decided instead to implement the regular expression version of the experiment for the remaining three languages and include this in the final results and analysis.
 
 \subsubsection{Collected Performance Results}
 
@@ -67,7 +68,9 @@ After the decision was made on the regular expression question for Perl and Pyth
 \label{table:runtime:comparative-algorithm}
 \end{table}
 
-The DFA-Gap algorithm is shown for all values of $k$ that were used, as it is interesting to see the subtle differences in the ranking of languages for different values of $k$.
+The DFA-Gap and Regexp algorithms are shown for just $k=3$. However, there was some fluctuation in the ranking of the languages as $k$ went from 1 to 5. For the application to the metric of performance, all values of $k$ for both of these algorithms will be used in the calculations.
+
+Full tables of run-times scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
 
 \subsection{Energy Usage Comparisons}
 \label{subsec:energy_comp}
@@ -80,16 +83,29 @@ In this section the energy usage results are examined. Table~\ref{table:energy:c
 \label{table:energy:comparative-algorithm}
 \end{table}
 
-The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap algorithm is again represented for all values of $k$, as the ranking of languages varies with $k$.
+The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap and Regexp algorithms are again represented by $k=3$, and again the rankings of the languages varied with $k$.
 
-These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 9 distinct groups of experiments.
+These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 14 distinct groups of experiments.
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.85\textwidth]{figures/power_per_sec.png}
-	\caption{Bar charts of energy usage per second, by algorithm}
-	\label{fig:graph:power_per_sec}
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/power_per_sec.png}
+        \caption{Energy/second, by algorithm}
+        \label{fig:graph:power_per_sec}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/total_power_usage.png}
+        \caption{Total energy by language}
+        \label{fig:graph:total_power_usage}
+    \end{minipage}
 \end{figure}
+
+The fact that Rust was the overall best performer in terms of energy usage is underscored by the chart in figure~\ref{fig:graph:total_power_usage}. In this chart, the total energy usage by all experiments in each language is shown. Here, the Perl and Python languages have been removed due to the fact that their longer run-times lead to energy numbers well out of scale with respect to the compiled languages. The red horizontal line shows the total usage by Rust and illustrates the differences with C and C++ across all three compilers.
+
+As with the run-times score tables, full tables of energy scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
 
 \subsection{Expressiveness Comparisons}
 \label{subsec:expr_comp}
@@ -123,6 +139,7 @@ In this area, C and C++ each needed only one line per element passed (listing~\r
 By further comparison: both Python and Perl, having the native ability to pass arrays of differing types, needed only one line to unpack the pattern representations.
 
 \subsubsection{Cyclomatic Complexity}
+\label{subsubsec:complexity}
 
 Table~\ref{table:expr:cyclomatic} shows a similar break-down of the cyclomatic complexity measurements: algorithms, framework, and combined total.
 
@@ -158,7 +175,7 @@ In table~\ref{table:expr:compression}, the results are shown.
 
 \begin{table}[!htb]
 \input{tables/compression}
-\caption{Comparison of compressibility}
+\caption{Comparison of compressibility by language}
 \label{table:expr:compression}
 \end{table}
 
@@ -202,7 +219,7 @@ Because of the possibly-inconsistent nature of the complexity data, it was decid
 \label{table:expr:expressiveness-score2}
 \end{table}
 
-Here, the results more closely track with expectations: Python and Perl head the list while C++ and Rust take the next two places. As has been mentioned, it is possible that Rust most likely suffered in the SLOC measurement due to the data-unpacking mechanism required by the framework.
+Here, the results more closely tracked with expectations: Python and Perl head the list while C++ and Rust take the next two places. As has been mentioned, it is possible that Rust likely suffered in the SLOC measurement due to the data-unpacking mechanism required by the framework.
 
 \subsection{Combining the Bases}
 \label{subsec:combined}
