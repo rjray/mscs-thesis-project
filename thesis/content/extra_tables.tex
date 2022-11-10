@@ -1,0 +1,64 @@
+\section{Additional Tables}
+\label{sec:extra_tables}
+
+In this appendix is a collection of tables that provide more information on the experiments that were run.
+
+\subsection{DFA-Gap Algorithm Tables}
+
+The following two collections of tables show the full range of results for run-times and for energy usage over time, for the DFA-Gap algorithm on all values of $k$ for which it was run.
+
+\subsubsection{DFA-Gap Run-times}
+
+In table~\ref{table:runtime:dfa_gap:comparative} the different rankings by run-time are shown for the DFA-Gap algorithm. The sixth sub-table, table~\ref{table:runtime:dfa_gap:combined}, shows the score resulting from summing all the values from $k=1$ to $k=5$ and then scoring them.
+
+\begin{table}[!htb]
+\input{tables/runtimes_app_dfa}
+\caption{Comparative run-times of DFA-Gap by value of $k$}
+\label{table:runtime:dfa_gap:comparative}
+\end{table}
+
+This last sub-table acts as an averaging of the results for the different values of $k$. Interesting in these results are that the different compilers for each of C and C++ appear in the same order of ranking for those languages. Rust's combined performance here was over 69\% slower than the fastest, but what is interesting about the performance of Rust is the notable drop in performance for values of $k$ greater than 1. At $k=1$, Rust was only 50.6\% slower than the GCC's C version. But at $k=3$ it was 76.3\%.
+
+Also of interest is how Perl closed the gap on Python as $k$ grew. At $k=4$ they were within 0.07\% of each other and at $k=5$ Perl had outperformed Python.
+
+\subsubsection{DFA-Gap Energy Usage}
+
+Here, in table~\ref{table:energy:dfa_gap:comparative}, the DFA-Gap energy usage rankings are displayed for the range of $k$ values as well as a combined-values score table.
+
+\begin{table}[!htb]
+\input{tables/energy_app_dfa}
+\caption{Comparative energy usage by DFA-Gap by value of $k$}
+\label{table:energy:dfa_gap:comparative}
+\end{table}
+
+In a result similar to the run-times tables, one language holds the top spot for all values of $k$: Rust. This is an interesting observation, as Rust had consistently scored seventh in run-time performance for these same experiments. This shows that Rust was using energy more efficiently overall, despite needing more time to produce the results. This has already been shown in figure~\ref{fig:graph:total_power_usage}, in section~\ref{subsec:energy_comp}.
+
+\subsection{Regexp-Gap Algorithm Tables}
+
+These tables show the full range of results for run-times and for energy usage over time, for the Regexp-Gap algorithm on all values of $k$ for which it was run.
+
+\subsubsection{Regexp-Gap Run-times}
+
+Table~\ref{table:runtime:regexp_gap:comparative} lays out the run-times of the regular expression variant of the gap algorithm. As with the corresponding collection of tables for the DFA-Gap experiments, a single language dominates the top ranking for all values of $k$. This time, however, the language was Rust. Also of interest is the fact that C++ in all three toolchain variants outperformed all variants of C.
+
+What makes this of such interest is that fact that all three compiled languages were using the same regular expression engine, PCRE2. As PCRE2 is written in C, one might expect the C versions of this experiment to perform the best. Rust and C++ were both using wrappers around the C interface, yet performed better.
+
+\begin{table}[!htb]
+\input{tables/runtimes_app_regexp}
+\caption{Comparative run-times of Regexp-Gap by value of $k$}
+\label{table:runtime:regexp_gap:comparative}
+\end{table}
+
+Also worthy of note is the relative closeness of the Perl and Python run-times to the compiled language values. This was less surprising, given that both languages' communities have invested time in the performance of their respective regular expression engines. While Perl was still nearly 4x the run-time of Rust in table~\ref{table:runtime:regexp:combined}, that is a great difference over the 56x difference against GCC's C in table~\ref{table:runtime:dfa_gap:combined}.
+
+\subsubsection{Regexp-Gap Energy Usage}
+
+Lastly, table~\ref{table:energy:regexp_gap:comparative} presents the energy usage score for the regular expression variant experiments. Of all the energy comparisons, these are the closest in relation to each other. This would indicate that the regular expression engines of Perl and Python, as well as PCRE2, bore the considerable majority of the work in these experiment runs.
+
+\begin{table}[!htb]
+\input{tables/energy_app_regexp}
+\caption{Comparative energy usage by Regexp-Gap by value of $k$}
+\label{table:energy:regexp_gap:comparative}
+\end{table}
+
+Noteworthy results here include the presence of Perl in the first position for $k=1$, and never placing lower than fourth. Rust, which had shown strong energy performance for the DFA-Gap experiments, here places last three of the five values of $k$. However, it is almost always within a 1\% difference of the language just ahead of it. This was the case with all of the scoring tables in this grouping; gaps between adjacent scores were rarely more than 1\% in difference and sometimes as little as 0.12\%.
