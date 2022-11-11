@@ -1,20 +1,12 @@
 \begin{lstlisting}[language=Python,caption={Python example of complexity},label={lst:sample_python},showstringspaces=false]
-def count_bits():
-  done = False
+def count_bits(n):
+  bits = 0
 
-  while not done:
-    inp = input()
-    n = int(inp)
-    bits = 0
+  while n != 0:
+    if n % 2 == 1:
+      bits += 1
 
-    while n != 0:
-      if n \% 2 == 1:
-        bits += 1
+    n //= 2
 
-        n //= 2
-
-    if bits == 0:
-      done = True
-
-  return
+  return bits
 \end{lstlisting}
