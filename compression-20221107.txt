@@ -1,5 +1,0 @@
-compression/C++.txt: 4,332 B / 22.3 KiB = 0.190
-compression/C.txt: 5,252 B / 26.5 KiB = 0.194
-compression/Perl.txt: 3,400 B / 17.0 KiB = 0.195
-compression/Python.txt: 3,016 B / 13.7 KiB = 0.215
-compression/Rust.txt: 5,008 B / 25.5 KiB = 0.192
