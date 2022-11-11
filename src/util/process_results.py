@@ -58,7 +58,7 @@ LANGUAGE_LABELS = {
 UNIQUE_LANGUAGES = ["C", "C++", "Perl", "Python", "Rust"]
 
 FILES = {
-    "data": "experiments_data.yml",
+    "data": "experiments-data.yml",
     "compression_data": "compression.txt",
     "sloc_data": "sloc.csv",
     "cyclomatic_data": "cyclomatic.%s",

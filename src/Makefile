@@ -47,7 +47,7 @@ empty :=
 space := $(empty) $(empty)
 KS := $(subst $(space),$(comma),$(K))
 
-EXPERIMENTS_FILE := experiments_data.yml
+EXPERIMENTS_FILE := experiments-data.yml
 
 # The default number of runs that each experiment will do, when running for
 # results. Note that the scripts (Perl and Python) override this for the longer
