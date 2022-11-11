@@ -52,6 +52,39 @@ Given that none of the experiment source files are of significant length, this m
 
 Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
 
+In the following combination of listing~\ref{lst:sample_python} and figure~\ref{fig:image:mccabe}, a small Python function is accompanied by a directed graph illustrating the cyclomatic complexity of the function.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{.45\textwidth}
+        \input{code/sample.py}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{.45\textwidth}
+        \caption{Cyclomatic graph}
+        \centering
+        \includegraphics[width=0.4\textwidth]{figures/mccabe.png}
+        \label{fig:image:mccabe}
+    \end{minipage}
+\end{figure}
+
+The function itself is not very complex: it simply counts the number of ``1'' bits in the given integer number. The corresponding graph has 5 nodes and 6 edges. McCabe gives his formula for calculating the complexity from a graph representation as:
+
+\[v~=~e - n + 2p\]
+
+where $v$ is the cyclomatic complexity, $e$ and $n$ represent the number of edges and nodes in the graph, and $p$ is the number of connected components. In this example, $p=1$ and thus $v=3$.
+
+McCabe gives examples of the control graphs for some typical constructs: a \textit{sequence} control, an \textit{if-then-else} control, a \textit{while} control, and an \textit{until} control. Each of the first three are demonstrated in this example: the edge from node 1 to node 2 is a \textit{sequence} control, the edges between nodes 2, 3 and 5 represent a \textit{while} control, and the edges from 3 to 4 and 2 represent an \textit{if-then-else} control.
+
+Thus, the graph nodes correspond to the following points in the function:
+
+\begin{enumerate}
+\item The entry-point of the function at line 1
+\item The \texttt{while}-loop at line 4
+\item The \texttt{if}-conditional at line 5
+\item The ``true'' branch of the conditional at line 6
+\item The exit/return from the function at line 10
+\end{enumerate}
+
 Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard}\footnote{lizard: \texttt{https://github.com/terryyin/lizard}} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}\footnote{From the Perl-Metrics-Simple package for Perl, \texttt{https://metacpan.org/dist/Perl-Metrics-Simple}}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli}\footnote{rust-code-analysis-cli: \texttt{https://github.com/mozilla/rust-code-analysis/}} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
 
 It is not clear if the techniques for measuring Perl and Rust were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{subsubsec:complexity}.
@@ -279,7 +312,7 @@ At this point, some initial observations could be made about the complexity meas
 \label{fig:graph-naive}
 \end{figure}
 
-Part of the reason for this is that the complexity measurement does not take into account calls to functions. This is by intent, as factoring out content to a separate function is part of the process of managing complexity. In the cases of C and C++, both utilized library functions: \texttt{strncmp} in C and \texttt{substr} in C++. In contrast, the use of \texttt{substr} in Perl is a keyword of the language. Python and Rust skip this entirely by virtue of having array-slicing be a core language feature, along with the ability to compare slices directly. Had the complexity-measuring tools taken the library calls into account, that would have changed the graph for those languages from one connected component to two, and resulted in a higher complexity score.
+Part of the reason for this is that the complexity measurement does not take into account calls to functions. This is by intent, as factoring out content to a separate function is part of the process of managing complexity. In the cases of C and C++, both utilized library functions: \texttt{strncmp} in C and \texttt{substr} in C++. In contrast, the use of \texttt{substr} in Perl is a keyword of the language. Python and Rust skip this entirely by virtue of having array-slicing be a core language feature, along with the ability to compare slices directly. Had the complexity-measuring tools taken the library calls into account, that would have changed the graph for those languages from one connected component to two, and resulted in a higher overall complexity score.
 
 Compare this to the \texttt{make\_next\_table} functions defined in the implementations of Knuth-Morris-Pratt. The complexity tool found the Python version to have a score of 6 while the C and C++ versions both scored 5. The reason for the distinction is that C and C++ allocated the array variable \textit{next\_table} prior to the function call and pass it as a parameter. By contrast, in Python \textit{next\_table} was created within the function. The loop used to create it is the source of the extra point of complexity. Figures~\ref{fig:graph-kmp-py} and~\ref{fig:graph-kmp-cpp} illustrate these slightly-different flow graphs. In figure~\ref{fig:graph-kmp-py}, states 2 and 3 represent the extra for-loop that introduces the extra point of complexity.
 

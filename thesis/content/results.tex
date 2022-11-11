@@ -10,7 +10,7 @@ The format chosen for the file of results was YAML\footnote{YAML: \texttt{https:
 \subsection{Results from the Experiments}
 \label{subsec:results}
 
-% TODO: Ensure correct data on file reference below
+% TODO: Ensure correct date on file reference below
 The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw experiments data is named ``\texttt{experiments-data-20221104.yml}''.
 
 \subsubsection{Scope of the Experiments}
@@ -33,7 +33,7 @@ While it was known that the interpreted languages (Python and Perl) would be slo
 
 This discovery required adjusting the automated experiments, to reduce the number of iterations for both interpreted languages. The Knuth-Morris-Pratt, Boyer-Moore, and Bitap algorithms were all reduced to 5 iterations each, for these languages. The Aho-Corasick algorithm ran in a more reasonable length of time and was left at 25 iterations, the same number as were run for the compiled languages.
 
-For the DFA-Gap algorithm, both compiled and interpreted languages had to be reduced in terms of iterations given that approximate-matching algorithms are in general slower than their exact-matching counterparts. The compiled languages ran 10 iterations of this algorithm for values of $k$ ranging from 1 to 5, whereas the interpreted languages were necessarily limited to 3 iterations for the same values of $k$.
+For the DFA-Gap algorithm, both compiled and interpreted languages had to be reduced in terms of iterations given that approximate-matching algorithms are in general slower than their exact-matching counterparts. The compiled languages ran 5 iterations of this algorithm for values of $k$ ranging from 1 to 5, whereas the interpreted languages were necessarily limited to 3 iterations for the same values of $k$. When the regular expressions variant of the algorithm was added, it too was run for 5 and 3 iterations over the languages.
 
 \subsection{Performance Comparisons}
 \label{subsec:perf_comp}
@@ -69,6 +69,64 @@ After the decision was made on the regular expression question for Perl and Pyth
 \end{table}
 
 The DFA-Gap and Regexp algorithms are shown for just $k=3$. However, there was some fluctuation in the ranking of the languages as $k$ went from 1 to 5. For the application to the metric of performance, all values of $k$ for both of these algorithms will be used in the calculations.
+
+The set of charts in figures~\ref{fig:graph:kmp-runtimes} to~\ref{fig:graph:regexp-runtimes} illustrate the run-times by language for each of the six algorithms. Note that all of these except figure~\ref{fig:graph:regexp-runtimes} omit the Perl and Python languages due to their extreme differences in the scale of running-time\footnote{A logarithmic scale was also tried, but the Perl/Python values were still too far from the norm (particularly in the Bitap results).}.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-kmp.png}
+        \caption{KMP run-times}
+        \label{fig:graph:kmp-runtimes}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-boyer_moore.png}
+        \caption{BM run-times}
+        \label{fig:graph:bm-runtimes}
+    \end{minipage}
+\end{figure}
+
+Starting with the Knuth-Morris-Pratt and Boyer-Moore algorithms (which have a passing relation to each other), the red lines indicate the fastest run-time and are meant to show the difference in the other languages' finish-time. In the Knuth-Morris-Pratt results, of interest is the fact that both C and C++ compiled by the LLVM toolchain strongly out-performed the GCC and Intel toolchains. This would be the only algorithm in which LLVM controlled the performance for both languages. In Boyer-Moore, the Intel toolchain takes the top spot with C, and the second spot with C++. Though this is not the only algorithm for which a C++ experiment placed second, this is the highest that C++ would place throughout all algorithms.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-shift_or.png}
+        \caption{Bitap run-times}
+        \label{fig:graph:bitap-runtimes}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-aho_corasick.png}
+        \caption{AC run-times}
+        \label{fig:graph:ac-runtimes}
+    \end{minipage}
+\end{figure}
+
+In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM toolchain actually produced the slowest times within the C and C++ camps in this case. In the Aho-Corasick results (figure~\ref{fig:graph:ac-runtimes}) LLVM once again produced the fastest code with the C version of the experiment. The Aho-Corasick run-times also reflect the overall speed of this algorithm, buoyed by the ability to test all patterns in a single pass through each target sequence.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-dfa_gap.png}
+        \caption{DFA run-times}
+        \label{fig:graph:dfa-runtimes}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-regexp.png}
+        \caption{Regexp run-times}
+        \label{fig:graph:regexp-runtimes}
+    \end{minipage}
+\end{figure}
+
+For the DFA and regular expression versions of the gap algorithm, figures~\ref{fig:graph:dfa-runtimes} and~\ref{fig:graph:regexp-runtimes}, a different style of charts was drawn. As both of these experiments ran for five different values of the $k$ parameter, the charts are designed to show all five run-times for each language as a stack.
+
+The DFA experiments follow an almost expected trajectory, with C being faster than C++ and C++ faster than Rust. However, the regular expression experiments show an exactly opposite trend, with Rust being the fastest of the language. Figure~\ref{fig:graph:regexp-runtimes} also includes results for the Perl and Python languages, as this experiment gave results for them that could be comfortably included.
 
 Full tables of run-times scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
 
