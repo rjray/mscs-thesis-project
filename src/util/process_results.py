@@ -65,6 +65,7 @@ FILES = {
     "total_power_chart": "total_power_usage.png",
     "pps_chart": "power_per_sec.png",
     "dfa_regexp_chart": "dfa_regexp_comp.png",
+    "algorithm_runtimes": "algorithm_runtimes-%s.png",
     "iterations_table": "iterations.tex",
     "runtimes_table": "runtimes.tex",
     "runtimes_appendix_tables": [
@@ -139,6 +140,16 @@ def make_map(from_list):
     new_map.sort(key=lambda i: from_list[i])
 
     return new_map
+
+
+# Get the figure and axes objects for a new plot.
+def get_fig_and_ax(large=False):
+    if large:
+        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
+    else:
+        fig, ax = plt.subplots()
+
+    return fig, ax
 
 
 # Validate the data. Data validation here means:
@@ -413,10 +424,7 @@ def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
         for idx, algo in enumerate(ALGORITHMS):
             bars[lang][idx] = data[lang][algo][key]["mean"]
 
-    if large:
-        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
-    else:
-        fig, ax = plt.subplots()
+    fig, ax = get_fig_and_ax(large)
 
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], bars[lang],
@@ -442,9 +450,6 @@ def total_power_usage_chart(
     # Algorithms
     algorithms = ALGORITHMS + APPROX_ALGORITHMS
 
-    # Filter out Perl/Python
-    languages = list(filter(lambda x: not x.startswith("p"), languages))
-
     # Language labels
     labels = [LANGUAGE_LABELS[x] for x in languages]
 
@@ -457,10 +462,7 @@ def total_power_usage_chart(
     # Apply a base-10 logarithm to it, because of Perl/Python:
     # totals = np.log10(totals)
 
-    if large:
-        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
-    else:
-        fig, ax = plt.subplots()
+    fig, ax = get_fig_and_ax(large)
 
     ax.bar(labels, totals)
     ax.set_ylabel("Joules")
@@ -475,7 +477,78 @@ def total_power_usage_chart(
     return
 
 
-# Create bar charts for energy used by each algorithm (Joules/second).
+# Create grouped bar charts for runtime per algorithm by language.
+def runtime_per_algorithm_chart(
+    data, filename, algorithm, *, languages=LANGUAGES, large=False
+):
+    # Language labels
+    labels = [LANGUAGE_LABELS[x] for x in languages]
+
+    # Expand filename
+    filename = filename % algorithm
+
+    # Get the runtime values
+    values = np.zeros(len(languages))
+    for idx, lang in enumerate(languages):
+        values[idx] = data[lang][algorithm]["runtime"]["mean"]
+
+    fig, ax = get_fig_and_ax(large)
+
+    ax.bar(labels, values)
+    ax.set_ylim(values.min() / 2)
+    ax.set_ylabel("Seconds")
+    ax.set_title(f"{ALGORITHM_LABELS[algorithm]} Run-Times by Language")
+    ax.axes.tick_params(axis="x", labelrotation=17, labelsize="large")
+    ax.axes.axhline(values.min(), color="r")
+
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create stacked bar charts for the 5 values of k for the given algorithm.
+def stacked_runtime_chart(
+    data, filename, algorithm, label, *, languages=LANGUAGES, large=False
+):
+    # Language labels
+    labels = [LANGUAGE_LABELS[x] for x in languages]
+
+    # Expand filename
+    filename = filename % algorithm
+
+    # Get the data into an array of np.array()
+    width = len(languages)
+    runtimes = [np.zeros(width) for _ in range(width)]
+    for k in range(1, 6):
+        algo = f"{algorithm}({k})"
+        for idx, lang in enumerate(languages):
+            runtimes[k - 1][idx] = data[lang][algo]["runtime"]["mean"]
+
+    fig, ax = get_fig_and_ax(large)
+
+    ax.bar(labels, runtimes[0], label="$k=1$")
+
+    for k in range(1, 5):
+        ax.bar(
+            labels, runtimes[k] - runtimes[k - 1], label=f"$k={k + 1}$",
+            bottom=runtimes[k - 1]
+        )
+
+    ax.set_ylabel("Seconds")
+    ax.set_title(f"{label} Run-Times by Language")
+    ax.axes.tick_params(axis="x", labelrotation=30, labelsize="large")
+    ax.legend()
+
+    fig.tight_layout()
+
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create grouped bar charts for energy used by each algorithm (Joules/second).
 def power_per_second_chart(
     data, filename, *, languages=LANGUAGES, large=False
 ):
@@ -514,10 +587,7 @@ def power_per_second_chart(
     for lang in languages:
         combined[lang] = (package[lang] + dram[lang]) / runtimes[lang]
 
-    if large:
-        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
-    else:
-        fig, ax = plt.subplots()
+    fig, ax = get_fig_and_ax(large)
 
     for idx, lang in enumerate(languages):
         ax.bar(x + steps[idx], combined[lang], step,
@@ -561,10 +631,7 @@ def dfa_regexp_charts(data, filename, *, large=False):
                 value = data[lang][f"{algo}({k + 1})"]["runtime"]["mean"]
                 combined[key][k] = value
 
-    if large:
-        fig, ax = plt.subplots(figsize=(7.5, 5.6), dpi=100.0)
-    else:
-        fig, ax = plt.subplots()
+    fig, ax = get_fig_and_ax(large)
 
     for idx, group in enumerate(groups):
         ax.bar(x + steps[idx], combined[group], step, label=group_labels[idx])
@@ -1245,6 +1312,9 @@ def main():
     print("# CREATING PLOTS AND TABLES")
     print("##################################################################")
 
+    # For filtering out Perl/Python in some graphs
+    compiled = list(filter(lambda x: not x.startswith("p"), LANGUAGES))
+
     print("\nCreating tables from experiments data...")
     print("  Creating table of iteration counts...")
     create_iterations_table(analyzed, FILES["iterations_table"])
@@ -1271,12 +1341,32 @@ def main():
 
     print("\nCreating plots/graphs from core analyzed data...")
     print("  Creating total power usage chart...")
-    total_power_usage_chart(analyzed, FILES["total_power_chart"])
+    # Compiled languages only
+    total_power_usage_chart(
+        analyzed, FILES["total_power_chart"], languages=compiled
+    )
     print("  Creating power-per-second usage chart...")
     power_per_second_chart(analyzed, FILES["pps_chart"])
     print("  Done.")
     print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
     dfa_regexp_charts(analyzed, FILES["dfa_regexp_chart"], large=True)
+    print("  Done.")
+    print("  Creating algorithm runtimes charts...")
+    # Do the exact-match algorithms, compiled only
+    for algorithm in ALGORITHMS:
+        runtime_per_algorithm_chart(
+            analyzed, FILES["algorithm_runtimes"], algorithm,
+            languages=compiled
+        )
+    # Do the stacked chart for DFA-Gap, compiled only
+    stacked_runtime_chart(
+        analyzed, FILES["algorithm_runtimes"], "dfa_gap", "DFA-Gap",
+        languages=compiled
+    )
+    # Do the stacked chart for Regexp-Gap, all languages
+    stacked_runtime_chart(
+        analyzed, FILES["algorithm_runtimes"], "regexp", "Regexp-Gap"
+    )
     print("  Done.")
 
     print("\nCreating elements from combined/post-processed data...")
