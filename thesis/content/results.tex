@@ -5,7 +5,7 @@ After the completion of the experiment programs' development, an automation mech
 
 The basis for the mechanism was a series of additional rules added to the already-present ``Makefile'' files that had been developed for the building of each language's set of programs. A single target-rule, ``\texttt{experiments}'', would recursively descend into each language-specific directory and trigger all algorithms in sequence. Each algorithm ran a specified number of times, and in most cases the initial run was discarded. This was to prevent the possibility of the data input files being in the disk device's cache, skewing the timing and energy readings with regards to later runs. All non-error output from the experiments was captured by the harness program and streamed to a single text file.
 
-The format chosen for the file of results was YAML\footnote{YAML: \texttt{https://yaml.org/}}, due to the ready availability of parsing libraries. YAML had an advantage over other formats such as CSV (comma-separated values) in that it allowed the flexibility of complex nested data were it to be necessary, while also being emitted in a streaming fashion. This greatly reduced the potential for output to be corrupted between algorithm executions.
+The format chosen for the file of results was YAML, due to the ready availability of parsing libraries. YAML had an advantage over other formats such as CSV (comma-separated values) in that it allowed the flexibility of complex nested data were it to be necessary, while also being emitted in a streaming fashion. This greatly reduced the potential for output to be corrupted between algorithm executions.
 
 \subsection{Results from the Experiments}
 \label{subsec:results}
@@ -224,7 +224,7 @@ The steps for deriving this measurement were:
 \item Each of these text files were compressed with \texttt{xv} and the compression ratio recorded
 \end{enumerate}
 
-A key difference between~\ref{bergmans} and here is the limited scope of the data being analyzed; since there is essentially just one ``project'' being put to scrutiny, the results are sensitive to the fact that some of the files were smaller in size to begin with. Initially the technique in~\cite{bergmans} was followed exactly, and involved using the standard \texttt{tar} utility to create the archives of each language. But when put into practice it was found that the metadata overhead of a \texttt{tar} archive was more than the size of the actual data in some cases.
+A key difference between~\cite{bergmans} and here is the limited scope of the data being analyzed; since there is essentially just one ``project'' being put to scrutiny, the results are sensitive to the fact that some of the files were smaller in size to begin with. Initially the technique in~\cite{bergmans} was followed exactly, and involved using the standard \texttt{tar} utility to create the archives of each language. But when put into practice it was found that the metadata overhead of a \texttt{tar} archive was more than the size of the actual data in some cases.
 
 Further, in their paper, Bergmans and their team had removed most smaller examples of code for each language from the final measurements. This was not an option here given the limited size and number of the samples. For this reason the decision was made to focus the compression on the text content only, by applying concatenation to the stripped versions of the source files and compressing the results of this process.
 

@@ -26,9 +26,9 @@ Reading the RAPL data is done through the \textit{model-specific registers} (MSR
 
 \[S~=~\frac{1}{2^{b}}\]
 
-In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S~=~61.04~\mu$J.
+In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S = 61.04~\mu$J.
 
-Obtaining the data during run-time from RAPL required reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
+Obtaining the data during run-time from RAPL required reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained from reading this register is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
 
 An issue with the RAPL system was encountered during runs of the experiments: because the value of the energy registers is 32 bits in size, it wraps around to 0 when the maximum value is reached. This caused occasional anomalous readings in cases where the register would reset between the initial reading and the final reading, resulting in a negative overall value. The program that processed the output from the experiments was adjusted to recognize such values and adjust them by applying a constant value computed as $C~=~S \times 2^{32}$, where $S$ is the scaling factor for that value's type (Package, DRAM, etc.).
 
@@ -40,7 +40,7 @@ The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the
 
 As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple and restricted in scope: it will only be used as a comparison of the implementation of identical algorithms in different languages.
 
-For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{sloc: \texttt{https://github.com/flosse/sloc}}.
+For the purpose of evaluating expressiveness, the SLOC measurements were limited to just the count of actual ``source'' lines as reported by the tool that was eventually chosen for this metric, \texttt{sloc}\footnote{This and other referenced software tools are summarized in table~\ref{table:software_sources}.}.
 
 \subsubsection{Language Conciseness Through Compression}
 
@@ -50,7 +50,7 @@ Given that none of the experiment source files are of significant length, this m
 
 \subsubsection{Cyclomatic Complexity}
 
-Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional (``if'') statements, loops (``for'', ``while'', etc.) and similar means of changing the path of execution through the program or function being measured.
+Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional statements, loops and similar means of changing the path of execution through the program or function being measured.
 
 In the following combination of listing~\ref{lst:sample_python} and figure~\ref{fig:image:mccabe}, a small Python function is accompanied by a directed graph illustrating the cyclomatic complexity of the function.
 
@@ -62,7 +62,7 @@ In the following combination of listing~\ref{lst:sample_python} and figure~\ref{
     \begin{minipage}[t]{.45\textwidth}
         \caption{Cyclomatic graph}
         \centering
-        \includegraphics[width=0.4\textwidth]{figures/mccabe.png}
+        \includegraphics[width=0.35\textwidth]{figures/mccabe.png}
         \label{fig:image:mccabe}
     \end{minipage}
 \end{figure}
@@ -85,7 +85,7 @@ Thus, the graph nodes correspond to the following points in the function:
 \item The exit/return from the function at line 10
 \end{enumerate}
 
-Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard}\footnote{lizard: \texttt{https://github.com/terryyin/lizard}} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}\footnote{From the Perl-Metrics-Simple package for Perl, \texttt{https://metacpan.org/dist/Perl-Metrics-Simple}}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli}\footnote{rust-code-analysis-cli: \texttt{https://github.com/mozilla/rust-code-analysis/}} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
+Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
 
 It is not clear if the techniques for measuring Perl and Rust were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{subsubsec:complexity}.
 
@@ -109,7 +109,7 @@ Independent of the per-program metrics, additional measurements of code expressi
 \begin{description}
 \item[Source Lines Of Code:] The measured lines of code in the implementation of the program, using a tool (\texttt{sloc}) designed to measure these values using consistent standards across the different programming languages.
 \item[Cyclomatic Complexity:] The measured complexity of the code, including both the average complexity for the file and specific complexities for those functions that directly correspond to each other across the different implementations.
-\item[Conciseness Through Compression:] Using the same tools as were used in the research in~\cite{bergmans} (\texttt{cloc}\footnote{cloc: \texttt{https://github.com/AlDanial/cloc/}} for removing code comments and \texttt{xz}\footnote{xz: \texttt{https://tukaani.org/xz/}} for data compression), archives of each language's code were compared to each other.
+\item[Conciseness Through Compression:] Using the same tools as were used in the research in~\cite{bergmans} (\texttt{cloc} for removing code comments and \texttt{xz} for data compression), archives of each language's code were compared to each other.
 \end{description}
 
 These processes are explained in more detail in section~\ref{subsubsec:conciseness}, along with the results.
@@ -297,7 +297,7 @@ Once this had been undertaken in Python and Perl, it was necessary to implement 
 
 It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension} that was available for Rust, while using the native regular expression support in C and C++. This quickly proved to be a problem: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
 
-The solution came in the form of the Perl-Compatible Regular Expressions engine\footnote{PCRE: \texttt{https://www.pcre.org/}, available in most Linux distributions}. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++\footnote{\texttt{https://github.com/jpcre2/jpcre2}} and Rust\footnote{\texttt{https://crates.io/crates/pcre2}} through wrapper libraries.
+The solution came in the form of the Perl-Compatible Regular Expressions engine. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++ and Rust through wrapper libraries.
 
 As the results will show, the effectiveness of regular expressions varied across the languages.
 
@@ -400,7 +400,7 @@ The CPU is dual-core, with hyperthreading cores, for a total of 4 computational 
 
 The NUC was cleaned of the vendor-installed operating system. Linux was installed on it using the minimal server edition of Ubuntu Linux 22.04.1. All unnecessary packages and software services were either disabled or removed completely.
 
-The development software (see next section) was then installed. This included the Linux version of the ``Homebrew''\footnote{Homebrew: \texttt{https://brew.sh/}} package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python and Perl interpreters that were used were also provided by Homebrew, as were the majority of the tools used for developing, testing, and evaluating the experiments. The Rust language toolchain was installed and managed using the ``Rustup''\footnote{rustup: \texttt{https://rustup.rs/}} management software. Core software development packages from Ubuntu were also installed at this time.
+The development software (see next section) was then installed. This included the Linux version of the ``Homebrew'' package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python and Perl interpreters that were used were also provided by Homebrew, as were the majority of the tools used for developing, testing, and evaluating the experiments. The Rust language toolchain was installed and managed using the ``Rustup'' management software. Core software development packages from Ubuntu were also installed at this time.
 
 \subsubsection{Compilers and Other Tools}
 
@@ -416,4 +416,4 @@ Table~\ref{table:software_specs} lists the primary software tools and packages t
 
 The tools used for the experiments themselves do include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
 
-The Valgrind\footnote{Valgrind: \texttt{https://valgrind.org/}} tool was used during development to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the expressiveness measurements of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of conciseness via compression, another part of the expressiveness measurements. The remaining factor for expressiveness measurement was cyclomatic complexity: the \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl and Rust. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Rust complexity was measured using the \texttt{rust-code-analysis-cli} tool, which was obtained directly from the project's GitHub repository. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
+The Valgrind tool was used during development to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the expressiveness measurements of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of conciseness via compression, another part of the expressiveness measurements. The remaining factor for expressiveness measurement was cyclomatic complexity: the \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl and Rust. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Rust complexity was measured using the \texttt{rust-code-analysis-cli} tool, which was obtained directly from the project's GitHub repository. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
