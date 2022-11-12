@@ -22,6 +22,7 @@ FIX_CONST = 2**32 * 0.00006104
 ALGORITHMS = ["kmp", "boyer_moore", "shift_or", "aho_corasick"]
 APPROX_ALGORITHMS = [f"dfa_gap({k + 1})" for k in range(5)]
 APPROX_ALGORITHMS += [f"regexp({k + 1})" for k in range(5)]
+ALL_ALGORITHMS = ALGORITHMS + APPROX_ALGORITHMS
 ALGORITHM_LABELS = {
     "kmp": "Knuth-Morris-Pratt",
     "boyer_moore": "Boyer-Moore",
@@ -81,7 +82,11 @@ FILES = {
     "cyclomatic_score_table": "cyclomatic-score.tex",
     "expressiveness_table": "expressiveness.tex",
     "expr2_table": "expressiveness2.tex",
-    "expressiveness_graph": "expressiveness_arrows.png",
+    "runtime_energy_totals_table": "runtime_energy_totals.tex",
+    "final_scores_tables": "final_scores.tex",
+    "final_scores_plot": "final_scores_plot.png",
+    "final_scores_distinct": "final_distinct.tex",
+    "final_scores_distinct_plot": "final_distinct.png",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -150,6 +155,26 @@ def get_fig_and_ax(large=False):
         fig, ax = plt.subplots()
 
     return fig, ax
+
+
+# Combine the data in the list of axes lists into an array of n-length arrays
+def combine_axes(*axes):
+    # Make each of them into unit vectors:
+    axes = list(map(lambda x: x / np.linalg.norm(x), axes))
+
+    combined_axes = map(np.array, zip(*axes))
+    return np.array(list(combined_axes))
+
+
+# As above, but without normalization
+def combine_axes_no_norm(*axes):
+    combined_axes = map(np.array, zip(*axes))
+    return np.array(list(combined_axes))
+
+
+# Calculate the "length" of the tuples in axes, independent of their dimension
+def calculate_lengths(axes):
+    return np.array(list(map(np.linalg.norm, axes)))
 
 
 # Validate the data. Data validation here means:
@@ -402,53 +427,11 @@ def read_cyclomatic(filename):
     return raw_data
 
 
-# Create a bar graph for run-times or memory usage by algorithm.
-def simple_graph(which, data, filename, *, languages=LANGUAGES, large=False):
-    if which not in SIMPLE_GRAPH_PARAMS:
-        print(f"  Unknown graph type: {which}")
-        return
-
-    key, ylabel, title, legend = SIMPLE_GRAPH_PARAMS[which]
-
-    # Total width of each algorithm's bars
-    width = 0.8
-    step = width / len(languages)
-    step_off = (len(languages) - 1) / 2
-    steps = list(map(lambda x: x * step, range(len(languages))))
-    x_len = len(ALGORITHMS)
-    x = np.arange(x_len)
-
-    bars = {}
-    for lang in languages:
-        bars[lang] = np.zeros(x_len, dtype=float)
-        for idx, algo in enumerate(ALGORITHMS):
-            bars[lang][idx] = data[lang][algo][key]["mean"]
-
-    fig, ax = get_fig_and_ax(large)
-
-    for idx, lang in enumerate(languages):
-        ax.bar(x + steps[idx], bars[lang],
-               step, label=LANGUAGE_LABELS[lang])
-
-    ax.set_xticks(
-        x + step * step_off, map(lambda a: ALGORITHM_LABELS[a], ALGORITHMS)
-    )
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.legend(loc=legend)
-
-    fig.tight_layout()
-    print(f"  Writing {filename}")
-    fig.savefig(filename)
-
-    return
-
-
 def total_power_usage_chart(
     data, filename, *, languages=LANGUAGES, large=False
 ):
     # Algorithms
-    algorithms = ALGORITHMS + APPROX_ALGORITHMS
+    algorithms = ALL_ALGORITHMS
 
     # Language labels
     labels = [LANGUAGE_LABELS[x] for x in languages]
@@ -1245,16 +1228,377 @@ def create_expressiveness_tables(
     return
 
 
-def combine_axes(*axes):
-    # Make each of them into unit vectors:
-    axes = list(map(lambda x: x / np.linalg.norm(x), axes))
+# Gather all values for `field` across all algorithms for all languages.
+def tally_one_field(data, field):
+    totals = np.zeros(len(LANGUAGES))
 
-    combined_axes = map(np.array, zip(*axes))
-    return np.array(list(combined_axes))
+    for idx, language in enumerate(LANGUAGES):
+        for algorithm in ALL_ALGORITHMS:
+            totals[idx] += data[language][algorithm][field]["mean"]
+
+    return totals
 
 
-def calculate_lengths(axes):
-    return np.array(list(map(np.linalg.norm, axes)))
+# Create the tables for scoring runtime and energy, and the 2x2 grid of final
+# results tables.
+def create_final_tables(data, expr1_scores, expr2_scores, files):
+    # Calculate the totals and final scores for runtime and energy (Pkg+DRAM):
+    runtime_totals = tally_one_field(data, "runtime")
+    runtime_scores = runtime_totals / runtime_totals.min()
+    runtime_map = make_map(runtime_scores)
+    energy_totals = \
+        tally_one_field(data, "package") + tally_one_field(data, "dram")
+    energy_scores = energy_totals / energy_totals.min()
+    energy_map = make_map(energy_scores)
+
+    # Create the two tables for these final scores:
+    maps = {"runtime": runtime_map, "energy": energy_map}
+    scores = [runtime_scores, energy_scores]
+    captions = ["Scores for total run-time", "Scores for total energy usage"]
+    labels = ["table:total:runtime", "table:total:energy"]
+    headings = list(map(lambda x: f"\\thead{{{x}}}", ["Language", "Score"]))
+    filename = files["runtime_energy_totals_table"]
+    print(f"    Writing {filename}")
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Total runtime and energy scores", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+
+        for idx, table in enumerate(["runtime", "energy"]):
+            print("\\begin{subtable}{0.49\\textwidth}", file=f)
+            print("    \\centering", file=f)
+            print(f"    \\caption{{{captions[idx]}}}", file=f)
+            print(f"    \\label{{{labels[idx]}}}", file=f)
+            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("        \\hline", file=f)
+            print("        " + " & ".join(headings) + " \\\\", file=f)
+            print("        \\hline", file=f)
+            for x in maps[table]:
+                row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+                row.append(f"{scores[idx][x]:.4f}")
+                print("        " + " & ".join(row) + " \\\\", file=f)
+            print("        \\hline", file=f)
+            print("    \\end{tabular}", file=f)
+            print("\\end{subtable}", file=f, end="")
+            if idx == 0:
+                print("%", file=f)
+            else:
+                print("", file=f)
+
+    # Now calculate the overall final scores. This will be a 2x2 grid of
+    # sub-tables, covering two types of final scoring and whether the
+    # expressiveness score includes cyclomatic complexity or not.
+    #
+    # For this, the expressiveness data for C and C++ has to be copied to each
+    # of the toolchain-specific entries for those languages. The expressiveness
+    # data arrays are only 5 elements long, and the scores arrays are 9. This
+    # is done manually because it isn't worth thinking of a clever loop-
+    # construct for it. Expressiveness data is ordered by the UNIQUE_LANGUAGES
+    # list ordering. Of course, LANGUAGES isn't the same...
+    expr_scores_all = np.zeros(len(LANGUAGES))
+    expr_scores_nocc = np.zeros(len(LANGUAGES))
+
+    # Scores with cyclomatic complexity:
+    expr_scores_all[0:3] = [expr1_scores[0]] * 3     # C
+    expr_scores_all[3:6] = [expr1_scores[1]] * 3     # C++
+    expr_scores_all[6] = expr1_scores[4]             # Rust
+    expr_scores_all[7] = expr1_scores[2]             # Perl
+    expr_scores_all[8] = expr1_scores[3]             # Python
+    # Scores without cyclomatic complexity:
+    expr_scores_nocc[0:3] = [expr2_scores[0]] * 3    # C
+    expr_scores_nocc[3:6] = [expr2_scores[1]] * 3    # C++
+    expr_scores_nocc[6] = expr2_scores[4]            # Rust
+    expr_scores_nocc[7] = expr2_scores[2]            # Perl
+    expr_scores_nocc[8] = expr2_scores[3]            # Python
+
+    # There may be a clever algorithmic way to create these four tables in a
+    # pair of nested loops. But it's Nov 11th and I don't have time for clever
+    # anymore...
+    filename = files["final_scores_tables"]
+    print(f"    Writing {filename}")
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Total scores tables", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+
+        scale_and_cc_axes = combine_axes(
+            runtime_scores, energy_scores, expr_scores_all
+        )
+        scale_and_cc_lengths = calculate_lengths(scale_and_cc_axes)
+        scale_and_cc_scores = scale_and_cc_lengths / scale_and_cc_lengths.min()
+        scale_and_cc_map = make_map(scale_and_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Score by scale, with complexity}", file=f)
+        print("    \\label{table:final:scale_and_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in scale_and_cc_map:
+            row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+            row.append(f"{scale_and_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}%", file=f)
+
+        scale_no_cc_axes = combine_axes(
+            runtime_scores, energy_scores, expr_scores_nocc
+        )
+        scale_no_cc_lengths = calculate_lengths(scale_no_cc_axes)
+        scale_no_cc_scores = scale_no_cc_lengths / scale_no_cc_lengths.min()
+        scale_no_cc_map = make_map(scale_no_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Score by scale, no complexity}", file=f)
+        print("    \\label{table:final:scale_no_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in scale_no_cc_map:
+            row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+            row.append(f"{scale_no_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}", file=f)
+
+        runtime_ranks = [0] * len(LANGUAGES)
+        rank = 1
+        for x in runtime_map:
+            runtime_ranks[x] = rank
+            rank += 1
+
+        energy_ranks = [0] * len(LANGUAGES)
+        rank = 1
+        for x in energy_map:
+            energy_ranks[x] = rank
+            rank += 1
+
+        # Calculating the expressiveness ranks is... complicated...
+
+        # With complexity:
+        expr_with_cc_ranks = [0] * len(LANGUAGES)
+        expr1_ranks_map = make_map(expr1_scores)
+        rank = 1
+        for x in expr1_ranks_map:
+            lang = UNIQUE_LANGUAGES[x]
+            if lang == "C":
+                expr_with_cc_ranks[0:3] = [rank] * 3
+                rank += 3
+            elif lang == "C++":
+                expr_with_cc_ranks[3:6] = [rank] * 3
+                rank += 3
+            elif lang == "Rust":
+                expr_with_cc_ranks[6] = rank
+                rank += 1
+            elif lang == "Perl":
+                expr_with_cc_ranks[7] = rank
+                rank += 1
+            else:
+                expr_with_cc_ranks[8] = rank
+                rank += 1
+
+        # Without complexity:
+        expr_no_cc_ranks = [0] * len(LANGUAGES)
+        expr2_ranks_map = make_map(expr2_scores)
+        rank = 1
+        for x in expr2_ranks_map:
+            lang = UNIQUE_LANGUAGES[x]
+            if lang == "C":
+                expr_no_cc_ranks[0:3] = [rank] * 3
+                rank += 3
+            elif lang == "C++":
+                expr_no_cc_ranks[3:6] = [rank] * 3
+                rank += 3
+            elif lang == "Rust":
+                expr_no_cc_ranks[6] = rank
+                rank += 1
+            elif lang == "Perl":
+                expr_no_cc_ranks[7] = rank
+                rank += 1
+            else:
+                expr_no_cc_ranks[8] = rank
+                rank += 1
+
+        # OK, now we can calculate rank-based placements.
+        rank_and_cc_axes = combine_axes_no_norm(
+            runtime_ranks, energy_ranks, expr_with_cc_ranks
+        )
+        rank_and_cc_lengths = calculate_lengths(rank_and_cc_axes)
+        rank_and_cc_scores = rank_and_cc_lengths / rank_and_cc_lengths.min()
+        rank_and_cc_map = make_map(rank_and_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Score by ranks, with complexity}", file=f)
+        print("    \\label{table:final:rank_and_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in rank_and_cc_map:
+            row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+            row.append(f"{rank_and_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}%", file=f)
+
+        rank_no_cc_axes = combine_axes_no_norm(
+            runtime_ranks, energy_ranks, expr_no_cc_ranks
+        )
+        rank_no_cc_lengths = calculate_lengths(rank_no_cc_axes)
+        rank_no_cc_scores = rank_no_cc_lengths / rank_no_cc_lengths.min()
+        rank_no_cc_map = make_map(rank_no_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Score by ranks, no complexity}", file=f)
+        print("    \\label{table:final:rank_no_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in rank_no_cc_map:
+            row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+            row.append(f"{rank_no_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}", file=f)
+
+    # Create a plot of the four final rankings. The idea is that we're trying
+    # to study the smoothness of the distribution of the 9 data points for each
+    # of the four tables.
+    fig, ax = get_fig_and_ax(large=True)
+    xr = range(1, len(LANGUAGES) + 1)
+    labels = [
+        "By score, with complexity", "By score, without complexity",
+        "By rank, with complexity", "By rank, without complexity"
+    ]
+    scores = [
+        scale_and_cc_scores, scale_no_cc_scores, rank_and_cc_scores,
+        rank_no_cc_scores
+    ]
+    maps = [
+        scale_and_cc_map, scale_no_cc_map, rank_and_cc_map, rank_no_cc_map
+    ]
+    markers = ["o", "o", "^", "^"]
+    for idx in range(4):
+        yr = [scores[idx][i] for i in maps[idx]]
+        ax.plot(xr, yr, marker=markers[idx], label=labels[idx])
+    ax.set_ylabel("Final score")
+    ax.set_xlabel("Ranking")
+    ax.set_title("Increase in score by ranking")
+    ax.legend()
+
+    filename = files["final_scores_plot"]
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    # Now create the ranking-based tables for the unique languages.
+    index = {k: v for v, k in enumerate(["c-", "cp", "pe", "py", "ru"])}
+    runtime_ranks2 = [None] * len(UNIQUE_LANGUAGES)
+    rank = 1
+    seen = set()
+    for x in runtime_map:
+        key = LANGUAGES[x][0:2]
+        if key not in seen:
+            seen.add(key)
+            runtime_ranks2[index[key]] = rank
+            rank += 1
+
+    energy_ranks2 = [None] * len(UNIQUE_LANGUAGES)
+    rank = 1
+    seen = set()
+    for x in energy_map:
+        key = LANGUAGES[x][0:2]
+        if key not in seen:
+            seen.add(key)
+            energy_ranks2[index[key]] = rank
+            rank += 1
+
+    filename = files["final_scores_distinct"]
+    print(f"    Writing {filename}")
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print("% Table: Final scores tables, distinct languages", file=f)
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+
+        rank_and_cc_axes = combine_axes_no_norm(
+            runtime_ranks2, energy_ranks2, expr1_ranks_map
+        )
+        rank_and_cc_lengths = calculate_lengths(rank_and_cc_axes)
+        rank_and_cc_scores = rank_and_cc_lengths / rank_and_cc_lengths.min()
+        rank_and_cc_map = make_map(rank_and_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Distinct by ranks, with complexity}", file=f)
+        print("    \\label{table:final:distinct_rank_and_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in rank_and_cc_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(f"{rank_and_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}%", file=f)
+
+        rank_no_cc_axes = combine_axes_no_norm(
+            runtime_ranks2, energy_ranks2, expr2_ranks_map
+        )
+        rank_no_cc_lengths = calculate_lengths(rank_no_cc_axes)
+        rank_no_cc_scores = rank_no_cc_lengths / rank_no_cc_lengths.min()
+        rank_no_cc_map = make_map(rank_no_cc_scores)
+
+        print("\\begin{subtable}{0.49\\textwidth}", file=f)
+        print("    \\centering", file=f)
+        print("    \\caption{Distinct by ranks, no complexity}", file=f)
+        print("    \\label{table:final:distinct_rank_no_cc}", file=f)
+        print("    \\begin{tabular}{|l|r|}", file=f)
+        print("        \\hline", file=f)
+        print("        " + " & ".join(headings) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        for x in rank_no_cc_map:
+            row = [UNIQUE_LANGUAGES[x]]
+            row.append(f"{rank_no_cc_scores[x]:.4f}")
+            print("        " + " & ".join(row) + " \\\\", file=f)
+        print("        \\hline", file=f)
+        print("    \\end{tabular}", file=f)
+        print("\\end{subtable}", file=f)
+
+    fig, ax = get_fig_and_ax(large=True)
+    xr = range(1, len(UNIQUE_LANGUAGES) + 1)
+    labels = ["Distinct, with complexity", "Distinct, without complexity"]
+    scores = [rank_and_cc_scores, rank_no_cc_scores]
+    maps = [rank_and_cc_map, rank_no_cc_map]
+    markers = ["o", "^"]
+    for idx in range(2):
+        yr = [scores[idx][i] for i in maps[idx]]
+        ax.plot(xr, yr, marker=markers[idx], label=labels[idx])
+    ax.set_ylabel("Final score (distinct languages)")
+    ax.set_xlabel("Ranking (distinct languages)")
+    ax.set_xticks(list(range(1, 6)))
+    ax.set_title("Increase in score by ranking, using distinct languages")
+    ax.legend()
+
+    filename = files["final_scores_distinct_plot"]
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
 
 
 # Main loop. Read the data, validate it, turn it into useful structure.
@@ -1386,6 +1730,8 @@ def main():
         expressiveness_scores, expr2_scores, FILES["expressiveness_table"],
         FILES["expr2_table"]
     )
+    print("  Creating combined runtimes/energy scores and final rankings...")
+    create_final_tables(analyzed, expressiveness_scores, expr2_scores, FILES)
     print("  Done.")
     # print("  Creating expressiveness arrow graph...")
     # arrow_graph(
