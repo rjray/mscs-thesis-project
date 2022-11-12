@@ -10,8 +10,7 @@ The format chosen for the file of results was YAML\footnote{YAML: \texttt{https:
 \subsection{Results from the Experiments}
 \label{subsec:results}
 
-% TODO: Ensure correct date on file reference below
-The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw experiments data is named ``\texttt{experiments-data-20221104.yml}''.
+The automated suite of experiments was run numerous times over the course of this research. The final run from which the analysis and conclusions here are drawn is preserved in the same repository on the GitHub platform~\cite{github} as all the other files related to this research. The file of raw experiments data is named ``\texttt{experiments-data-20221111.yml}''. The final, full run of experiments took approximately 95 hours and 15 minutes to complete on the NUC device described in section~\ref{subsec:testing_platform}.
 
 \subsubsection{Scope of the Experiments}
 
@@ -25,7 +24,7 @@ The final run of the experiments generated a total of 1,190 data-points taken fr
 \end{center}
 \end{table}
 
-For all numbers greater than or equal to 10, there was an additional ``priming'' run (as described above) to ensure that disk cache status did not play into the values for full run-time or package-level energy usage. Note also that the DFA-Gap and Regexp-Gap columns are stand-ins for 5 such columns each (for the values of $k$ from 1 to 5). Each value of $k$ was run for the same number of iterations.
+For all numbers 10 and greater, there was an additional ``priming'' run (as described above) to ensure that disk cache status did not play into the values for full run-time or package-level energy usage. Note also that the DFA-Gap and Regexp-Gap columns are stand-ins for 5 such columns each (for the values of $k$ from 1 to 5). Each value of $k$ was run for the same number of iterations.
 
 \subsubsection{Outliers and the Interpreted Languages}
 
@@ -106,7 +105,7 @@ Starting with the Knuth-Morris-Pratt and Boyer-Moore algorithms (which have a pa
     \end{minipage}
 \end{figure}
 
-In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM toolchain actually produced the slowest times within the C and C++ camps in this case. In the Aho-Corasick results (figure~\ref{fig:graph:ac-runtimes}) LLVM once again produced the fastest code with the C version of the experiment. The Aho-Corasick run-times also reflect the overall speed of this algorithm, buoyed by the ability to test all patterns in a single pass through each target sequence.
+In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM toolchain actually produced the slowest times within the C and C++ groups in this case. In the Aho-Corasick results (figure~\ref{fig:graph:ac-runtimes}) LLVM once again produced the fastest code with the C version of the experiment. The Aho-Corasick run-times also reflect the overall speed of this algorithm, powered by the ability to test all patterns in a single pass through each target sequence.
 
 \begin{figure}[ht]
     \centering
@@ -126,7 +125,7 @@ In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM to
 
 For the DFA and regular expression versions of the gap algorithm, figures~\ref{fig:graph:dfa-runtimes} and~\ref{fig:graph:regexp-runtimes}, a different style of charts was drawn. As both of these experiments ran for five different values of the $k$ parameter, the charts are designed to show all five run-times for each language as a stack.
 
-The DFA experiments follow an almost expected trajectory, with C being faster than C++ and C++ faster than Rust. However, the regular expression experiments show an exactly opposite trend, with Rust being the fastest of the language. Figure~\ref{fig:graph:regexp-runtimes} also includes results for the Perl and Python languages, as this experiment gave results for them that could be comfortably included.
+The DFA experiments follow an almost expected trajectory, with C being faster than C++ and C++ faster than Rust. However, the regular expression experiments show an exactly opposite trend, with Rust being the fastest of the languages. Figure~\ref{fig:graph:regexp-runtimes} also includes results for the Perl and Python languages, as this experiment gave results for them that could be comfortably included.
 
 Full tables of run-times scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
 
@@ -161,7 +160,7 @@ These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. I
     \end{minipage}
 \end{figure}
 
-The fact that Rust was the overall best performer in terms of energy usage is underscored by the chart in figure~\ref{fig:graph:total_power_usage}. In this chart, the total energy usage by all experiments in each language is shown. Here, the Perl and Python languages have been removed due to the fact that their longer run-times lead to energy numbers well out of scale with respect to the compiled languages. The red horizontal line shows the total usage by Rust and illustrates the differences with C and C++ across all three compilers.
+The fact that Rust was the overall best performer in terms of energy usage is underscored by the chart in figure~\ref{fig:graph:total_power_usage}. In this chart, the total (mean) energy usage by all experiments in each language is shown. Here, the Perl and Python languages have been removed again due to the fact that their longer run-times lead to energy numbers well out of scale with respect to the compiled languages. The red horizontal line shows the total usage by Rust and illustrates the differences with C and C++ across all three of their toolchains.
 
 As with the run-times score tables, full tables of energy scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
 
@@ -267,7 +266,7 @@ These vectors' lengths were calculated and scaled by the lowest value, giving th
 \label{table:expr:expressiveness-score}
 \end{table}
 
-It was not a surprise that Python ended up ranked as the most-expressive of the five contenders, as it had led the group in all three expressiveness metrics. The ranking of C++ ahead of Perl by just over 5 percentage points was more of a surprise, while the presence of C at the bottom was also not surprising.
+It was not a surprise that Python ended up ranked as the most-expressive of the five contenders, as it had led the group in all three expressiveness metrics. The ranking of C++ ahead of Perl by just over 5 percentage points was more of a surprise, while the presence of C at the bottom was not surprising.
 
 Because of the possibly-inconsistent nature of the complexity data, it was decided to derive a second score based on just the SLOC and compression scores. All other calculation steps were the same. This resulted in table~\ref{table:expr:expressiveness-score2}.
 
@@ -281,3 +280,55 @@ Here, the results more closely tracked with expectations: Python and Perl head t
 
 \subsection{Combining the Bases}
 \label{subsec:combined}
+
+There were now three distinct measurements available for combination and analysis. The first step was to derive a single set of scores for the run-time basis and the energy-used basis, combining the values from all 14 groups of experiments into single values. For this, values were simply added together then scaled by the minimum value as has been done elsewhere. The total run-time table~\ref{table:total:runtime} shows these values, derived from the algorithm-only run-time metric. In table~\ref{table:total:energy}, the same is done with the combination of the ``Package'' and ``DRAM'' energy metrics.
+
+\begin{table}[!htb]
+\input{tables/runtime_energy_totals}
+\caption{Final scores for totaled run-time and energy, by language}
+\label{table:totals:runtime-energy}
+\end{table}
+
+From here came a big question in two parts: Should the final scoring be based on the languages' scores for these bases or based on the language rankings? And secondly, should the cyclomatic complexity data be included in the expressiveness basis or not?
+
+While the question regarding the complexity data has already been discussed, it still remained to be seen whether it would affect the final rankings. More than this, however, was the question of whether to simply apply the ranking of each language to determine final placement. Doing so might create a stronger distinction between adjacent languages than the scores themselves would. On the other hand, using the scores would retain the subtlety in the differences between languages.
+
+The decision was made to examine all combinations of these two variables. Table~\ref{table:totals:all_metrics} shows the four sub-tables that result from this analysis. As can be seen from comparing \ref{table:final:scale_and_cc} with \ref{table:final:scale_no_cc}, and \ref{table:final:rank_and_cc} with \ref{table:final:rank_no_cc}, the cyclomatic complexity values did not affect the respective rankings at all: both pairs of tables have identical placement for their 9 rows. Comparing column-wise (\ref{table:final:scale_and_cc} with \ref{table:final:rank_and_cc}, and \ref{table:final:scale_no_cc} with \ref{table:final:rank_no_cc}), it can be seen that using the rank in place of scores lead to a slight difference in final ranking. Specifically, Rust and Python each moved up one place under a ranking basis. More significant, though, is how the different approaches affected the changes in scores.
+
+\begin{table}[!htb]
+\input{tables/final_scores}
+\caption{Final scores for all combined metrics, by language}
+\label{table:totals:all_metrics}
+\end{table}
+
+Comparing the two sub-tables that include complexity values, it can be seen that the difference between the top (GCC C++) and bottom (Perl) is slightly higher in \ref{table:final:scale_and_cc} than in \ref{table:final:rank_and_cc}. This difference is even more pronounced in the two non-complexity tables. In addition to this, the growth of the score value is smoother when the languages are arranged based on rank. This is illustrated in figure~\ref{fig:graph:final_scores_plot}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/final_scores_plot.png}
+	\caption{Plot of the rise in final score by ranking}
+	\label{fig:graph:final_scores_plot}
+\end{figure}
+
+In the lines for the score-based ordering (marked by solid circles on the plot), the final scores remain well under 1.5 until the \nth{8} and \nth{9} positions (which correspond to Python and Perl respectively). This is due to the fact that score-based ordering would necessarily be very reactive to the significant jumps in the final scores for run-time and energy usage. Looking at the lines for ranking-based ordering (solid triangles), these follow a more linear path while the final scores for Perl still ending up in the same general range as for the score-based ordering.
+
+The lines for score-based ordering also show the effect of the top three entries' scores being within a range of 0.07\%, resulting in flat lines until the \nth{4} data-point. The ranking-based ordering exhibits this same pattern for the first two data-points as well, due to the entries in \nth{1} and \nth{2} positions having identical expressiveness rankings and reciprocal rankings for run-time and energy.
+
+Throughout these experiments, the C and C++ languages have been evaluated for three different toolchains each. What would the final results look like, if each of C and C++ were represented by only their best-scoring variants?
+
+\begin{table}[!htb]
+\input{tables/final_distinct}
+\caption{Final scores for all combined metrics, by distinct language}
+\label{table:totals:all_metrics_distinct}
+\end{table}
+
+In table~\ref{table:totals:all_metrics_distinct} the five distinct languages are shown with their ordering and score based on ranking, both with and without the complexity metrics. Now, without C and C++ creating ``ties'' in the application of expressiveness ranks to the remaining two ranks, the Rust language comes out on top. This is keeping with the fact that Rust has held the top spot for both run-times and energy usage.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/final_distinct.png}
+	\caption{Plot of the rise in final score, using distinct languages}
+	\label{fig:graph:final_distinct_plot}
+\end{figure}
+
+In figure~\ref{fig:graph:final_distinct_plot}, the line for the first four rankings is much more straight than had been in figure~\ref{fig:graph:final_scores_plot}. It is worth noting that the change between Python in \nth{4} place and Perl in \nth{5} is much smaller than for the previous places.
