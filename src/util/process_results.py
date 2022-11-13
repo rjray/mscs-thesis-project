@@ -66,6 +66,7 @@ FILES = {
     "total_power_chart": "total_power_usage.png",
     "pps_chart": "power_per_sec.png",
     "dfa_regexp_chart": "dfa_regexp_comp.png",
+    "dfa_regexp_chart2": "dfa_regexp_comp2.png",
     "algorithm_runtimes": "algorithm_runtimes-%s.png",
     "iterations_table": "iterations.tex",
     "runtimes_table": "runtimes.tex",
@@ -620,10 +621,66 @@ def dfa_regexp_charts(data, filename, *, large=False):
         ax.bar(x + steps[idx], combined[group], step, label=group_labels[idx])
 
     ax.set_xticks(
-        x + step * step_off, map(lambda k: f"k = {k + 1}", range(x_len))
+        x + step * step_off, map(lambda k: f"$k = {k + 1}$", range(x_len))
     )
     ax.set_ylabel("Seconds")
     ax.set_title("Comparison of DFA vs. Regexp in Perl/Python")
+    ax.legend(loc="upper left")
+
+    fig.tight_layout()
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# Create bar charts for comparing DFA to Regexp for C/C++/Rust.
+def dfa_regexp_charts2(data, filename, *, large=False):
+    groups = [
+        "c.dfa_gap", "c.regexp", "cpp.dfa_gap", "cpp.regexp", "rust.dfa_gap",
+        "rust.regexp"
+    ]
+    group_labels = [
+        "C (DFA)", "C (Regexp)", "C++ (DFA)", "C++ (Regexp)", "Rust (DFA)",
+        "Rust (Regexp)"
+    ]
+    # Total width of each group's bars
+    width = 0.8
+    step = width / len(groups)
+    step_off = (len(groups) - 1) / 2
+    steps = list(map(lambda x: x * step, range(len(groups))))
+    x_len = 5
+    x = np.arange(x_len)
+
+    combined = {key: np.zeros(x_len) for key in groups}
+    # Create the bar data
+    for k in range(x_len):
+        for lang in ["c", "cpp", "rust"]:
+            for algo in ["dfa_gap", "regexp"]:
+                key = f"{lang}.{algo}"
+                a_key = f"{algo}({k + 1})"
+                value = 0.0
+                if lang == "rust":
+                    # Just one set of numbers for Rust
+                    value = data[lang][a_key]["runtime"]["mean"]
+                else:
+                    # C and C++ have to average their three toolchains
+                    for tool in ["gcc", "llvm", "intel"]:
+                        l_key = f"{lang}-{tool}"
+                        value += data[l_key][a_key]["runtime"]["mean"]
+                    value /= 3.0
+                combined[key][k] = value
+
+    fig, ax = get_fig_and_ax(large)
+
+    for idx, group in enumerate(groups):
+        ax.bar(x + steps[idx], combined[group], step, label=group_labels[idx])
+
+    ax.set_xticks(
+        x + step * step_off, map(lambda k: f"$k = {k + 1}$", range(x_len))
+    )
+    ax.set_ylabel("Seconds")
+    ax.set_title("Comparison of DFA vs. Regexp in C, C++ and Rust")
     ax.legend(loc="upper left")
 
     fig.tight_layout()
@@ -774,12 +831,13 @@ def create_runtime_tables(data, filename):
         print("% Table: Comparative runtimes sub-tables", file=f)
         print(f"% Generated: {datetime.datetime.now()}", file=f)
         for idx, algo in enumerate(algorithms):
+            algo_label = algo.replace("(3)", "")
             # Start the sub-table:
             print("\\begin{subtable}{0.33\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
                 f, data, LANGUAGES, algo, "runtime",
-                caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo}"
+                caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo_label}"
             )
             # End the sub-table:
             print("\\end{subtable}", file=f, end="")
@@ -867,12 +925,13 @@ def create_energy_tables(data, filename):
         print("% Table: Comparative energy usage sub-tables", file=f)
         print(f"% Generated: {datetime.datetime.now()}", file=f)
         for idx, algo in enumerate(algorithms):
+            algo_label = algo.replace("(3)", "")
             # Start the sub-table:
             print("\\begin{subtable}{0.33\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
                 f, data, LANGUAGES, algo, ["package", "dram"],
-                caption=ALGORITHM_LABELS[algo], label=f"energy:{algo}",
+                caption=ALGORITHM_LABELS[algo], label=f"energy:{algo_label}",
                 divisor="total_runtime"
             )
             # End the sub-table:
@@ -1001,6 +1060,8 @@ def create_sloc_tables(data, filename):
         # First sub-table (without boilerplate):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Algorithm lines}", file=f)
+        print("    \\label{table:sloc:algorithm}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & Code & Score \\\\", file=f)
@@ -1012,12 +1073,12 @@ def create_sloc_tables(data, filename):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Algorithm lines}", file=f)
-        print("    \\label{table:sloc:algorithm}", file=f)
         print("\\end{subtable}%", file=f)
         # Second sub-table (boilerplate only):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Framework lines}", file=f)
+        print("    \\label{table:sloc:framework}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & Support & Score \\\\", file=f)
@@ -1029,12 +1090,12 @@ def create_sloc_tables(data, filename):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Framework lines}", file=f)
-        print("    \\label{table:sloc:framework}", file=f)
         print("\\end{subtable}%", file=f)
         # Third sub-table (all lines):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Total of lines}", file=f)
+        print("    \\label{table:sloc:all}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & All & Score \\\\", file=f)
@@ -1046,8 +1107,6 @@ def create_sloc_tables(data, filename):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Total of lines}", file=f)
-        print("    \\label{table:sloc:all}", file=f)
         print("\\end{subtable}", file=f)
 
     return all_scaled
@@ -1102,6 +1161,8 @@ def create_cyclomatic_tables(data, filename, score_file):
         # First sub-table (algorithms without boilerplate):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Algorithms complexity}", file=f)
+        print("    \\label{table:cyclomatic:algorithm}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & Total & Avg \\\\", file=f)
@@ -1113,12 +1174,12 @@ def create_cyclomatic_tables(data, filename, score_file):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Algorithms complexity}", file=f)
-        print("    \\label{table:cyclomatic:algorithm}", file=f)
         print("\\end{subtable}%", file=f)
         # Second sub-table (boilerplate only):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Framework complexity}", file=f)
+        print("    \\label{table:cyclomatic:framework}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & Total & Avg \\\\", file=f)
@@ -1130,12 +1191,12 @@ def create_cyclomatic_tables(data, filename, score_file):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Framework complexity}", file=f)
-        print("    \\label{table:cyclomatic:framework}", file=f)
         print("\\end{subtable}%", file=f)
         # Third sub-table (all values):
         print("\\begin{subtable}{0.33\\textwidth}", file=f)
         print("    \\centering", file=f)
+        print("    \\caption{Total complexity}", file=f)
+        print("    \\label{table:cyclomatic:total}", file=f)
         print("    \\begin{tabular}{|c|r|r|}", file=f)
         print("        \\hline", file=f)
         print("        Language & Total & Avg \\\\", file=f)
@@ -1147,8 +1208,6 @@ def create_cyclomatic_tables(data, filename, score_file):
             print("        " + " & ".join(row) + " \\\\", file=f)
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
-        print("    \\caption{Total complexity}", file=f)
-        print("    \\label{table:cyclomatic:total}", file=f)
         print("\\end{subtable}", file=f)
 
     all_score = all_totals / all_totals.min()
@@ -1687,13 +1746,16 @@ def main():
     print("  Creating total power usage chart...")
     # Compiled languages only
     total_power_usage_chart(
-        analyzed, FILES["total_power_chart"], languages=compiled
+        analyzed, FILES["total_power_chart"], languages=compiled, large=True
     )
     print("  Creating power-per-second usage chart...")
-    power_per_second_chart(analyzed, FILES["pps_chart"])
+    power_per_second_chart(analyzed, FILES["pps_chart"], large=True)
     print("  Done.")
     print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
     dfa_regexp_charts(analyzed, FILES["dfa_regexp_chart"], large=True)
+    print("  Done.")
+    print("  Creating DFA vs. Regexp C/C++/Rust runtimes chart...")
+    dfa_regexp_charts2(analyzed, FILES["dfa_regexp_chart2"], large=True)
     print("  Done.")
     print("  Creating algorithm runtimes charts...")
     # Do the exact-match algorithms, compiled only
