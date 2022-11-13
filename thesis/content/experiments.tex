@@ -7,33 +7,6 @@ To gather the desired measurements the experiments were executed in the chosen l
 
 To begin, some concepts will be introduced and terms defined.
 
-\subsubsection{RAPL (Running Average Power Limit)}
-\label{subsubsec:rapl}
-
-The \textit{Running Average Power Limit} (RAPL) measurement system was introduced by Intel into their CPU products starting with the Sandybridge family of processors~\cite{khan}. The system allows measuring energy over several areas:
-
-\begin{description}
-\item[Package:] The full (socketed) processor package, which may contain multiple cores.
-\item[Power-Plane 0:] The domain that encompasses the combined cores within the package. This reading will cover all cores within the CPU of the package.
-\item[Power-Plane 1:] Sometimes referred to as ``uncore'', this domain generally covers the integrated GPU (if present).
-\item[DRAM:] The domain for the DRAM memory that the CPU is managing, whose energy usage is separate from the package.
-\item[Psys:] The domain that covers the entire system-on-chip energy usage. This would include the package and DRAM values, as well as other system-level energy consumption.
-\end{description}
-
-A computer system may have more than one package, and the RAPL interface includes methods for determining the number of packages and gathering the energy readings for each package separately. However, it is not possible to measure a package's energy usage at the level of an individual core.
-
-Reading the RAPL data is done through the \textit{model-specific registers} (MSR) interface, as detailed in~\cite[Chapter~14]{intel}. The method involves reading several registers to determine the number of packages the system has, then determining the scaling factors for each of time units (expressed in seconds), power units (Watts), and energy units (Joules). The scaling factors are stored in a single register referred to as \texttt{MSR\_RAPL\_POWER\_UNIT}, as groups of bits within the register. Each scaling factor is a 4-bit (5-bit in the case of energy units) value used to compute a fractional floating-point number (where $b$ represents the value of the n-bit factor):
-
-\[S~=~\frac{1}{2^{b}}\]
-
-In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S = 61.04~\mu$J.
-
-Obtaining the data during run-time from RAPL required reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained from reading this register is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
-
-An issue with the RAPL system was encountered during runs of the experiments: because the value of the energy registers is 32 bits in size, it wraps around to 0 when the maximum value is reached. This caused occasional anomalous readings in cases where the register would reset between the initial reading and the final reading, resulting in a negative overall value. The program that processed the output from the experiments was adjusted to recognize such values and adjust them by applying a constant value computed as $C~=~S \times 2^{32}$, where $S$ is the scaling factor for that value's type (Package, DRAM, etc.).
-
-Adding the appropriate constant for the type of value that was anomalous dealt with the issue and ensured that all iterations of each algorithm and each language would be usable for the analysis of the results.
-
 \subsubsection{SLOC (Source Lines Of Code)}
 
 The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
@@ -75,7 +48,7 @@ where $v$ is the cyclomatic complexity, $e$ and $n$ represent the number of edge
 
 McCabe gives examples of the control graphs for some typical constructs: a \textit{sequence} control, an \textit{if-then-else} control, a \textit{while} control, and an \textit{until} control. Each of the first three are demonstrated in this example: the edge from node 1 to node 2 is a \textit{sequence} control, the edges between nodes 2, 3 and 5 represent a \textit{while} control, and the edges from 3 to 4 and 2 represent an \textit{if-then-else} control.
 
-Thus, the graph nodes correspond to the following points in the function:
+Thus, the graph nodes correspond to the following lines in the function:
 
 \begin{enumerate}
 \item The entry-point of the function at line 1
@@ -88,6 +61,33 @@ Thus, the graph nodes correspond to the following points in the function:
 Measuring the complexity in a consistent way is important when comparing different languages. A tool called \texttt{lizard} was used for all languages except Perl (which was not supported by the tool) and Rust (which exhibited bugs when the data for the Aho-Corasick implementation was reviewed). To gather the metrics for the Perl code a second tool, called \texttt{countperl}, was used. For Rust, a tool called \texttt{rust-code-analysis-cli} from the Mozilla project was used. This tool provided greater depth and detail into the Rust code than \texttt{lizard} had, and did not exhibit the bugs noticed in the data for the Aho-Corasick source code.
 
 It is not clear if the techniques for measuring Perl and Rust were completely identical to the techniques used by \texttt{lizard} for the other languages, so this is noted in the results in section~\ref{subsubsec:complexity}.
+
+\subsubsection{RAPL (Running Average Power Limit)}
+\label{subsubsec:rapl}
+
+The \textit{Running Average Power Limit} (RAPL) measurement system was introduced by Intel into their CPU products starting with the Sandybridge family of processors~\cite{khan}. The system allows measuring energy over several areas:
+
+\begin{description}
+\item[Package:] The full (socketed) processor package, which may contain multiple cores.
+\item[Power-Plane 0:] The domain that encompasses the combined cores within the package. This reading will cover all cores within the CPU of the package.
+\item[Power-Plane 1:] Sometimes referred to as ``uncore'', this domain generally covers the integrated GPU (if present).
+\item[DRAM:] The domain for the DRAM memory that the CPU is managing, whose energy usage is separate from the package.
+\item[Psys:] The domain that covers the entire system-on-chip energy usage. This would include the package and DRAM values, as well as other system-level energy consumption.
+\end{description}
+
+A computer system may have more than one package, and the RAPL interface includes methods for determining the number of packages and gathering the energy readings for each package separately. However, it is not possible to measure a package's energy usage at the level of an individual core.
+
+Reading the RAPL data is done through the \textit{model-specific registers} (MSR) interface, as detailed in~\cite[Chapter~14]{intel}. The method involves reading several registers to determine the number of packages the system has, then determining the scaling factors for each of time units (expressed in seconds), power units (Watts), and energy units (Joules). The scaling factors are stored in a single register referred to as \texttt{MSR\_RAPL\_POWER\_UNIT}, as groups of bits within the register. Each scaling factor is a 4-bit (5-bit in the case of energy units) value used to compute a fractional floating-point number (where $b$ represents the value of the n-bit factor):
+
+\[S~=~\frac{1}{2^{b}}\]
+
+In the case of the energy units factor, the value of $b$ on the test platform was 01110b (14), and $S = 61.04~\mu$J.
+
+Obtaining the data during run-time from RAPL required reading from of a series of read-only registers within the MSR and scaling the values obtained by the appropriate value of $S$ for the units. For example, reading the Power-Plane 0 (CPU) energy value uses the \texttt{MSR\_PP0\_ENERGY\_STATUS} register. The value obtained from reading this register is 64 bits in width, though only the initial 32 bits hold energy data (the high 32 bits are reserved by Intel). The value read is masked to remove any high bits, then multiplied by the energy units scale factor to produce a value in Joules.
+
+An issue with the RAPL system was encountered during runs of the experiments: because the value of the energy registers is 32 bits in size, it wraps around to 0 when the maximum value is reached. This caused occasional anomalous readings in cases where the register would reset between the initial reading and the final reading, resulting in a negative overall value. The program that processed the output from the experiments was adjusted to recognize such values and adjust them by applying a constant value computed as $C~=~S \times 2^{32}$, where $S$ is the scaling factor for that value's type (Package, DRAM, etc.).
+
+Adding the appropriate constant for the type of value that was anomalous dealt with the issue and ensured that all iterations of each algorithm and each language would be usable for the analysis of the results.
 
 \subsubsection{Summary of Metrics}
 
@@ -119,12 +119,10 @@ These processes are explained in more detail in section~\ref{subsubsec:concisene
 
 The harness that was developed for managing the execution of the experiment programs was based on the code developed by Pereira et al~\cite{pereira} and made available via their GitHub repository\footnote{\texttt{https://github.com/greensoftwarelab/Energy-Languages}}. Their code was adapted and heavily modified to allow for some command-line options controlling features such as the number of iterations each experiment would be run, verbosity of output, etc. It was enhanced to record maximum memory usage and to work with the specific computer selected to be the testing platform.
 
-The full source code for the modified harness is included in this project's repository~\cite{github}.
-
 \subsection{Languages}
 \label{subsec:languages}
 
-The experiments were performed using five languages. The languages were chosen for their commonalities as well as their differences:
+The languages used were chosen for their commonalities as well as their differences:
 
 \begin{itemize}
 \item Three of the languages (C, C++, Rust) are compiled to machine code and were chosen for performance first and foremost. The remaining two (Perl and Python) are interpreted (``scripting'') languages which are highly regarded for speed of development and rapid prototyping, as well as being popular in bioinformatics computing.
@@ -142,7 +140,7 @@ C relies on what is referred to as \textit{manual memory management}, meaning th
 
 Memory management in C is done through a collection of functions in the C standard library, including \texttt{malloc}, \texttt{calloc}, \texttt{realloc}, \texttt{reallocarray}, and \texttt{free}. While \texttt{free} returns allocated memory to the heap, the other functions either allocate memory or change the size of an existing block of allocated memory.
 
-Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. Due to the low-level nature of C and the maturity of the compilers, C generally performed the best at each algorithm compared to other languages. Listing~\ref{lst:naive_c} shows a C implementation of the naive algorithm.
+Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. Due to the low-level nature of C and the maturity of the compilers, C generally performed well at each algorithm compared to other languages. Listing~\ref{lst:naive_c} shows a C implementation of the naive algorithm.
 
 \input{code/naive.c}
 
@@ -200,7 +198,7 @@ Each of the experiment programs providing an algorithm was implemented according
 \item An ``algorithm'' module that provides the code specific to the algorithm being used as a basis for the experiment
 \end{itemize}
 
-The input and runner modules were written once per language and re-used across all five algorithms.
+The input and runner modules were written once per language and re-used across all algorithms.
 
 \subsubsection{Input modules}
 
@@ -242,7 +240,7 @@ In the C implementation it was necessary to use a memory pointer of the type, \t
 
 In C++ it was initially attempted to reuse the \texttt{void~**} approach that had been used in C. This proved to be extremely difficult under the stricter compiler rules, and the decision was made to use the \texttt{std::variant} class instead, which represents a type-safe union in the C++ language. While the same variant type definition could have been used for both the single-pattern and multi-pattern algorithms, it was decided to distinguish them for the sake of readability. The type definitions were made in the file \texttt{run.hpp}, the header-file for the runner module of C++. Unpacking a vector of the variant types brought further type-safety in the form of a generically-typed function \texttt{get<>} in the standard library that was used to extract the values to new objects of the correct type.
 
-Rust had the language features that seemed the most clear and expressive in implementation: enumeration and pattern-matching. In Rust, an enumeration type (\texttt{enum}) can optionally assign data types to the elements of the enumeration. When an enumeration element is instantiated it is provided an instance of that data when applicable. This lead to a system for the Rust programs in which the initialization function for an algorithm created and returned a vector of the enumeration type. The algorithm routines that received these types would extract them from the vector using a pattern-matching\footnote{In the computer language sense, not to be confused with pattern-matching in strings} construct that ensured the types of each individual element of the vector received from the initialization function. The program would raise a run-time exception if the given vector element was not of the expected type. In contrast, Rust required the least-expressive approach to appending the sentinel value onto the pattern string for the sake of creating the ``next'' table.
+Rust had the language features that seemed the most clear and expressive in implementation: enumeration and pattern-matching. In Rust, an enumeration type (\texttt{enum}) can optionally assign data types to the elements of the enumeration. When an enumeration element is instantiated it is provided an instance of that data when applicable. This lead to a system for the Rust programs in which the initialization function for an algorithm created and returned a vector of the enumeration type. The algorithm routines that received these types would extract them from the vector using a pattern-matching\footnote{In the computer language sense, not to be confused with pattern-matching in strings.} construct that ensured the types of each individual element of the vector received from the initialization function. The program would raise a run-time exception if the given vector element was not of the expected type. In contrast, Rust required the least-expressive approach to appending the sentinel value onto the pattern string for the sake of creating the ``next'' table.
 
 Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void~**} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar value would have caused a run-time exception in either program.
 
@@ -250,7 +248,7 @@ Given the dynamically-typed nature of data in Perl and Python, both of these imp
 
 The C version of the basic algorithm was drawn from~\cite[Chapter 14]{handbook}. Like Knuth-Morris-Pratt, it requires a character at the end of the pattern for calculating the suffixes table. The C and C++ implementations used the ``null'' string-terminating byte for this while the others added it explicitly.
 
-Starting with Rust in this case, one aspect became very clear in this algorithm's implementation: the need to regularly cast various numerical (particularly integer) types to other types. Because of the larger amount of array-indexing in this algorithm, the number of times an \texttt{i32} (signed 32-bit integer) or \texttt{u32} (unsigned) had to be cast to or from a \texttt{usize} type (an unsigned type used for lengths and indexing) was significant. While this does lead to fewer bugs in the code, at the same time it detracted from the conciseness of the Rust version.
+Starting the analysis with Rust in this case, one aspect became very clear in this algorithm's implementation: the need to regularly cast various numerical (particularly integer) types to other types. Because of the larger amount of array-indexing in this algorithm, the number of times an \texttt{i32} (signed 32-bit integer) or \texttt{u32} (unsigned) had to be cast to or from a \texttt{usize} type (an unsigned type used for lengths and indexing) was significant. While this does lead to fewer bugs in the code, at the same time it detracted from the conciseness and readability of the Rust version.
 
 Perl and Python were comparable in their conciseness and logical expression of this algorithm. Python showed an advantage in the form of its native support for iterators as a type and functions such as \texttt{range} that return these iterators. Operations like looping backwards through a series of integers was clearer in the Python code than in the corresponding Perl.
 
@@ -274,7 +272,7 @@ Lastly, the Rust implementation went through several iterations before reaching 
 
 \subsubsection{Approximate Matching by DFA with Gaps}
 
-As this algorithm was new material, it was difficult to anticipate what concerns and issues would arise. Some aspects of each implementation we close in design to the Aho-Corasick code due to the fact that both algorithms are centered around a DFA. All implementations were based on the developed algorithms~\ref{alg:create_dfa} and~\ref{alg:find_pattern_with_gaps}, from section~\ref{subsec:dfa_gap}.
+As this algorithm was new material, it was difficult to anticipate what concerns and issues would arise. Some aspects of each implementation were close in design to the Aho-Corasick code due to the fact that both algorithms are centered around a DFA. All implementations were based on the developed algorithms~\ref{alg:create_dfa} and~\ref{alg:find_pattern_with_gaps}, from section~\ref{subsec:dfa_gap}.
 
 As was the case with some of the previous algorithms, the main differences between the C and C++ implementations were in the use of C++ standard library classes in place of manual memory management. The availability of a postfix-increment operator in these languages allowed the two statements of lines 8--9 in algorithm~\ref{alg:find_pattern_with_gaps} to be combined into a single statement. Unlike the Aho-Corasick DFA allocation, this algorithm has a predictable number of states. This made allocation of the DFA much more exact and clean in comparison.
 
@@ -289,13 +287,13 @@ The performance of the Perl and Python languages on the DFA-Gap algorithm led to
 
 Both Perl and Python have native support for extended regular expressions as a part of the language. When this is taken into account, it is found to be preferable to use the implementation of the DFA as a regular expression. The regular expression engines in both Perl and Python are implemented in compiled code and are thus much faster than the hand-coded DFA implementations.
 
-As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the DFA-Gap algorithm for those two languages.
+As will be shown in section~\ref{subsubsec:results:perf_perl_python}, this had a very significant effect on the overall performance of the gap algorithm for those two languages.
 
 The key to meeting the four requirements in section~\ref{subsec:regexp_variant}, particularly the fourth requirement, was a mechanism called \textit{positive-lookahead}. This mechanism allows the engine to match the pattern as a sequence ahead of the current point, without actually consuming any of the matched characters. This was instrumental in finding overlapping matches.
 
-Once this had been undertaken in Python and Perl, it was necessary to implement similar experiments for the compiled languages. In the case of C++, a class for regular expressions had been part of the C++ Standard Library since the adoption of the C++11 standard. C, as well, offered regular expression support in the form of the POSIX regular expressions functions included as part of the C standard library. Rust, though, does not have built-in regular expression support.
+Once this had been undertaken in Python and Perl, it was necessary to implement similar experiments for the compiled languages. In the case of C++, a class for regular expressions had been part of the C++ Standard Library since the adoption of the C++11 standard. C, as well, offered regular expression support in the form of the POSIX regular expressions functions included as part of the C standard library. Rust, though, did not have built-in regular expression support.
 
-It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension} that was available for Rust, while using the native regular expression support in C and C++. This quickly proved to be a problem: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
+It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension.} that was available for Rust, while using the native regular expression support in C and C++. This quickly proved to be a problem: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
 
 The solution came in the form of the Perl-Compatible Regular Expressions engine. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++ and Rust through wrapper libraries.
 
@@ -306,10 +304,10 @@ As the results will show, the effectiveness of regular expressions varied across
 At this point, some initial observations could be made about the complexity measurements of some of the code. In the code examples given throughout section~\ref{subsec:languages}, all implementations of the naive algorithm had the same cyclomatic complexity value of 3. All also produced the same directed flow graph, shown in figure~\ref{fig:graph-naive}. In this graph, nodes 1 and 6 represent the entry and exit to the function. Node 2 represents the for-loop, and node 3 represents the if-else conditional block.
 
 \begin{figure}[ht]
-\centering
-\input{figures/graph-naive}
-\caption{Flow graph of the naive algorithm}
-\label{fig:graph-naive}
+    \centering
+    \input{figures/graph-naive}
+    \caption{Flow graph of the naive algorithm}
+    \label{fig:graph-naive}
 \end{figure}
 
 Part of the reason for this is that the complexity measurement does not take into account calls to functions. This is by intent, as factoring out content to a separate function is part of the process of managing complexity. In the cases of C and C++, both utilized library functions: \texttt{strncmp} in C and \texttt{substr} in C++. In contrast, the use of \texttt{substr} in Perl is a keyword of the language. Python and Rust skip this entirely by virtue of having array-slicing be a core language feature, along with the ability to compare slices directly. Had the complexity-measuring tools taken the library calls into account, that would have changed the graph for those languages from one connected component to two, and resulted in a higher overall complexity score.
@@ -317,22 +315,22 @@ Part of the reason for this is that the complexity measurement does not take int
 Compare this to the \texttt{make\_next\_table} functions defined in the implementations of Knuth-Morris-Pratt. The complexity tool found the Python version to have a score of 6 while the C and C++ versions both scored 5. The reason for the distinction is that C and C++ allocated the array variable \textit{next\_table} prior to the function call and pass it as a parameter. By contrast, in Python \textit{next\_table} was created within the function. The loop used to create it is the source of the extra point of complexity. Figures~\ref{fig:graph-kmp-py} and~\ref{fig:graph-kmp-cpp} illustrate these slightly-different flow graphs. In figure~\ref{fig:graph-kmp-py}, states 2 and 3 represent the extra for-loop that introduces the extra point of complexity.
 
 \begin{figure}[ht]
-\centering
-\begin{minipage}[t]{0.45\textwidth}
-\centering
-\input{figures/graph-kmp-py}
-\caption{Flow of the Python \texttt{make\_next\_table} function}
-\label{fig:graph-kmp-py}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.45\textwidth}
-\centering
-\input{figures/graph-kmp-cpp}
-\caption{Flow of the C++ \texttt{make\_next\_table} function}
-\label{fig:graph-kmp-cpp}
-\end{minipage}
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \input{figures/graph-kmp-py}
+        \caption{Flow of the Python \texttt{make\_next\_table} function}
+        \label{fig:graph-kmp-py}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \input{figures/graph-kmp-cpp}
+        \caption{Flow of the C++ \texttt{make\_next\_table} function}
+        \label{fig:graph-kmp-cpp}
+    \end{minipage}
 \end{figure}
 
-The resulting complexity of the various implementations is explored in more depth in section~\ref{sec:results}.
+The resulting complexity of the various implementations is explored in more depth in section~\ref{subsubsec:complexity}.
 
 \subsection{Optimizations}
 
@@ -340,14 +338,14 @@ Over the course of the development of the experiments in each language, the need
 
 \begin{description}
 \item[Data Preprocessing:] While the C and C++ languages were able to seamlessly use individual characters from the strings as array indices, Rust and the interpreted languages were not. Based on an assumption that production-targeted code would apply any similar preprocessing, the strings were converted to forms directly usable by the other languages. In the case of Rust, this was a conversion of strings to arrays of unsigned 8-bit integers. In the case of Python, it was a direct mapping of strings (which are already treated as sequences by Python) into the ordinal values of each character. Perl required the most preprocessing, with strings first being converted to arrays of individual characters before being mapped to their ordinal values.
-\item[Pattern Preprocessing:] To bring down the running times of the interpreted languages' experiments, a mechanism for preprocessing patterns was developed that allowed for each pattern to be processed only once prior to being applied to all sequences. Without this, some instances of the Knuth-Morris-Pratt algorithm (for example) took close to an hour to complete. One the structure of this was established, it was also applied to the compiled languages as well.
-\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would had little or no effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the overall readability of the code.
+\item[Pattern Preprocessing:] To bring down the running times of the interpreted languages' experiments, a mechanism for preprocessing patterns was developed that allowed for each pattern to be processed only once prior to being applied to all sequences. Without this, some instances of the Knuth-Morris-Pratt algorithm (for example) took close to an hour to complete. Once the structure of this was established, it was also applied to the compiled languages as well.
+\item[Minimizing Type-Casting:] In the case of Rust's strong typing, it was necessary to frequently cast integer values into Rust's \texttt{usize} type for use as array indices. Though this would have had little or no effect on run-time, the decision was made in some cases to declare a cast version of the integer value to help in the overall readability of the code.
 \item[Compiler Options:] For the three compiled languages, consistent choices of compiler options for optimization were applied. For the C and C++ code, the same options were used for both languages. For the Rust code, the \texttt{cargo} utility was run with an option that instructed the compiler to build optimized code instead of debug-instrumented code. These were not applicable to the Perl and Python code, as both of those are interpreted languages.
 \end{description}
 
-All optimization steps were designed to be done inside the timing window of the runner module, and contributed to the reported algorithm run-time.
+All code-optimization steps were designed to be done inside the timing window of the runner module, and contributed to the reported algorithm run-time.
 
-\subsection{Data Used}
+\subsection{Experimental Data}
 \label{subsec:data}
 
 The data used for the experiments was generated in a random fashion. It was specifically created to emulate basic DNA data, while keeping the size of the data manageable from the perspective of the programs that would be run.
@@ -367,7 +365,7 @@ For the approximate-matching algorithm, the same set of patterns was used since 
 The data set selected for these experiments consisted of the following:
 
 \begin{itemize}
-\item 100,000 sequence strings of length ranging from 1,008 to 1,040 characters ($1,024 \pm 16$). The number of patterns and their length was chosen to provide sufficient data to extensively exercise each algorithm implementation, while still fitting within the physical memory of the testing platform.
+\item 100,000 sequence strings of length ranging from 1,008 to 1,040 characters ($1,024 \pm 16$). The number of patterns and their length was chosen to provide sufficient data to extensively exercise each algorithm implementation.
 \item 100 pattern strings of length ranging from 8 to 10 characters ($9 \pm 1$). The length was adjusted several times through command-line parameters to the data-generation utility until a size was found for which the generated patterns would reliably meet the minimum threshold for sequences matched. The matching percentage over the 100 patterns ranged from 0.10\% to 1.62\%, with an average of 0.76\%.
 \item A full set of correct counts of each pattern's occurrences in each sequence, as would be found by an exact-matching algorithm. This was established using a backtracking regular expression search for each of the selected patterns over each of the generated sequences. The regular expression was designed to properly include overlapping pattern occurrences.
 \item An additional set of answer-files were generated for the approximate-matching algorithm, for values of $k$ ranging from 1 to 5. These, too, were generated using crafted regular expressions that would detect overlapping occurrences of the patterns.
@@ -394,7 +392,7 @@ The machine used for the experiments was an Intel-brand NUC7i5BNH i5-7260U, an u
 \label{table:hardware_specs}
 \end{table}
 
-The CPU is dual-core, with hyperthreading cores, for a total of 4 computational cores. This did not come into consideration for the experiments as none of the code was written to be multi-threaded.
+The CPU is dual-core, with hyperthreading cores, for a total of 4 computational cores. This did not affect the experiments as none of the code was written to be multi-threaded.
 
 \subsubsection{Operating System and Configuration}
 
@@ -416,4 +414,8 @@ Table~\ref{table:software_specs} lists the primary software tools and packages t
 
 The tools used for the experiments themselves do include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
 
-The Valgrind tool was used during development to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the expressiveness measurements of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of conciseness via compression, another part of the expressiveness measurements. The remaining factor for expressiveness measurement was cyclomatic complexity: the \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl and Rust. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Rust complexity was measured using the \texttt{rust-code-analysis-cli} tool, which was obtained directly from the project's GitHub repository. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
+%The Valgrind tool was used during development to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the expressiveness measurements of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of conciseness via compression, another part of the expressiveness measurements. The remaining factor for expressiveness measurement was cyclomatic complexity: the \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl and Rust. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Rust complexity was measured using the \texttt{rust-code-analysis-cli} tool, which was obtained directly from the project's GitHub repository. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
+
+\subsection{Resources}
+
+All source code for all experiment programs, as well as the harness utility described and the Python utilities used for data generation and processing of results, is available on the GitHub platform~\cite{github}.

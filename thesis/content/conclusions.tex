@@ -1,50 +1,16 @@
 \section{Conclusions}
 \label{sec:conclusions}
 
-An earlier incarnation of this work was focused on the security benefits of the Rust language. Through the process of research and running of the experiments, the focus changed to that stated in the abstract: finding the best language for bioinformatics based on a balance of three distinct metrics.
+In choosing the three diverse metrics to measure on, the goal was to provide an environment in which any of the five languages would have the chance to stand out. In this regard the research can be considered successful: each of the five languages managed to be at least as high as the \nth{2} position in at least one metrics table.
+
+An earlier incarnation of this work had focused on the security benefits of the Rust language. Through the process of research and running of the experiments, the focus changed to that stated in the abstract: finding the best language for bioinformatics based on a balance of these three distinct metrics.
 
 And, in the end, that language appears to be Rust.
 
-Over the three bases that will be reviewed below, Rust stood out in two of them. The measure of expressiveness is the only area in which it was not in the top place of the table.
+Over the three bases that were reviewed, Rust clearly stood out in performance and energy. The measure of expressiveness is the only area in which it was not in the top place of the table. That said, expressiveness is the most subjective of the measurements and Rust could well improve in this measure through broader utilization and its own evolution.
 
-Whether this establishes Rust as the ``best'' language for this purpose cannot be said for certain, for the definition of ``best'' can only be objective up to a point before subjective judgment and feelings begin to influence decisions.
+Whether this establishes Rust as the ``best'' language for this purpose cannot be said for certain, for the definition of ``best'' can only be objective up to a point before subjective judgment and feelings begin to influence decisions. In the end, the measurements taken and evaluated began to somewhat resemble the concept of a triathlon: it was not necessary for Rust to win every category to have ended up as the recommended solution, the overall winner. Rust did not even achieve notable performance metrics, only being the top-ranked for one of the six algorithms. But Rust's performance numbers were steady and reliable across all algorithms. In terms of energy usage Rust was top-ranked in fully half of the algorithms and variations. This lead to Rust leading both of these metrics in the final results.
 
-\subsection{Review of Metrics}
+Recently, ZDNet published an article~\cite{tung} about the National Security Agency's recommendation for developers to consider switching to programming languages that feature greater memory safety. While memory safety was not a primary focus of this research, it is noteworthy that the recommended language is also considered to be the safest in this regard. All of the experiments written in compiled languages were tested with Valgrind, being refined and debugged until Valgrind reported no memory-related errors detected\footnote{Perl and Python were not tested with Valgrind, as they are built on bytecode interpreters whose memory-safety is a separate issue.}. Of the compiled languages, only Rust never exhibited any memory errors through Valgrind.
 
-In choosing three diverse metrics to measure on, the goal was to provide an environment in which any of the five languages would have the chance to stand out. In this regard the research can be considered successful: each of the five languages managed to be at least as high as the \nth{2} position in at least one metrics table.
-
-\subsubsection{Performance}
-
-Performance was chosen first, and measured most closely, due to the fact that the time a program spends running is one of the most-noticeable features of the program (be that good or bad). Run-time measurement was also the easiest of the metrics to gather, both in terms of total program execution and in wall-clock time specifically spent in the algorithms themselves.
-
-It was in the measuring of performance that it first became clear what a stark difference there would be between the interpreted and compiled languages. One can forget the extent of this gap when working with interpreted languages in-depth for long periods of time. The Perl and Python performance numbers were so large in many cases that they had to be omitted from charts to preserve clarity, even when put to logarithmic scaling.
-
-\subsubsection{Energy Usage}
-
-In regards to energy usage, the only significant barrier to overcome was ensuring that the machine used to run the experiments would be sufficiently isolated so as to have the least amount of interference possible from other running processes. The nature of the RAPL system of measuring power consumption also required that the experiments be run with super-user access levels. This amplified the need for the code to be as safe as possible, even though the testing machine was not made accessible by the general internet.
-
-RAPL posed other challenges to use, such as the previously-mentioned 32-bit limitation in the registers used for tracking the energy usage. But this was overcome, and the RAPL system ended up proving robust-enough to handle measuring programs whose run-times ranged from barely one second to nearly three hours.
-
-\subsubsection{Expressiveness}
-
-Expressiveness was generally the most-challenging of the metrics to measure and evaluate. Even the most concrete, numerical measurements of code such as SLOC and complexity are subject to some debate and dissent. In these aspects of the research, measurement was taken through a range of open-source tools and the results tracked closely with expectation; the interpreted languages showed the strongest scores on the three expressiveness sub-metrics.
-
-However, much of what was measured for this metric was also dependent upon the skill shown in the writing of the programs. Familiarity with the different languages varied, from significant experience in C and Perl to relative newness with regards to Rust. It is not possible to say whether someone more expert in the Rust language, for example, could have implemented the chosen algorithms with more efficiency and better expressiveness metrics.
-
-Additionally, the complexity component of this metric had been cast in some doubt by the inability to use a single tool for all language involved. This was shown in section~\ref{subsec:combined} to have not influenced the final rankings.
-
-\subsection{Real-World Implications}
-
-\subsection{Final Thoughts}
-
-As was said at the start of this section, this research evolved significantly over the span of time it was undertaken.
-
-In the end, the measurements taken and evaluated began to somewhat resemble the concept of a triathlon: it was not necessary for Rust to win every category to have ended up as the recommended solution, the overall winner. Rust did not even achieve notable performance metrics, only being the top-ranked for one of the six algorithms. But Rust's energy performance was very noteworthy, and the performance numbers were steady and reliable across all algorithms leading to Rust leading both of these metrics in the final results.
-
-Late in the process of developing this paper, ZDNet published an article~\cite{tung} by Liam Tung covering a story around the recent recommendations of the National Security Agency that developers consider switching to programming languages that feature greater memory safety. While memory safety was not a primary focus of this research, it is noteworthy that the recommended language is also considered to be the safest in this regard. All of the experiments written in compiled languages were tested with Valgrind and debugged until Valgrind reported no memory-related errors detected\footnote{Perl and Python were not tested with Valgrind, as they are built on bytecode interpreters whose memory-safety is a separate issue.}. Of the compiled languages, only Rust never exhibited any memory errors through Valgrind.
-
-With this, it becomes more understandable why Perkel~\cite{nature} found so many in the sciences turning to Rust as their choice of a performance-oriented language. Though the youngest of the languages evaluated here, Rust has quickly grown to showing great potential for a wide range of applications.
-
-\subsection{Resources}
-
-All source code for all experiment programs, as well as the harness utility described and the Python utilities used for data generation and processing of results, is available on the GitHub platform~\cite{github}.
+With this, it becomes more understandable why Perkel~\cite{nature} found so many in the sciences turning to Rust as their choice of a performance-oriented language. Though the youngest of the languages evaluated here, Rust has quickly grown to showing great potential for a wide range of applications. As the collected results show, it is not necessary to dominate every metric in order to come out on top: steady and reliable performance, be it raw speed or good energy management, can carry one to the winning position.

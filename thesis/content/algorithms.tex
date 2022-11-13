@@ -107,7 +107,7 @@ The vector is initialized in the preprocessing phase first to an all-1's value i
 
 Here, it is clear that the letter ``C'' appears twice in the pattern as there are two 0-values in S(C). Each of the other three letters appear just once. Examining the bits of each S-value shows exactly where each letter appears in the pattern.
 
-During the process of computing the $S$ vector, a ``limit'' value is also calculated: it starts out as 0, and has a number of bits set equal to the full with of the pattern. At the end of the loop that calculates $S$, the value of $limit$ is shifted to the right by one bit, then subjected to a bit-complement operation. The result is a value that can be directly used in comparison, when determining if a match has been found.
+During the process of computing the $S$ vector, a ``limit'' value is also calculated: it starts out as 0, and has a number of bits set equal to the full width of the pattern. At the end of the loop that calculates $S$, the value of $limit$ is shifted to the right by one bit, then subjected to a bit-complement operation. The result is a value that can be directly used in comparison, when determining if a match has been found.
 
 The process of searching for a match begins with a $state$ value of $W$ bit-width, set to all 1's. The target string is read one character at a time. For each iteration of this loop, $state$ is shifted to the left one bit (introducing a 0) and then \texttt{or}'d with the $S$ value of the character under the index. If, after this operation (the ``shift-or''), the value of $state$ is less than the value of $limit$ then a match has been found and will be reported.
 
@@ -174,7 +174,7 @@ To illustrate the process of this algorithm, consider the target string that beg
 \label{fig:ac_progression}
 \end{figure}
 
-Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is a failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and the DFA moves to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is checked and found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
+Starting at the 0 state, the first ``A'' moves the DFA to state 1 after which the second ``A'' moves it to state 8. From 8, the character ``C'' is a failure transition, so the value of $f(8)$ is read. The value is 1, so the DFA immediately moves to state 1 and looks for a transition on ``C''. It exists, and the DFA moves to states 2, 3 and 4 in turn. Upon reaching state 4 the value of $output(4)$ is found to not be the empty set, so the machine signals a match of the patterns ``ACTG'' and ``CTG''.
 
 Here, the Aho-Corasick algorithm has positively identified the presence of two of the three patterns encoded by the DFA. Only 5 characters from the target string were processed, and because the DFA indexes by the ordinal values of the characters no direct comparisons were made. Further, no back-tracking was required to find the second pattern.
 
@@ -187,7 +187,7 @@ The idea of using a DFA to represent the pattern is inspired primarily by~\cite{
 
 From this, a different type of approximate-matching can be pictured: one that allows for well-defined, finite ``gaps'' between elements of the pattern being matched. Given a value $k$ that is a positive integer, gaps that are up to $k$ characters in length can be tolerated while still regarding the pattern as matching a point in the target sequence. And when $k = 0$, the approach becomes the naive exact-matching approach that is of time-complexity O($mn$).
 
-Current algorithms for approximate matching in DNA sequences use a variety of approaches, such as edit distance. But methods based on edit distance can result in all changes or differences being clumped together as opposed to distributed across the pattern in a more balanced fashion. For example, given the same ``CTAGC'' pattern used for the previous single-pattern algorithms and $k = 3$ this algorithm would allow as many as 12 additions to the pattern in order to match a position in the sequence. Simply allowing an edit distance of 12 in a different algorithm could potentially lead to all 12 additions being between two of the pattern characters. The algorithm described here is designed to prevent such uneven distribution of the gap letters in the matched segment of the sequence.
+Current algorithms for approximate matching in DNA sequences use a variety of approaches, such as edit distance. But methods based on edit distance can result in all changes or differences being clumped together as opposed to distributed across the pattern in a more balanced fashion. For example, given the same ``CTAGC'' pattern used for the previous single-pattern algorithms and $k = 3$ this algorithm would allow as many as 12 additions to the pattern in order to match a position in the sequence. Simply allowing an edit distance of 12 in a different algorithm could potentially lead to 12 additions being made between just two of the pattern characters. The algorithm described here is designed to prevent such uneven distribution of the gap letters in the matched segment of the sequence.
 
 The basis of the algorithm is the notion that such an approximate match as described here can be expressed in terms of a regular expression that supports the specification of ranges of matches for a given class or symbol in the expression. Such a specification is generally encoded as \texttt{$\lbrace a,b \rbrace$} in an expression, where $a$ and $b$ are integers and $b \geq a$. Most compatible engines support several variant forms of this:
 
@@ -198,7 +198,7 @@ The basis of the algorithm is the notion that such an approximate match as descr
 \item[\texttt{$\lbrace a,b \rbrace$}:] matches at least $a$ occurrences and at most $b$ occurrences
 \end{description}
 
-Using the third construct and the ``CTAGC'' pattern, an example regular expression for a value of $k = 3$ could look like:
+Using the fourth construct and the ``CTAGC'' pattern, an example regular expression for a value of $k = 3$ could look like:
 
 \begin{center}
 \texttt{C.$\lbrace 0,3 \rbrace$T.$\lbrace 0,3 \rbrace$A.$\lbrace 0,3 \rbrace$G.$\lbrace 0,3 \rbrace$C}
@@ -242,7 +242,7 @@ Thus, for a given pattern of length $m$, the size of the DFA grows linearly with
 
 \subsubsection{Creation of the DFA}
 
-Dividing the DFA-Gap process into two parts, the first part is the creation of the automaton itself. This is outlined here in algorithm~\ref{alg:create_dfa}:
+Dividing the DFA-Gap process into two parts, the first part is the creation of the automaton itself. This is outlined in algorithm~\ref{alg:create_dfa}.
 
 \IncMargin{1em}
 \begin{algorithm}[ht]
@@ -287,11 +287,11 @@ Dividing the DFA-Gap process into two parts, the first part is the creation of t
 
 Lines 1--6 initialize the elements. The body of the outer for-loop runs from line 8 to line 19, and is primarily concerned with extending the trunk of the DFA. The inner for-loop, lines 13--16, builds one branch connected to the state that was the head of the trunk prior to lines 8--10. After the outer loop completes, lines 21--23 assign $A$ (the set of acceptance states) and $q_0$ (the starting state) and return a 3-element tuple of these values along with the transition function $\delta$ itself. This tuple represents what the next part of the algorithm requires in order to perform the matching process.
 
-Lines 2, 4, 9, and 13 reference a process that was not explicitly defined: \texttt{CreateState()}. The implementation of this would be dependent on the approach to the algorithm as a whole. In these examples, it is assumed that this process creates one complete state representation with all transitions initialized to the failure value. This allows the default transition to be a failure unless explicitly updated by the this part of the algorithm.
+Lines 2, 4, 9, and 13 reference a process that was not explicitly defined: \texttt{CreateState()}. The implementation of this would be dependent on the approach to the algorithm as a whole. In these examples, it is assumed that this process creates one complete state representation with all transitions initialized to the failure value. This allows the default transition to be a failure unless explicitly updated by the algorithm.
 
 \subsubsection{Matching with the DFA}
 
-The second part of the process is to use the DFA in the matching process. This is outlined here in algorithm~\ref{alg:find_pattern_with_gaps}:
+The second part of the process is to use the DFA in the matching process. This is outlined in algorithm~\ref{alg:find_pattern_with_gaps}.
 
 \IncMargin{1em}
 \begin{algorithm}[ht]

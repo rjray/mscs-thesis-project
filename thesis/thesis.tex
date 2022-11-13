@@ -2,7 +2,7 @@
 
 \input{setup}
 
-\title{Evaluating Languages for Bioinformatics: Energy, Expressiveness and Performance}
+\title{\mytitle{}}
 \author{Randy J. Ray}
 \date{2022}
 
@@ -16,13 +16,14 @@
 % Abstract, Acknowledgments Table of contents - numbering starts at 4, Roman numerals
 \pagenumbering{roman}
 \setcounter{page}{4}
-\input{content/abstract}
-\clearpage
 \input{content/acknowledgments}
+\clearpage
+\input{content/abstract}
 \clearpage
 \tableofcontents
 \listoffigures
 \listoftables
+\addcontentsline{toc}{section}{Source Code Listings}
 \lstlistoflistings
 \clearpage
 
@@ -53,8 +54,10 @@
 
 \appendix
 
+\clearpage
 \input{content/extra_tables}
 
+\clearpage
 \input{content/software_sources}
 
 \end{document}
