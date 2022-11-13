@@ -88,6 +88,7 @@ FILES = {
     "final_scores_plot": "final_scores_plot.png",
     "final_scores_distinct": "final_distinct.tex",
     "final_scores_distinct_plot": "final_distinct.png",
+    "expressiveness_graph": "expressiveness_arrows.png",
 }
 
 SIMPLE_GRAPH_PARAMS = {
@@ -691,21 +692,20 @@ def dfa_regexp_charts2(data, filename, *, large=False):
 
 
 # Create a 3-D graph of arrows coming out from the origin.
-def arrow_graph(data, labels, filename):
+def arrow_graph(data, labels, filename, title):
     ax = plt.figure().add_subplot(projection='3d')
 
     ax.set(
-        xlim=(0, 1),
-        ylim=(0, 1),
-        zlim=(0, 1),
         xlabel="SLOC",
         ylabel="Complexity",
         zlabel="Compression"
     )
 
-    z = np.zeros(5)
     u, v, w = data.transpose()
-    ax.quiver(z, z, z, u, v, w, label=labels)
+    for i in range(len(labels)):
+        ax.plot([0, u[i]], [0, v[i]], [0, w[i]], linewidth=2, label=labels[i])
+    ax.legend(loc="upper left")
+    ax.set_title(title)
 
     print(f"    Writing {filename}")
     plt.savefig(filename)
@@ -1792,14 +1792,15 @@ def main():
         expressiveness_scores, expr2_scores, FILES["expressiveness_table"],
         FILES["expr2_table"]
     )
+    print("  Creating expressiveness arrow graph...")
+    arrow_graph(
+        expressiveness_axes, UNIQUE_LANGUAGES, FILES["expressiveness_graph"],
+        "Magnitude of expressiveness vectors"
+    )
+    print("  Done.")
     print("  Creating combined runtimes/energy scores and final rankings...")
     create_final_tables(analyzed, expressiveness_scores, expr2_scores, FILES)
     print("  Done.")
-    # print("  Creating expressiveness arrow graph...")
-    # arrow_graph(
-    #     expressiveness_axes, UNIQUE_LANGUAGES, FILES["expressiveness_graph"]
-    # )
-    # print("  Done.")
 
     # As in, done with everything...
     print("\nDone.")
