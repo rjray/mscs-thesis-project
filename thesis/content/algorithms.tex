@@ -13,6 +13,13 @@ The Knuth-Morris-Pratt~\cite{knuth} algorithm is one of the foundational algorit
 
 Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time-complexity linear to the sum of the pattern length and the target length.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.65\textwidth]{figures/kmpexample.jpg}
+    \caption[Example of Knuth-Morris-Pratt algorithm]{Example of Knuth-Morris-Pratt, original source~\cite{shandilya}}
+    \label{fig:image:kmpexample}
+\end{figure}
+
 Generally when matching, the pattern is aligned with positions in the target string. Shifting is done when a character mismatch is found between an index in the target and the corresponding index in the pattern. Where a naive implementation might shift the pattern by one place after each failed match, resulting in a time complexity approaching O($mn$), the Knuth-Morris-Pratt approach is built on the concept of an auxiliary table (referred to as the ``next'' table) that instructs the matching algorithm on how much to shift the pattern over the target stream. Based on repetition within the pattern itself, the table may call for a shift of the pattern by more than one character for a given mismatch.
 
 The computation of this table is shown in the paper to require O($m$) steps, and the process of matching the pattern to the target takes at most an additional $2n$ steps. This is due to the fact that, at each step of the matching process, only one of the text pointer or the pattern pointer are moved (each of which can only move $n$ times at most). This results in a worst-case run-time bounded by O($m+n$).
@@ -25,11 +32,9 @@ As an example, consider a search for the pattern ``CTAGC'' in a sequence that st
 \caption{Knuth-Morris-Pratt next-table}
 \label{fig:kmp_next}
 \end{figure}
-\onehalfspacing
 
 With the table in hand, the process moves to matching. The matching algorithm goes through the following steps:
 
-\singlespacing
 \begin{enumerate}
 \item $i$ and $j$ both initialize to 0
 \item $p_0 = s_0$, so $next$ is not consulted
@@ -44,7 +49,6 @@ With the table in hand, the process moves to matching. The matching algorithm go
 \item $i$ and $j$ increment
 \item $p_i$ continues to match $s_j$ as both variables increment. When $i = 5$, the algorithm detects a match.
 \end{enumerate}
-\onehalfspacing
 
 Here, the Knuth-Morris-Pratt algorithm has found the match in 10 character comparisons, 5 of which were required to verify the full match.
 
