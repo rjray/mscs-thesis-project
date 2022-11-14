@@ -1,7 +1,7 @@
 \section{Introduction}
 \label{sec:introduction}
 
-When evaluating a programming language for use on a project, we as programmers are faced with an ever-growing array of choices. These choices range from long-lived, well-established languages such as C or Fortran, to the very latest offerings such as Julia or Swift. Selecting a language is a process that is generally rooted in a combination of factors: suitability to the target platform, performance, expressiveness, and (often most importantly) the programmer's familiarity and comfort with the language.
+When evaluating a programming language for use on a project, programmers are faced with an ever-growing array of choices. These choices range from long-lived, well-established languages such as C or Fortran, to the very latest offerings such as Julia or Swift. Selecting a language is a process that is generally rooted in a combination of factors: suitability to the target platform, performance, expressiveness, and (often most importantly) the programmer's familiarity and comfort with the language.
 
 This thesis will be a comparison of the relative strengths of five different programming languages when applied to five different algorithms. To explore this, the problem of large-scale string matching will be examined with a focus on matching DNA-like strings.
 
@@ -37,7 +37,7 @@ In~\cite{heather} Heather and Chain say, ``It is hard to overstate the importanc
 Implementations of the selected algorithms will be developed in five languages: C, C++, Rust, Perl, and Python. Each language's implementations will be evaluated against the others on three bases:
 
 \begin{enumerate}
-\item \textbf{Performance}: Overall run-times for each solution will be gathered using existing timer mechanisms. Time-measurements will be somewhat coarse, as overhead operations such as I/O will necessarily be included in the times.
+\item \textbf{Performance}: Run-times for each solution will be gathered using existing timer mechanisms. Time-measurements will be somewhat coarse, as overhead operations such as I/O will necessarily be included in the times.
 \item \textbf{Expressiveness}: Each solution will be measured on several source-level metrics in an effort to evaluate the expressiveness of the code.
 \item \textbf{Energy efficiency}: Energy usage will be measured for each solution using the Running Average Power Limit (RAPL) tools available on Intel processors. RAPL will be outlined in greater detail in section~\ref{subsubsec:rapl}.
 \end{enumerate}

@@ -1,11 +1,13 @@
 \section{Motivations and Prior Work}
 \label{sec:motivations}
 
-This section will discuss some of the motivations that lead to researching this specific topic. Additionally, a range of prior works will be discussed.
+This research began initially as an effort to demonstrate the suitability of the Rust programming language for the bioinformatics field. An exploration of the Rust-Bio project~\cite{rust} led to finding the SeqAn\footnote{SeqAn: \texttt{\url{https://www.seqan.de/}}} project for C++. Further investigation led to an understanding of the ongoing popularity of languages like Perl and Python in this area, as well. It was decided that, rather than focus specifically on Rust and its potential, this effort would instead pursue an understanding of the relative power of a selected set of languages on the metrics described.
+
+It is believed that these three measurements can evaluate the languages with enough clarity that a programmer could make an informed choice as to which would better meet their needs.
 
 \subsection{Programming Languages}
 
-Programming languages have a history. The first commercially-available compiled language was FORTRAN, first appearing in 1956. But there were languages before FORTRAN, languages that were highly specialized and often relied on obscure syntax. Languages evolve and new languages emerge as the applications of computing and the needs of software grow and expand. Some languages, such as C and later versions of Fortran, persist even as new languages intended to replace them fall out of favor and die off. When examining what makes a language successful, it is necessary to look at multiple factors:
+Programming languages have a long history. The first commercially-available compiled language was FORTRAN, first appearing in 1956. But there were languages before FORTRAN, languages that were highly specialized and often relied on obscure syntax. Languages evolve and new languages emerge as the applications of computing and the needs of software grow and expand. Some languages, such as C and later versions of Fortran, persist even as new languages intended to replace them fall out of favor and die off. When examining what makes a language successful, it is necessary to look at multiple factors:
 
 \begin{itemize}
 \item How well does it perform? How fast are the programs written in the language?
@@ -13,9 +15,9 @@ Programming languages have a history. The first commercially-available compiled 
 \item How difficult is it to develop software in the language? How difficult is it to maintain?
 \end{itemize}
 
-A comparison of languages is not only predicated on their speed but also on readability, expressiveness, and capability. A language must be able to perform, but it must also be understandable. Jokes about the relative readability and maintainability of different languages date back to the APL language if not earlier than that. Setting aside endeavors such as obfuscated code competitions, some languages are simply harder to read than their peers. Perl and Python are often compared in this regard, for example. Perl's syntax relies heavily on use of non-alphabetic symbols (referred to as ``sigils'') in using and referencing variables. Contrast this with Python's comparatively clean syntax, which is closer in style to that of C and other similar languages.
+A comparison of languages is not only predicated on their speed but also on readability, expressiveness, and capability. A language must be able to perform, but it must also be understandable. Jokes about the relative readability and maintainability of different languages date back to the APL language if not earlier than that. Setting aside endeavors such as obfuscated code competitions, some languages are simply harder to read than their peers. Perl and Python are often compared in this regard, for example. Perl's syntax relies heavily on the use of non-alphabetic symbols (referred to as ``sigils'') in using and referencing variables. Contrast this with Python's comparatively clean syntax, which is closer in style to that of C and other similar languages.
 
-A full treatment on the discipline of programming language design is outside the scope of this writing. Instead, issues of the more aesthetics-oriented language differences will be addressed by examining some static aspects of code, aspects that are completely independent of the running of the programs themselves.
+A full treatment on the discipline of programming language design is outside the scope of this writing. Instead, issues of the more aesthetics-oriented language differences will be addressed by examining some static aspects of the code, aspects that are completely independent of the running of the programs themselves.
 
 \subsection{Performance, Expressiveness, Energy}
 
@@ -27,13 +29,7 @@ While there are many varied reasons why people developing software like or disli
 
 Expressiveness can be a significant factor in language selection and use. In~\cite{berkholz}, Berkholz looks at measuring expressiveness by looking at how many lines of code change in an average version control commit for projects written in a range of languages. He found functional languages such as Lisp and Haskell to be the most expressive, and domain-specific languages to be biased towards high levels of expressiveness.
 
-In addition to performance and expressiveness, the energy usage of software is rapidly becoming more important as data-centers try to reduce carbon footprints and developers target battery-driven devices like mobile phones. In~\cite{pereira}, Pereira et al did an extensive analysis of energy efficiency at the programming language level. Upon seeing the results and the methods used, it became clear that this should be used with the previous two metrics to evaluate a set of languages in even broader terms.
-
-\subsection{The Motivations}
-
-This research began initially as an effort to demonstrate the suitability of the Rust programming language for the bioinformatics field. An exploration of the Rust-Bio project~\cite{rust} led to finding the SeqAn\footnote{SeqAn: \texttt{\url{https://www.seqan.de/}}} project for C++. Further investigation led to an understanding of the ongoing popularity of languages like Perl and Python in this area, as well. It was decided that, rather than focus specifically on Rust and its potential, this effort would instead pursue an understanding of the relative power of a selected set of languages on the metrics described.
-
-It is believed that these three measurements can evaluate the languages with enough clarity that a programmer could make an informed choice as to which would better meet their needs.
+In addition to performance and expressiveness, the energy usage of software is rapidly becoming more important as data-centers try to reduce carbon footprints and developers target battery-driven devices like mobile phones. In~\cite{pereira}, Pereira, et al did an extensive analysis of energy efficiency at the programming language level. Upon seeing the results and the methods used, it became clear that this should be used with the previous two metrics to evaluate a set of languages in even broader terms.
 
 \subsection{Prior Work}
 
@@ -43,8 +39,8 @@ Rahate and Chandak~\cite{rahate} performed a study focused on algorithm performa
 
 In~\cite{chen2021string}, Chen and Nguyen describe an approach to string matching over DNA data with $k$ differences. Their technique was based primarily on \textit{edit distance}, and lent ideas to the development of the $k$-gap approximate-matching algorithm that will be described in~\ref{subsec:dfa_gap}.
 
-Neamatollahi et al~\cite{neamatollahi} describe three pattern matching algorithms that are specifically targeted at searches on large DNA sequences. While the first is a more traditional character-based matching algorithm, the second and third take advantage of aspects of the CPU such as word-width to speed up comparisons.
+Neamatollahi, et al~\cite{neamatollahi} describe three pattern matching algorithms that are specifically targeted at searches on large DNA sequences. While the first is a more traditional character-based matching algorithm, the second and third take advantage of aspects of the CPU such as word-width to speed up comparisons.
 
 The concept of multiple-pattern-matching for exact matches is explored by Bhuka and Somayajulu in~\cite{bhukya}. Their approach is based on the use of pair indexing for both the sequence and the pattern. This paper gave weight to the idea of multi-pattern matching and led to the decision to take the Aho \& Corasick algorithm~\cite{aho} as one of the evaluation algorithms.
 
-In~\cite{cheng2003approximate}, Cheng et al describe a novel data structure and use it in two new parallel approximate matching algorithms. Ultimately, this was not used directly as the multiple-machine clusters would have greatly increased the complexity of taking energy usage measurements.
+In~\cite{cheng2003approximate}, Cheng, et al describe a novel data structure and use it in two new parallel approximate matching algorithms. Ultimately, this was not used directly as the multiple-machine clusters would have greatly increased the complexity of taking energy usage measurements.

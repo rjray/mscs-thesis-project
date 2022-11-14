@@ -625,7 +625,7 @@ def dfa_regexp_charts(data, filename, *, large=False):
         x + step * step_off, map(lambda k: f"$k = {k + 1}$", range(x_len))
     )
     ax.set_ylabel("Seconds")
-    ax.set_title("Comparison of DFA vs. Regexp in Perl/Python")
+    ax.set_title("Comparison of DFA vs. Regexp in Perl and Python")
     ax.legend(loc="upper left")
 
     fig.tight_layout()

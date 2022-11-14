@@ -9,7 +9,7 @@ To begin, some concepts will be introduced and terms defined.
 
 \subsubsection{SLOC (Source Lines Of Code)}
 
-The SLOC, or \textit{Source Lines Of Code}, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
+The \textit{Source Lines Of Code}, or SLOC, measurement attempts to evaluate the conciseness of the source code to a program. It generally distinguishes between physical lines of text, comments, and actual source lines.
 
 As a metric of code quality or developer productivity, SLOC is not without some controversy. In~\cite{alpernas} the authors point out that measuring lines of code can be very diverse in its execution, and often not clear in its purpose. Nguyen, et al~\cite{nguyen} put forward the basis for an unambiguous standard guide to counting, and describe its use with the support of a configurable counting tool. Here, the purpose of measuring SLOC will be simple and restricted in scope: it will only be used as a comparison of the implementation of identical algorithms in different languages.
 
@@ -23,7 +23,7 @@ Given that none of the experiment source files are of significant length, this m
 
 \subsubsection{Cyclomatic Complexity}
 
-Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the measurement is based on measurement of control structures such as conditional statements, loops and similar means of changing the path of execution through the program or function being measured.
+Thomas McCabe introduced the concept of \textit{cyclomatic complexity} in 1976~\cite{mccabe}. In the most simple terms, it measures the number of paths through a program or function. Sometimes referred to as ``McCabe Complexity'', the value is based on measurement of control structures such as conditional statements, loops and similar means of changing the path of execution through the program or function being measured.
 
 In the following combination of listing~\ref{lst:sample_python} and figure~\ref{fig:image:mccabe}, a small Python function is accompanied by a directed graph illustrating the cyclomatic complexity of the function.
 
@@ -117,7 +117,7 @@ These processes are explained in more detail in section~\ref{subsubsec:concisene
 \subsection{Experiment Harness}
 \label{subsec:harness}
 
-The harness that was developed for managing the execution of the experiment programs was based on the code developed by Pereira et al~\cite{pereira} and made available via their GitHub repository\footnote{\texttt{https://github.com/greensoftwarelab/Energy-Languages}}. Their code was adapted and heavily modified to allow for some command-line options controlling features such as the number of iterations each experiment would be run, verbosity of output, etc. It was enhanced to record maximum memory usage and to work with the specific computer selected to be the testing platform.
+The harness that was developed for managing the execution of the experiment programs was based on the code developed by Pereira, et al~\cite{pereira} and made available via their GitHub repository\footnote{\texttt{\url{https://github.com/greensoftwarelab/Energy-Languages}}}. Their code was adapted and heavily modified to allow for some command-line options controlling features such as the number of iterations each experiment would be run, verbosity of output, etc. It was enhanced to record maximum memory usage and to work with the specific computer selected to be the testing platform.
 
 \subsection{Languages}
 \label{subsec:languages}
@@ -130,17 +130,17 @@ The languages used were chosen for their commonalities as well as their differen
 \item The languages showcase differing aspects the approach to memory management, as are detailed below.
 \end{itemize}
 
-Each language section includes a sample of the language, implementing the naive (O($mn$)) matching algorithm.
+Each language section includes a sample of the language, implementing a naive (O($mn$)) matching algorithm.
 
 \subsubsection{C}
 
-The C programming language is the oldest and most-established of the languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO).
+The C programming language is the oldest and most-established of the chosen languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO).
 
 C relies on what is referred to as \textit{manual memory management}, meaning that the programmer is responsible for all allocation and freeing of dynamic memory. This approach can often lead to several major classes of bugs when used incorrectly, such as memory safety issues or memory leaks. Multiple pointers to the same region of memory can become ``dangling pointers'' when one pointer frees the memory without the other pointers being invalidated at the same time. Further attempts to use any of the other pointers can lead to memory corruption or segmentation faults.
 
 Memory management in C is done through a collection of functions in the C standard library, including \texttt{malloc}, \texttt{calloc}, \texttt{realloc}, \texttt{reallocarray}, and \texttt{free}. While \texttt{free} returns allocated memory to the heap, the other functions either allocate memory or change the size of an existing block of allocated memory.
 
-Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. Due to the low-level nature of C and the maturity of the compilers, C generally performed well at each algorithm compared to other languages. Listing~\ref{lst:naive_c} shows a C implementation of the naive algorithm.
+Experiments using the C language were run on three different compiler toolchains: the GNU Compiler Collection (GCC), the LLVM Compiler Infrastructure (LLVM), and the Intel\textregistered~oneAPI Toolkit. This was done to show the subtle differences between programs generated by these compilers, which are free and commonly-used. Due to the low-level nature of C and the maturity of the compilers, C generally performed well at each algorithm compared to other languages. Listing~\ref{lst:naive_c} shows a C implementation of the naive algorithm.
 
 \input{code/naive.c}
 
@@ -168,7 +168,7 @@ A Perl implementation of the naive algorithm is given in listing~\ref{lst:naive_
 
 \subsubsection{Python}
 
-Python is another interpreted language, developed by Guido van Rossum while at Centrum Wiskunde \& Informatica in the late 1980's and first released as version 0.9.0 in 1991. Like Perl, it is also dynamically-typed and multi-paradigm in its nature. As a language, Python consistently ranks high in user popularity on such measures as the TIOBE Programming Community Index\footnote{TIOBE Index: \texttt{https://www.tiobe.com/tiobe-index/}}.
+Python is another interpreted language, developed by Guido van Rossum while at Centrum Wiskunde \& Informatica in the late 1980's and first released as version 0.9.0 in 1991. Like Perl, it is also dynamically-typed and multi-paradigm in its nature. As a language, Python consistently ranks high in user popularity on such measures as the TIOBE Programming Community Index\footnote{TIOBE Index: \texttt{\url{https://www.tiobe.com/tiobe-index/}}}.
 
 Python's memory management is a combination of reference counting and a cycle-detecting garbage collector. A Python implementation of the naive algorithm is given in listing~\ref{lst:naive_python}.
 
@@ -242,7 +242,7 @@ In C++ it was initially attempted to reuse the \texttt{void~**} approach that ha
 
 Rust had the language features that seemed the most clear and expressive in implementation: enumeration and pattern-matching. In Rust, an enumeration type (\texttt{enum}) can optionally assign data types to the elements of the enumeration. When an enumeration element is instantiated it is provided an instance of that data when applicable. This lead to a system for the Rust programs in which the initialization function for an algorithm created and returned a vector of the enumeration type. The algorithm routines that received these types would extract them from the vector using a pattern-matching\footnote{In the computer language sense, not to be confused with pattern-matching in strings.} construct that ensured the types of each individual element of the vector received from the initialization function. The program would raise a run-time exception if the given vector element was not of the expected type. In contrast, Rust required the least-expressive approach to appending the sentinel value onto the pattern string for the sake of creating the ``next'' table.
 
-Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void~**} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar value would have caused a run-time exception in either program.
+Given the dynamically-typed nature of data in Perl and Python, both of these implementations were simple lists of values returned without any extra effort at encoding. As with the \texttt{void~**} approach the onus was on the program to unpack the elements in the correct order. Trying to use a list or list-reference value as an ordinary scalar value would have caused a run-time exception in either language.
 
 \subsubsection{Boyer and Moore}
 
@@ -293,7 +293,7 @@ The key to meeting the four requirements in section~\ref{subsec:regexp_variant},
 
 Once this had been undertaken in Python and Perl, it was necessary to implement similar experiments for the compiled languages. In the case of C++, a class for regular expressions had been part of the C++ Standard Library since the adoption of the C++11 standard. C, as well, offered regular expression support in the form of the POSIX regular expressions functions included as part of the C standard library. Rust, though, did not have built-in regular expression support.
 
-It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension.} that was available for Rust, while using the native regular expression support in C and C++. This quickly proved to be a problem: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
+It was decided to use the \texttt{regex} ``crate''\footnote{A ``crate'' is the term used in the Rust community for a packaged library or extension.} that was available for Rust, while using the native regular expression support in C and C++. This exposed problems: The C and C++ engines proved to be exceedingly slow, and unable to properly identify the matched substrings. Additionally, Rust's \texttt{regex} package did not support the positive-lookahead feature of regular expressions that was necessary to prevent making multiple passes over the target string.
 
 The solution came in the form of the Perl-Compatible Regular Expressions engine. As the name hints, the engine provides support for the various extensions to regular expression syntax introduced by Perl (as well as other languages and dialects). In particular, PCRE supports both positive-lookahead and capturing within the lookahead. Lastly, while written for the C language it was possible to use this engine in both C++ and Rust through wrapper libraries.
 
@@ -312,7 +312,7 @@ At this point, some initial observations could be made about the complexity meas
 
 Part of the reason for this is that the complexity measurement does not take into account calls to functions. This is by intent, as factoring out content to a separate function is part of the process of managing complexity. In the cases of C and C++, both utilized library functions: \texttt{strncmp} in C and \texttt{substr} in C++. In contrast, the use of \texttt{substr} in Perl is a keyword of the language. Python and Rust skip this entirely by virtue of having array-slicing be a core language feature, along with the ability to compare slices directly. Had the complexity-measuring tools taken the library calls into account, that would have changed the graph for those languages from one connected component to two, and resulted in a higher overall complexity score.
 
-Compare this to the \texttt{make\_next\_table} functions defined in the implementations of Knuth-Morris-Pratt. The complexity tool found the Python version to have a score of 6 while the C and C++ versions both scored 5. The reason for the distinction is that C and C++ allocated the array variable \textit{next\_table} prior to the function call and pass it as a parameter. By contrast, in Python \textit{next\_table} was created within the function. The loop used to create it is the source of the extra point of complexity. Figures~\ref{fig:graph-kmp-py} and~\ref{fig:graph-kmp-cpp} illustrate these slightly-different flow graphs. In figure~\ref{fig:graph-kmp-py}, states 2 and 3 represent the extra for-loop that introduces the extra point of complexity.
+Compare this to the \texttt{make\_next\_table} functions defined in the implementations of Knuth-Morris-Pratt. The complexity tool found the Python version to have a score of 6 while the C and C++ versions both scored 5. The reason for the distinction is that C and C++ allocated the array variable \textit{next\_table} prior to the function call and passed it as a parameter. By contrast, in Python \textit{next\_table} was created within the function. The loop used to create it is the source of the extra point of complexity. Figures~\ref{fig:graph-kmp-py} and~\ref{fig:graph-kmp-cpp} illustrate these slightly-different flow graphs. In figure~\ref{fig:graph-kmp-py}, states 2 and 3 represent the extra for-loop that introduces the extra point of complexity.
 
 \begin{figure}[ht]
     \centering
@@ -398,7 +398,7 @@ The CPU is dual-core, with hyperthreading cores, for a total of 4 computational 
 
 The NUC was cleaned of the vendor-installed operating system. Linux was installed on it using the minimal server edition of Ubuntu Linux 22.04.1. All unnecessary packages and software services were either disabled or removed completely.
 
-The development software (see next section) was then installed. This included the Linux version of the ``Homebrew'' package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python and Perl interpreters that were used were also provided by Homebrew, as were the majority of the tools used for developing, testing, and evaluating the experiments. The Rust language toolchain was installed and managed using the ``Rustup'' management software. Core software development packages from Ubuntu were also installed at this time.
+The development software (see next section) was then installed. This included the Linux version of the ``Homebrew'' package manager. Homebrew was specifically used to install the latest version of the LLVM Compiler Infrastructure, to allow all experiment code to be compiled directly on the NUC (rather than copying executable files built on a different machine). The Python and Perl interpreters that were used were also provided by Homebrew, as were the majority of the tools used for developing, testing, and evaluating the experiments on the development platform. The Rust language toolchain was installed and managed using the ``Rustup'' management software. Core software development packages from Ubuntu were also installed at this time.
 
 \subsubsection{Compilers and Other Tools}
 
@@ -413,8 +413,6 @@ Table~\ref{table:software_specs} lists the primary software tools and packages t
 \end{table}
 
 The tools used for the experiments themselves do include the GNU Make tool, as it was the driver for automating the running of the full range of experiments on a regular basis.
-
-%The Valgrind tool was used during development to identify memory leaks in each of the experiment programs, while \texttt{sloc} was used to measure the Source Lines Of Code metric as part of determining the expressiveness measurements of the programs. The \texttt{perf} tool was used to identify performance bottlenecks in the running programs. The tools \texttt{cloc} and \texttt{xz} were used together in the calculation of conciseness via compression, another part of the expressiveness measurements. The remaining factor for expressiveness measurement was cyclomatic complexity: the \texttt{lizard} tool was used to calculate cyclomatic complexity values for all languages except Perl and Rust. Perl complexity was measured using the \texttt{countperl} tool, part of the Perl package \texttt{Perl-Metrics-Simple}, and was installed from the official Ubuntu repositories. Rust complexity was measured using the \texttt{rust-code-analysis-cli} tool, which was obtained directly from the project's GitHub repository. Lastly, the Python programming language was used not only for experiments but also to develop the tools which processed and analyzed the data gathered during the running of the experiments, as well as for generating the randomized data that the experiments used to exercise the algorithms.
 
 \subsection{Resources}
 

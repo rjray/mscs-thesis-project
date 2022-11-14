@@ -92,7 +92,7 @@ While the Knuth-Morris-Pratt algorithm had made 10 character comparisons to find
 
 The Bitap algorithm (sometimes known as ``Shift-Or'', or ``Shift-Add'') was initially developed by B\'{a}lint D\"{o}m\"{o}lki in 1964. In 1989 it was re-invented by Ricardo Baeza-Yates and Gaston H. Gonnet, and published in~\cite{baeza} in 1992. Here, it has been chosen for the distinctive approach when compared to the other algorithms.
 
-In terms of time complexity, the algorithm is on the same terms as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the same input data.
+In terms of time complexity, the algorithm is on the same terms as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the experiment input data.
 
 The structure of the algorithm is based on encoding the pattern in a vector of bitmaps. The vector has length equal to the alphabet size, and each element of the vector is a bit-field of width $W$, where $W$ is the size in bits of an unsigned integer. $W$ also limits the length of the pattern in this implementation, though it is possible to implement the algorithm for longer patterns.
 
@@ -181,7 +181,7 @@ Here, the Aho-Corasick algorithm has positively identified the presence of two o
 \subsection{Approximate Matching with Gaps}
 \label{subsec:dfa_gap}
 
-For the fifth and final algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
+For the fifth algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
 
 The idea of using a DFA to represent the pattern is inspired primarily by~\cite{aho} and~\cite{becchi}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automaton. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
 
@@ -381,7 +381,7 @@ The requirements of using a regular expression were summarized as:
 
 The first requirement could be further expressed as constraining the time-complexity of the set-up to O($m$), linear in the length of the pattern. The DFA creation stage of the original algorithm required $k$ additional steps for $m-1$ instances of the main loop. Because $k$ is a constant in this algorithm, the complexity of that part of the original algorithm was only bounded by O($2m$) rather than being polynomial. A complexity of O($m$) would, therefore, hint at a simpler variation of the algorithm.
 
-The second requirement might be mistaken for constraining the time-complexity of search to O($n$), but this is not the case. As an approximate-matching algorithm, there would necessarily be some back-tracking through the target sequence when it has been determined that a candidate position is not the start of a matching substring after all. Instead, the goal was to try to keep the complexity close to O($(m+k)n$).
+The second requirement might be mistaken for constraining the time-complexity of search to O($n$), but this is not the case. As an approximate-matching algorithm, there would necessarily be some back-tracking through the target sequence when it has been determined that a candidate position is not the start of a matching substring. Instead, the goal was to try to keep the complexity close to O($(m+k)n$).
 
 Requirement 3 dictated the need for the chosen regular expression engines to either capture and return matches, or to positively identify the ending-point as well as the starting-point of each match. This was simple to achieve, as match-capturing is a standard feature of regular expression engines.
 

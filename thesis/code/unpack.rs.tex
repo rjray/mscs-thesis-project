@@ -1,4 +1,4 @@
-\begin{lstlisting}[language=Rust,caption={Rust unpacking of pattern data},label={lst:rust_unpack},showstringspaces=false]
+\begin{lstlisting}[language=Rust,caption={Rust unpacking of pattern data (Aho-Corasick)},label={lst:rust_unpack},showstringspaces=false]
     let pattern_count = match &pat_data[0] {
         MultiPatternData::PatternCount(val) => val,
         _ => panic!("Incorrect value at pat_data slot 0"),

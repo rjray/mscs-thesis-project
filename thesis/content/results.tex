@@ -41,7 +41,7 @@ The first of the three measures of the languages' suitability was chosen to be t
 
 It was in the measuring of performance that it first became clear what a stark difference there was between the interpreted and compiled languages. One can forget the extent of this gap when working with interpreted languages in-depth for long periods of time. The Perl and Python performance numbers were so large in many cases that they had to be omitted from charts to preserve clarity, even when put to logarithmic scaling.
 
-\subsubsection{Special Casing for Perl and Python}
+\subsubsection{Adjusting for Perl and Python}
 \label{subsubsec:results:perf_perl_python}
 
 Early examination of the performance results for Perl and Python (section~\ref{subsubsec:dfa_regexp}) had shown that the custom-built DFAs were strongly out-performed by using those languages' native support for regular expressions. Looking at these results separately from the rest of the experiments, the difference was considerable as is shown in figure~\ref{fig:graph:dfa_regexp_comp}.
@@ -80,7 +80,7 @@ After the decision was made on the regular expression question, processing of th
 \label{table:runtime:comparative-algorithm}
 \end{table}
 
-The DFA-Gap and Regexp algorithms are shown for just $k=3$. However, there was some fluctuation in the ranking of the languages as $k$ went from 1 to 5. For the application to the metric of performance, all values of $k$ for both of these algorithms will be used in the calculations.
+The DFA-Gap and Regexp algorithms are shown for just $k=3$. However, there was some fluctuation in the ranking of the languages as $k$ went from 1 to 5. For the calculation of the metric of performance, all values of $k$ for both of these algorithms will be used.
 
 The set of charts in figures~\ref{fig:graph:kmp-runtimes} to~\ref{fig:graph:regexp-runtimes} illustrate the run-times by language for each of the six algorithms. Note that all of these except figure~\ref{fig:graph:regexp-runtimes} omit the Perl and Python languages due to their extreme differences in the scale of running-time\footnote{As was mentioned, a logarithmic scale was also tried but the Perl/Python values were still too far from the norm (particularly in the Bitap results).}.
 
@@ -100,7 +100,7 @@ The set of charts in figures~\ref{fig:graph:kmp-runtimes} to~\ref{fig:graph:rege
     \end{minipage}
 \end{figure}
 
-Starting with the Knuth-Morris-Pratt (\ref{fig:graph:kmp-runtimes}) and Boyer-Moore (\ref{fig:graph:bm-runtimes}) algorithms which have a passing relation to each other, the red lines indicate the fastest run-time and are meant to show the difference in the other languages' finish-time. In the Knuth-Morris-Pratt results, of interest is the fact that both C and C++ compiled by the LLVM toolchain strongly out-performed the GCC and Intel toolchains. This would be the only algorithm in which LLVM controlled the performance for both languages. In Boyer-Moore, the Intel toolchain takes the top spot with C, and the second spot with C++. Though this is not the only algorithm for which a C++ experiment placed second, this is the highest that C++ would place throughout all algorithms.
+Starting with the Knuth-Morris-Pratt (\ref{fig:graph:kmp-runtimes}) and Boyer-Moore (\ref{fig:graph:bm-runtimes}) algorithms which have a passing relation to each other, the red lines indicate the fastest run-time and are meant to show the difference in the other languages' finish-time. In the Knuth-Morris-Pratt results, of interest is the fact that both C and C++ compiled by the LLVM toolchain strongly out-performed the GCC and Intel toolchains. This was the only algorithm in which LLVM controlled the performance for both languages. In Boyer-Moore, the Intel toolchain took the top spot with C, and the second spot with C++. Though this is not the only algorithm for which a C++ experiment placed second, this is the highest that C++ placed throughout all algorithms.
 
 \begin{figure}[ht]
     \centering
@@ -118,7 +118,7 @@ Starting with the Knuth-Morris-Pratt (\ref{fig:graph:kmp-runtimes}) and Boyer-Mo
     \end{minipage}
 \end{figure}
 
-In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM toolchain actually produced the slowest times within the C and C++ groups in this case. In the Aho-Corasick results (figure~\ref{fig:graph:ac-runtimes}) LLVM once again produced the fastest code with the C version of the experiment. The Aho-Corasick run-times also highlight the overall speed of this algorithm, powered by the ability to test all patterns in a single pass through each target sequence.
+In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM toolchain actually produced the slowest times within the C and C++ groups in this case. In the Aho-Corasick results (figure~\ref{fig:graph:ac-runtimes}) LLVM once again produced the fastest code for the C version of the experiment. The Aho-Corasick run-times also highlight the overall speed of this algorithm, enabled by the ability to test all patterns in a single pass through each target sequence.
 
 \begin{figure}[ht]
     \centering
@@ -136,7 +136,7 @@ In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM to
     \end{minipage}
 \end{figure}
 
-For the DFA and regular expression versions of the gap algorithm, figures~\ref{fig:graph:dfa-runtimes} and~\ref{fig:graph:regexp-runtimes}, a different style of charts was drawn. As both of these experiments ran for five different values of the $k$ parameter, the charts are designed to show all five run-times for each language as a stack.
+For the DFA and regular expression versions of the gap algorithm, figures~\ref{fig:graph:dfa-runtimes} and~\ref{fig:graph:regexp-runtimes}, different styles of charts were drawn. As both of these experiments ran for five different values of the $k$ parameter, the charts are designed to show all five run-times for each language as a stack.
 
 The DFA experiments follow an almost expected trajectory, with C being faster than C++ and C++ faster than Rust. However, the regular expression experiments show an exactly opposite trend, with Rust being the fastest of the languages. Figure~\ref{fig:graph:regexp-runtimes} also includes results for the Perl and Python languages, as this experiment gave results for them that could be comfortably included.
 
@@ -155,7 +155,7 @@ In comparing expressiveness, it is useful to look at all three of the chosen com
 
 \begin{description}
 \item[SLOC:] Total SLOC values for each language's files were combined. In the case of C and C++, this includes relevant lines from the header files for the runner and input modules.
-\item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Any function whose value was exactly 1 was discarded so as to not artificially lower the average complexity for the module. Each module's function-level scores were then averaged, and all modules' averages for a given language were summed together.
+\item[Complexity:] Each file's cyclomatic complexity values were computed on a per-function basis. Each module's function scores were averaged, and all modules' averages for a given language were summed together.
 \item[Conciseness:] Using a method adapted from Bergmans, et al~\cite{bergmans}, each source code file for a given language was stripped of comments and then merged into a sort of ``archive'' using the standard ``\texttt{cat}'' command available on Linux. Each such resulting file was then compressed with the ``\texttt{xz}'' compression utility and the compression ratio recorded.
 \end{description}
 
@@ -175,7 +175,7 @@ Here Python is the clear leader, with Perl being 40\% larger in table~\ref{table
 
 \input{code/unpack.rs}
 
-In this area, C and C++ each needed only one line per element passed (listing~\ref{lst:c_unpack}), while Rust required four\footnote{One of which was a closing-brace with a semicolon and might not have been counted by the \texttt{sloc} tool.} (listing~\ref{lst:rust_unpack}). This is a 12-line difference in just the Aho-Corasick implementation, so it can be understood how this would likely propagate through the other algorithm implementations.
+In this area, C and C++ each needed only one line per element passed (listing~\ref{lst:c_unpack}), while Rust required four\footnote{One of which was a closing-brace with a semicolon and might not have been counted by the \texttt{sloc} tool.} (listing~\ref{lst:rust_unpack}). This is a 12-line difference in just the Aho-Corasick implementation, so it can be understood how this could propagate through the other algorithm implementations.
 
 By further comparison: both Python and Perl, having the native ability to pass arrays of differing types, needed only one line to unpack the pattern representations.
 
@@ -192,7 +192,7 @@ Table~\ref{table:expr:cyclomatic} shows a similar break-down of the cyclomatic c
 
 Unlike the SLOC measurements, however, there is greater variation in the rankings of the languages. Here the contest between the first and second rankings was between Python and C++. Rust placed last in the measure of the algorithm code, possibly due to the same issue of excess lines around the unpacking of pattern data. Rust did rank third in the framework table~\ref{table:cyclomatic:framework} where it also had a significantly lower average value than C++ or Python. Even as Rust ended tied for the fourth rank in the total table, its totaled average complexity was still the lowest of the five.
 
-It is important here to note again that it was necessary to use different tools to calculate the complexity of the Perl and Rust code. The \texttt{lizard} tool did not support Perl at all, and examination of the Rust results showed some bugs in the handling of Rust. Because of this, it is not possible to say with certainty that the relative comparisons of complexity between the five languages are completely sound. For the purposes of this paper the total complexity values will be used as presented here. It is felt that this will be sufficient as these values will only contribute $\frac{1}{3}$ of the value of the final expressiveness value.
+It is important here to note again that it was necessary to use different tools to calculate the complexity of the Perl and Rust code. The \texttt{lizard} tool did not support Perl at all, and examination of the Rust results showed some bugs in the handling of Rust. Because of this, it is not possible to say with certainty that the relative comparisons of complexity between the five languages are completely sound.
 
 \subsubsection{Conciseness}
 \label{subsubsec:conciseness}
@@ -288,7 +288,7 @@ RAPL posed other challenges to use, such as the previously-mentioned 32-bit limi
 
 The language exhibiting the lowest energy usage is listed first, with the rest ranked behind it. The DFA-Gap and Regexp algorithms are again represented by $k=3$, and again the rankings of the languages varied with $k$.
 
-These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 14 distinct groups of experiments.
+These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. In this collection of bar-charts, the Rust language (represented by the pink bars) can be seen to be the lowest value in the Knuth-Morris-Pratt, Boyer-Moore, and DFA-Gap instances. In fact, Rust scored the lowest energy usage for all five variations of the DFA-Gap algorithm, making it the most-efficient language for 7 of the 14 distinct groups of experiments. Here, Perl and Python are included because the per-second measurements normalize their higher energy usage.
 
 \begin{figure}[h]
 	\centering
@@ -311,7 +311,7 @@ As with the run-times score tables, full tables of energy scores for all values 
 \subsection{Combining the Bases}
 \label{subsec:combined}
 
-There were now three distinct measurements available for combination and analysis. The first step was to derive a single set of scores for the run-time basis and the energy-used basis, combining the values from all 14 groups of experiments into single values. For this, values were simply added together then scaled by the minimum value as has been done elsewhere. The total run-time table~\ref{table:total:runtime} shows these values, derived from the algorithm-only run-time metric. In table~\ref{table:total:energy}, the same is done with the combination of the ``Package'' and ``DRAM'' energy metrics.
+There were now three distinct measurements available for combination and analysis. The first step was to derive a single set of scores for the run-time basis and the energy-used basis, combining the values from all 14 groups of experiments into single values. For this, values were simply added together then scaled by the minimum value as has been done before. The total run-time table~\ref{table:total:runtime} shows these values, derived from the algorithm-only run-time metric. In table~\ref{table:total:energy}, the same is done with the combination of the ``Package'' and ``DRAM'' energy metrics.
 
 \begin{table}[!htb]
 \input{tables/runtime_energy_totals}
@@ -319,7 +319,7 @@ There were now three distinct measurements available for combination and analysi
 \label{table:totals:runtime-energy}
 \end{table}
 
-From here came a big question in two parts: Should the final scoring be based on the languages' scores for these bases or based on the language rankings? And secondly, should the cyclomatic complexity data be included in the expressiveness basis or not?
+From here came a question in two parts: Should the final scoring be based on the languages' scores for these bases or based on the language rankings? And secondly, should the cyclomatic complexity data be included in the expressiveness basis or not?
 
 While the question regarding the complexity data has already been discussed, it still remained to be seen whether it would affect the final rankings. More than this, however, was the question of whether to simply apply the ranking of each language to determine final placement. Doing so might create a stronger distinction between adjacent languages than the scores themselves would. On the other hand, using the scores would retain the subtlety in the differences between languages.
 
@@ -362,3 +362,15 @@ In table~\ref{table:totals:all_metrics_distinct} the five distinct languages are
 \end{figure}
 
 In figure~\ref{fig:graph:final_distinct_plot}, the line for the first four rankings is much more straight than had been in figure~\ref{fig:graph:final_scores_plot}. It is worth noting that the change between Python in \nth{4} place and Perl in \nth{5} is much smaller than for the previous places.
+
+Whether this establishes Rust as the ``best'' language for this purpose cannot be said for certain, for the definition of ``best'' can only be objective up to a point before subjective judgment and feelings begin to influence decisions. In the end, the measurements taken and evaluated began to resemble the concept of a triathlon: it was not necessary for Rust to win every category to have ended up as the recommended solution, the overall winner. Rust did not even achieve notable performance metrics, only being the top-ranked for one of the six algorithms. But Rust's performance numbers were steady and reliable across all algorithms. In terms of energy usage Rust was top-ranked in fully half of the algorithms and variations. This lead to Rust leading both of these metrics in the final results.
+
+An earlier incarnation of this work had focused on the security benefits of the Rust language. Through the process of research and running of the experiments, the focus changed to that stated in the abstract: finding the optimal language based on a balance of performance, expressiveness, and energy use.
+
+And, in the end, that language appears to be Rust.
+
+Over the three bases that were reviewed, Rust clearly stood out in performance and energy. The measure of expressiveness is the only area in which it was not in the top place of the table. That said, expressiveness is the most subjective of the measurements and Rust could well improve in this measure through broader utilization and its own evolution.
+
+Recently, ZDNet published an article~\cite{tung} about the National Security Agency's recommendation for developers to consider switching to programming languages that feature greater memory safety. While memory safety was not a focus of this research, it is noteworthy that the language recommended here is also considered to be the safest of the group in this regard. All of the experiments written in compiled languages were tested with Valgrind, being refined and debugged until Valgrind reported detecting no memory-related errors\footnote{Perl and Python were not tested with Valgrind, as they are built on bytecode interpreters whose memory-safety is a separate issue.}. Of the compiled languages, only Rust never exhibited any memory errors through Valgrind.
+
+With this, it becomes more understandable why Perkel~\cite{nature} found so many in the sciences turning to Rust as their choice of a performance-oriented language. Though the youngest of the languages evaluated here, Rust has quickly grown to showing great potential for a wide range of applications.
