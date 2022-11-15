@@ -1,0 +1,11 @@
+\begin{lstlisting}[language=C,caption={C/C++ DFA-Gap main loop},label={lst:dfa_c}]
+for (int i = 0; i <= end; i++) {
+  int state = 0;
+  int ch = 0;
+  while ((i + ch) < n && dfa[state][sequence[i + ch]] != FAIL)
+    state = dfa[state][sequence[i + ch++]];
+
+  if (state == terminal)
+    matches++;
+}
+\end{lstlisting}

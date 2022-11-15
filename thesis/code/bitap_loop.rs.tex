@@ -1,0 +1,8 @@
+\begin{lstlisting}[language=Rust,caption={Bitap main loop in Rust},label={lst:bitap_rust}]
+for j in 0..n {
+    state = (state << 1) | s_positions[sequence[j] as usize];
+    if state < *lim {
+        matches += 1;
+    }
+}
+\end{lstlisting}
