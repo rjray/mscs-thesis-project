@@ -16,7 +16,7 @@ Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matc
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.65\textwidth]{figures/kmpexample.jpg}
-    \caption[Example of Knuth-Morris-Pratt algorithm]{Example of Knuth-Morris-Pratt, original source~\cite{shandilya}}
+    \caption[Example of Knuth-Morris-Pratt algorithm]{Example of Knuth-Morris-Pratt (original source~\cite{shandilya})}
     \label{fig:image:kmpexample}
 \end{figure}
 
@@ -216,7 +216,7 @@ However, this not correct because the dot (``\texttt{.}'') matches all character
 
 This, given that $k$ is known at the time of the construction, can be readily transformed into a DFA.
 
-As an initial naive approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m - 1$ characters of the pattern being searched for. It first creates states 0 and 1, representing the initial state and the the state reached by encountering the first character of the pattern ($p_0$). These two states constitute the beginning of the ``trunk'' of the DFA. Then the algorithm loops from 1 to $m-1$, performing the following steps for each loop iteration:
+As an initial naive approach to the algorithm, the constructed DFA emulates the counting-states by creating $k$ additional states for each of the first $m-1$ characters of the pattern being searched for. It first creates states 0 and 1, representing the initial state and the the state reached by encountering the first character of the pattern ($p_0$). These two states constitute the beginning of the ``trunk'' of the DFA. Then the algorithm loops from 1 to $m-1$, performing the following steps for each loop iteration:
 
 \begin{enumerate}
 \item A new state is created on the trunk (``\texttt{new\_state}'')
