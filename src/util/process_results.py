@@ -68,6 +68,7 @@ FILES = {
     "dfa_regexp_chart": "dfa_regexp_comp.png",
     "dfa_regexp_chart2": "dfa_regexp_comp2.png",
     "algorithm_runtimes": "algorithm_runtimes-%s.png",
+    "k_runtimes": "k_runtimes-%s.png",
     "iterations_table": "iterations.tex",
     "runtimes_table": "runtimes.tex",
     "runtimes_appendix_tables": [
@@ -526,6 +527,39 @@ def stacked_runtime_chart(
     ax.legend()
 
     fig.tight_layout()
+
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+def k_runtimes_graph(
+    data, filename, algorithm, label, *, languages=LANGUAGES, large=False
+):
+    # Language labels
+    labels = [LANGUAGE_LABELS[x] for x in languages]
+
+    # Expand filename
+    filename = filename % algorithm
+
+    # Get the data into an array of np.array()
+    width = len(languages)
+    runtimes = [np.zeros(5) for _ in range(width)]
+    for k in range(1, 6):
+        algo = f"{algorithm}({k})"
+        for idx, lang in enumerate(languages):
+            runtimes[idx][k - 1] = data[lang][algo]["runtime"]["mean"]
+
+    fig, ax = get_fig_and_ax(large)
+
+    xr = range(1, 6)
+    for x in range(width):
+        ax.plot(xr, runtimes[x], label=labels[x], marker="o")
+    ax.set_xticks(list(range(1, 6)))
+    ax.set_ylabel("Seconds")
+    ax.set_title(f"{label} Run-Times by Language for $k$")
+    ax.legend()
 
     print(f"    Writing {filename}")
     fig.savefig(filename)
@@ -1756,6 +1790,16 @@ def main():
     print("  Done.")
     print("  Creating DFA vs. Regexp C/C++/Rust runtimes chart...")
     dfa_regexp_charts2(analyzed, FILES["dfa_regexp_chart2"], large=True)
+    print("  Done.")
+    print("  Creating k-indexed runtimes graphs...")
+    k_runtimes_graph(
+        analyzed, FILES["k_runtimes"], "dfa_gap", "DFA-Gap",
+        languages=compiled, large=True
+    )
+    k_runtimes_graph(
+        analyzed, FILES["k_runtimes"], "regexp", "Regexp-Gap",
+        languages=compiled, large=True
+    )
     print("  Done.")
     print("  Creating algorithm runtimes charts...")
     # Do the exact-match algorithms, compiled only
