@@ -258,6 +258,8 @@ The C and C++ implementations are best compared to each other, as this is anothe
 
 The C version of Bitap was taken from~\cite[Chapter 5]{handbook}, where it is referred to as Shift-Or. The design of the algorithm given there is clearly drawn from the Shift-Or algorithm illustrated in~\cite{baeza}. The C++ version followed the C very closely with the only changes being the use of the C++ standard classes for strings and vectors. Likewise, the Rust version of this algorithm proved very simple and bore a reasonable resemblance to the C and C++.
 
+\input{code/bitap_loop.rs}
+
 The Perl and Python implementations were also very similar to the compiled versions, with the same exception that each language has arrays as first-class data types. The Python version, however, did have one notable difference: due to Python's integers being of arbitrary size, it was not enough to take the bit-complement of 0 to get a ``full'' bit-field. In Python this resulted in a value of -1, rather than the expected $2^W - 1$ (where $W$ is the word-size used within the algorithm). To force Python to treat these values as unsigned 64-bit, it was necessary to declare a ``mask'' value equal to $2^W - 1$ and apply this to the result of every logical bit-operation performed. This incurred a significant performance penalty on the Python implementation, giving it the widest performance gap when compared against its Perl counterpart.
 
 \subsubsection{Aho and Corasick}
@@ -274,7 +276,9 @@ Lastly, the Rust implementation went through several iterations before reaching 
 
 As this algorithm was new material, it was difficult to anticipate what concerns and issues would arise. Some aspects of each implementation were close in design to the Aho-Corasick code due to the fact that both algorithms are centered around a DFA. All implementations were based on the developed algorithms~\ref{alg:create_dfa} and~\ref{alg:find_pattern_with_gaps}, from section~\ref{subsec:dfa_gap}.
 
-As was the case with some of the previous algorithms, the main differences between the C and C++ implementations were in the use of C++ standard library classes in place of manual memory management. The availability of a postfix-increment operator in these languages allowed the two statements of lines 8--9 in algorithm~\ref{alg:find_pattern_with_gaps} to be combined into a single statement. Unlike the Aho-Corasick DFA allocation, this algorithm has a predictable number of states. This made allocation of the DFA much more exact and clean in comparison.
+\input{code/dfa_loop.c}
+
+As was the case with some of the previous algorithms, the main differences between the C and C++ implementations were in the use of C++ standard library classes in place of manual memory management; their main loops were identical (listing~\ref{lst:dfa_c}). The availability of a postfix-increment operator in these languages allowed the two statements of lines 8--9 in algorithm~\ref{alg:find_pattern_with_gaps} to be combined into a single statement. Unlike the Aho-Corasick DFA allocation, this algorithm has a predictable number of states. This made allocation of the DFA much more exact and clean in comparison.
 
 The Rust version of this algorithm is largely identical in structure to the C and C++ versions. In terms of SLOC, it comes in longer than either of those, due primarily to the number of lines used for pattern-matching in the processing of the pattern data structure created by the initialization routine.
 
