@@ -53,7 +53,7 @@ Early examination of the performance results for Perl and Python (section~\ref{s
 	\label{fig:graph:dfa_regexp_comp}
 \end{figure}
 
-Not only were the run-times themselves higher for the DFA implementations, but the growth in run-time as $k$ increases was more pronounced for the DFA implementations than for the regular expression implementations. Note that while Perl's DFA was outperformed by Python's for the first three values of $k$, at $k=4$ it was effectively equal and was slightly better at $k=5$. However, in the regular expression implementation Python remained the better performer consistently.
+Not only were the run-times themselves higher for the DFA implementations, but the growth in run-time as $k$ increases was more pronounced for the DFA implementations than for the regular expression implementations. Note that while Perl's DFA was outperformed by Python's for the first two values of $k$, at $k=3$ it was slightly lower and was steadily improving over Python for both $k=4$ and $k=5$. However, in the regular expression implementation Python remained the better performer consistently.
 
 This had led to a significant question during development regarding the measurement of performance for the algorithms: should the Perl and Python manually-coded DFA implementations be replaced by the regular expression implementations? It is highly unlikely that an experienced programmer in either of these two languages would choose to create the DFA manually when they could instead create a regular expression based on the pattern and a given value of $k$, in any case. When the performance is so drastically disparate it seems even less likely.
 
@@ -89,13 +89,13 @@ The set of charts in figures~\ref{fig:graph:kmp-runtimes} to~\ref{fig:graph:rege
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-kmp.png}
-        \caption{KMP run-times}
+        \caption[Knuth-Morris-Pratt run-times]{KMP run-times}
         \label{fig:graph:kmp-runtimes}
     \end{minipage}\hfill
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-boyer_moore.png}
-        \caption{BM run-times}
+        \caption[Boyer-Moore run-times]{BM run-times}
         \label{fig:graph:bm-runtimes}
     \end{minipage}
 \end{figure}
@@ -113,7 +113,7 @@ Starting with the Knuth-Morris-Pratt (\ref{fig:graph:kmp-runtimes}) and Boyer-Mo
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-aho_corasick.png}
-        \caption{AC run-times}
+        \caption[Aho-Corasick run-times]{AC run-times}
         \label{fig:graph:ac-runtimes}
     \end{minipage}
 \end{figure}
@@ -125,13 +125,13 @@ In the Bitap results shown in figure~\ref{fig:graph:bitap-runtimes}, the LLVM to
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-dfa_gap.png}
-        \caption{DFA run-times}
+        \caption[DFA-Gap run-times]{DFA run-times}
         \label{fig:graph:dfa-runtimes}
     \end{minipage}\hfill
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.85\textwidth]{figures/algorithm_runtimes-regexp.png}
-        \caption{Regexp run-times}
+        \caption[Regexp-Gap run-times]{Regexp run-times}
         \label{fig:graph:regexp-runtimes}
     \end{minipage}
 \end{figure}
@@ -140,7 +140,7 @@ For the DFA and regular expression versions of the gap algorithm, figures~\ref{f
 
 The DFA experiments follow an almost expected trajectory, with C being faster than C++ and C++ faster than Rust. However, the regular expression experiments show an exactly opposite trend, with Rust being the fastest of the languages. Figure~\ref{fig:graph:regexp-runtimes} also includes results for the Perl and Python languages, as this experiment gave results for them that could be comfortably included.
 
-Full tables of run-times scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}.
+Full tables of run-times scores for all values of $k$ in both DFA-Gap and Regexp-Gap experiments can be found in section~\ref{sec:extra_tables}. A short analysis of the relative size of the run-times themselves is done in section~\ref{sec:extra_graphs}, as those details are less directly relevant to the collected performance calculations.
 
 \subsection{Expressiveness Comparisons}
 \label{subsec:expr_comp}
@@ -371,6 +371,6 @@ And, in the end, that language appears to be Rust.
 
 Over the three bases that were reviewed, Rust clearly stood out in performance and energy. The measure of expressiveness is the only area in which it was not in the top place of the table. That said, expressiveness is the most subjective of the measurements and Rust could well improve in this measure through broader utilization and its own evolution.
 
-Recently, ZDNet published an article~\cite{tung} about the National Security Agency's recommendation for developers to consider switching to programming languages that feature greater memory safety. While memory safety was not a focus of this research, it is noteworthy that the language recommended here is also considered to be the safest of the group in this regard. All of the experiments written in compiled languages were tested with Valgrind, being refined and debugged until Valgrind reported detecting no memory-related errors\footnote{Perl and Python were not tested with Valgrind, as they are built on bytecode interpreters whose memory-safety is a separate issue.}. Of the compiled languages, only Rust never exhibited any memory errors through Valgrind.
+Recently, ZDNet published an article~\cite{tung} about the National Security Agency's recommendation for developers to consider switching to programming languages that feature greater memory safety. While memory safety was not a focus of this research, it is noteworthy that the language recommended here is also considered to be the safest of the group in this regard. All of the experiments written in compiled languages were tested with Valgrind, being refined and debugged until Valgrind reported detecting no memory-related errors\footnote{Perl and Python were not tested with Valgrind, as they are built on bytecode interpreters.}. Of the compiled languages, only Rust never exhibited any memory errors through Valgrind.
 
 With this, it becomes more understandable why Perkel~\cite{nature} found so many in the sciences turning to Rust as their choice of a performance-oriented language. Though the youngest of the languages evaluated here, Rust has quickly grown to showing great potential for a wide range of applications.
