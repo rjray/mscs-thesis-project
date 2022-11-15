@@ -115,7 +115,7 @@ clean: clean-all
 
 realclean: clean clean-data
 
-clean-all: harness-clean $(LANG_CLEAN) clean-images clean-tex
+clean-all: harness-clean $(LANG_CLEAN) clean-images clean-tex clean-gen-data
 
 reset: clean all
 
@@ -125,9 +125,12 @@ clean-images:
 clean-tex:
 	$(RM) *.tex
 
+clean-get-data:
+	$(RM) $(SLOC_FILE) $(COMPRESSION_STATS) $(CYCLOMATIC_FILE_CSV) \
+		$(CYCLOMATIC_FILE_JSON) $(CYCLOMATIC_FILE_YAML)
+
 # A rule to run valgrind over all the compiled code to ensure that no memory
 # leaks have been introduced.
-
 memcheck:
 	echo "# Running on host:" `hostname` > $(MEMCHECK_FILE)
 	echo "# Memory check started:" `date` >> $(MEMCHECK_FILE)
