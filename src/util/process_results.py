@@ -86,8 +86,10 @@ FILES = {
     "expr2_table": "expressiveness2.tex",
     "runtime_energy_totals_table": "runtime_energy_totals.tex",
     "final_scores_tables": "final_scores.tex",
+    "final_scores_extra": "final_scores_extra-%d.tex",
     "final_scores_plot": "final_scores_plot.png",
     "final_scores_distinct": "final_distinct.tex",
+    "final_scores_distinct_extra": "final_distinct_extra-%d.tex",
     "final_scores_distinct_plot": "final_distinct.png",
     "expressiveness_graph": "expressiveness_arrows.png",
 }
@@ -751,7 +753,7 @@ def arrow_graph(data, labels, filename, title):
 # write the LaTeX code to the open file `f`.
 def create_computed_table(
     f, data, langs, algorithm, fields, *, caption=None, label=None,
-    divisor=None
+    divisor=None, value="Value"
 ):
     if label:
         print(f"    Creating table {label}")
@@ -772,8 +774,11 @@ def create_computed_table(
     y_axis = langs
     y_labels = lang_labels
 
-    colspec = "l|r"
-    headers = "Language & Score"
+    colspec = "l|r|r"
+    headers = list(
+        map(lambda x: f"\\thead{{{x}}}", ["Language", value, "Score"])
+    )
+    headers = " & ".join(headers)
 
     # Create the vector of numbers for the data:
     table_data = np.zeros(length)
@@ -789,10 +794,10 @@ def create_computed_table(
     if divisor:
         table_data /= divisors
     # Normalize:
-    table_data /= table_data.min()
+    table_data_scores = table_data / table_data.min()
 
     # Now we need a map of the order to display rows in.
-    row_map = make_map(table_data)
+    row_map = make_map(table_data_scores)
 
     # Caption and label:
     print(f"    \\caption{{{caption}}}", file=f)
@@ -810,7 +815,8 @@ def create_computed_table(
 
     for y_idx in row_map:
         row = [y_labels[y_idx]]
-        row.append(f"{table_data[y_idx]:.4f}")
+        row.append(f"{table_data[y_idx]:.2f}")
+        row.append(f"{table_data_scores[y_idx]:.4f}")
         print("        " + " & ".join(row) + " \\\\", file=f)
 
     print("        \\hline", file=f)
@@ -867,15 +873,16 @@ def create_runtime_tables(data, filename):
         for idx, algo in enumerate(algorithms):
             algo_label = algo.replace("(3)", "")
             # Start the sub-table:
-            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("\\begin{subtable}{0.49\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
                 f, data, LANGUAGES, algo, "runtime",
-                caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo_label}"
+                caption=ALGORITHM_LABELS[algo], label=f"runtime:{algo_label}",
+                value="Runtime"
             )
             # End the sub-table:
             print("\\end{subtable}", file=f, end="")
-            if idx % 3 == 2 or idx == len(algorithms) - 1:
+            if idx % 2 == 1 or idx == len(algorithms) - 1:
                 print("", file=f)
             else:
                 print("%", file=f)
@@ -898,15 +905,16 @@ def create_runtime_appendix_tables(data, filenames):
             print(f"% Generated: {datetime.datetime.now()}", file=f)
             for idx, algo in enumerate(algorithms):
                 # Start the sub-table:
-                print("\\begin{subtable}{0.33\\textwidth}", file=f)
+                print("\\begin{subtable}{0.49\\textwidth}", file=f)
                 print("    \\centering", file=f)
                 create_computed_table(
                     f, data, LANGUAGES, algo, "runtime",
-                    caption=f"$k={idx + 1}$", label=f"runtime:{algo}"
+                    caption=f"$k={idx + 1}$", label=f"runtime:{algo}",
+                    value="Runtime"
                 )
                 # End the sub-table:
                 print("\\end{subtable}", file=f, end="")
-                if idx % 3 == 2:
+                if idx % 2 == 1:
                     print("", file=f)
                 else:
                     print("%", file=f)
@@ -918,26 +926,34 @@ def create_runtime_appendix_tables(data, filenames):
             for idx, lang in enumerate(LANGUAGES):
                 for algo in algorithms:
                     combined[idx] += data[lang][algo]["runtime"]["mean"]
-            combined /= combined.min()
-            combined_map = make_map(combined)
+            combined_scores = combined / combined.min()
+            combined_map = make_map(combined_scores)
             caption = "Combined $k$"
             label = f"runtime:{a_label}:combined"
+            headers = list(
+                map(
+                    lambda x: f"\\thead{{{x}}}",
+                    ["Language", "Runtime", "Score"]
+                )
+            )
+            headers = " & ".join(headers)
 
             # Start the sub-table
-            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("\\begin{subtable}{0.49\\textwidth}", file=f)
             print("    \\centering", file=f)
             # Caption and label:
             print(f"    \\caption{{{caption}}}", file=f)
             print(f"    \\label{{table:{label}}}", file=f)
             # Sub-table
-            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("    \\begin{tabular}{|l|r|r|}", file=f)
             print("        \\hline", file=f)
-            print("        Language & Score \\\\", file=f)
+            print(f"        {headers} \\\\", file=f)
             print("        \\hline", file=f)
 
             for idx in combined_map:
                 row = [lang_labels[idx]]
-                row.append(f"{combined[idx]:.4f}")
+                row.append(f"{combined[idx]:.2f}")
+                row.append(f"{combined_scores[idx]:.4f}")
                 print("        " + " & ".join(row) + " \\\\", file=f)
 
             print("        \\hline", file=f)
@@ -961,16 +977,16 @@ def create_energy_tables(data, filename):
         for idx, algo in enumerate(algorithms):
             algo_label = algo.replace("(3)", "")
             # Start the sub-table:
-            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("\\begin{subtable}{0.49\\textwidth}", file=f)
             print("    \\centering", file=f)
             create_computed_table(
                 f, data, LANGUAGES, algo, ["package", "dram"],
                 caption=ALGORITHM_LABELS[algo], label=f"energy:{algo_label}",
-                divisor="total_runtime"
+                divisor="total_runtime", value="Energy"
             )
             # End the sub-table:
             print("\\end{subtable}", file=f, end="")
-            if idx % 3 == 2 or idx == len(algorithms) - 1:
+            if idx % 2 == 1 or idx == len(algorithms) - 1:
                 print("", file=f)
             else:
                 print("%", file=f)
@@ -993,16 +1009,16 @@ def create_energy_appendix_tables(data, filenames):
             print(f"% Generated: {datetime.datetime.now()}", file=f)
             for idx, algo in enumerate(algorithms):
                 # Start the sub-table:
-                print("\\begin{subtable}{0.33\\textwidth}", file=f)
+                print("\\begin{subtable}{0.49\\textwidth}", file=f)
                 print("    \\centering", file=f)
                 create_computed_table(
                     f, data, LANGUAGES, algo, ["package", "dram"],
                     caption=f"$k={idx + 1}$", label=f"energy:{algo}",
-                    divisor="total_runtime"
+                    divisor="total_runtime", value="Energy"
                 )
                 # End the sub-table:
                 print("\\end{subtable}", file=f, end="")
-                if idx % 3 == 2:
+                if idx % 2 == 1:
                     print("", file=f)
                 else:
                     print("%", file=f)
@@ -1013,29 +1029,38 @@ def create_energy_appendix_tables(data, filenames):
             combined = np.zeros(len(LANGUAGES))
             for idx, lang in enumerate(LANGUAGES):
                 for algo in algorithms:
-                    combined[idx] += data[lang][algo]["package"]["mean"]
-                    combined[idx] += data[lang][algo]["dram"]["mean"]
-                    combined[idx] /= data[lang][algo]["total_runtime"]["mean"]
-            combined /= combined.min()
-            combined_map = make_map(combined)
+                    val = data[lang][algo]["package"]["mean"]
+                    val += data[lang][algo]["dram"]["mean"]
+                    val /= data[lang][algo]["total_runtime"]["mean"]
+                    combined[idx] += val
+            combined_scores = combined / combined.min()
+            combined_map = make_map(combined_scores)
             caption = "Combined $k$"
             label = f"energy:{a_label}:combined"
+            headers = list(
+                map(
+                    lambda x: f"\\thead{{{x}}}",
+                    ["Language", "Energy", "Score"]
+                )
+            )
+            headers = " & ".join(headers)
 
             # Start the sub-table
-            print("\\begin{subtable}{0.33\\textwidth}", file=f)
+            print("\\begin{subtable}{0.49\\textwidth}", file=f)
             print("    \\centering", file=f)
             # Caption and label:
             print(f"    \\caption{{{caption}}}", file=f)
             print(f"    \\label{{table:{label}}}", file=f)
             # Sub-table
-            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("    \\begin{tabular}{|l|r|r|}", file=f)
             print("        \\hline", file=f)
-            print("        Language & Score \\\\", file=f)
+            print(f"        {headers} \\\\", file=f)
             print("        \\hline", file=f)
 
             for idx in combined_map:
                 row = [lang_labels[idx]]
-                row.append(f"{combined[idx]:.4f}")
+                row.append(f"{combined[idx]:.2f}")
+                row.append(f"{combined_scores[idx]:.4f}")
                 print("        " + " & ".join(row) + " \\\\", file=f)
 
             print("        \\hline", file=f)
@@ -1266,6 +1291,55 @@ def create_cyclomatic_tables(data, filename, score_file):
     return all_score
 
 
+def make_extra_table(
+    filename, values_map, values_axes, values_lengths, values_scores,
+    values_labels, type, cc, no_norm=False
+):
+    headers = [
+        "Language", "Runtime", "Expressiveness", "Energy",
+        "Unit vector \\\\ length", "Score"
+    ]
+    if no_norm:
+        # The last two tables don't have their values normalized, so they
+        # aren't unit vectors.
+        headers[4] = "Vector length"
+    headers = " & ".join(
+        list(map(lambda x: f"\\thead{{{x}}}", headers))
+    )
+    if type == "score":
+        spec = "|l|r|r|r|c|r|"
+    else:
+        spec = "|l|c|c|c|c|r|"
+
+    print(f"    Writing {filename}")
+    with open(filename, "w", encoding="utf-8") as f:
+        # Preamble comments:
+        print(
+            f"% Table: Full final results table, {type}, {cc} complexity",
+            file=f
+        )
+        print(f"% Generated: {datetime.datetime.now()}", file=f)
+        print("\\centering", file=f)
+        print(f"\\begin{{tabular}}{{{spec}}}", file=f)
+        print("    \\hline", file=f)
+        print(f"    {headers} \\\\", file=f)
+        print("    \\hline", file=f)
+        for x in values_map:
+            row = [values_labels[x]]
+            for v in values_axes[x]:
+                if type == "score":
+                    row.append(f"{v:.4f}")
+                else:
+                    row.append(str(v))
+            row.append(f"{values_lengths[x]:.4f}")
+            row.append(f"{values_scores[x]:.4f}")
+            print("    " + " & ".join(row) + " \\\\", file=f)
+        print("    \\hline", file=f)
+        print("\\end{tabular}", file=f)
+
+    return
+
+
 def create_expressiveness_tables(
     sloc, cyclomatic, compression, expressiveness, expr2, filename, filename2
 ):
@@ -1346,10 +1420,16 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
 
     # Create the two tables for these final scores:
     maps = {"runtime": runtime_map, "energy": energy_map}
+    totals = [runtime_totals, energy_totals]
     scores = [runtime_scores, energy_scores]
     captions = ["Scores for total run-time", "Scores for total energy usage"]
     labels = ["table:total:runtime", "table:total:energy"]
-    headings = list(map(lambda x: f"\\thead{{{x}}}", ["Language", "Score"]))
+    headings = [
+        list(
+            map(lambda x: f"\\thead{{{x}}}", ["Language", "Runtime", "Score"])
+        ),
+        list(map(lambda x: f"\\thead{{{x}}}", ["Language", "Energy", "Score"]))
+    ]
     filename = files["runtime_energy_totals_table"]
     print(f"    Writing {filename}")
 
@@ -1363,12 +1443,13 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
             print("    \\centering", file=f)
             print(f"    \\caption{{{captions[idx]}}}", file=f)
             print(f"    \\label{{{labels[idx]}}}", file=f)
-            print("    \\begin{tabular}{|l|r|}", file=f)
+            print("    \\begin{tabular}{|l|r|r|}", file=f)
             print("        \\hline", file=f)
-            print("        " + " & ".join(headings) + " \\\\", file=f)
+            print("        " + " & ".join(headings[idx]) + " \\\\", file=f)
             print("        \\hline", file=f)
             for x in maps[table]:
                 row = [LANGUAGE_LABELS[LANGUAGES[x]]]
+                row.append(f"{totals[idx][x]:.2f}")
                 row.append(f"{scores[idx][x]:.4f}")
                 print("        " + " & ".join(row) + " \\\\", file=f)
             print("        \\hline", file=f)
@@ -1410,6 +1491,13 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
     # anymore...
     filename = files["final_scores_tables"]
     print(f"    Writing {filename}")
+    headings = list(map(lambda x: f"\\thead{{{x}}}", ["Language", "Score"]))
+    # It's now Nov 15th and I have to create MORE tables from this data. I have
+    # no one else to blame but myself...
+    extra_files = [files["final_scores_extra"] % i for i in range(4)]
+    dist_files = [files["final_scores_distinct_extra"] % i for i in range(2)]
+    all_lang_labels = [LANGUAGE_LABELS[x] for x in LANGUAGES]
+    dist_lang_labels = UNIQUE_LANGUAGES
 
     with open(filename, "w", encoding="utf-8") as f:
         # Preamble comments:
@@ -1439,6 +1527,15 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}%", file=f)
 
+        make_extra_table(
+            extra_files[0], scale_and_cc_map,
+            combine_axes_no_norm(
+                runtime_scores, expr_scores_all, energy_scores
+            ),
+            scale_and_cc_lengths, scale_and_cc_scores, all_lang_labels,
+            "score", "with"
+        )
+
         scale_no_cc_axes = combine_axes(
             runtime_scores, energy_scores, expr_scores_nocc
         )
@@ -1461,6 +1558,15 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}", file=f)
+
+        make_extra_table(
+            extra_files[1], scale_no_cc_map,
+            combine_axes_no_norm(
+                runtime_scores, expr_scores_nocc, energy_scores
+            ),
+            scale_no_cc_lengths, scale_no_cc_scores, all_lang_labels,
+            "score", "without"
+        )
 
         runtime_ranks = [0] * len(LANGUAGES)
         rank = 1
@@ -1544,6 +1650,15 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}%", file=f)
 
+        make_extra_table(
+            extra_files[2], rank_and_cc_map,
+            combine_axes_no_norm(
+                runtime_ranks, expr_with_cc_ranks, energy_ranks
+            ),
+            rank_and_cc_lengths, rank_and_cc_scores, all_lang_labels,
+            "rank", "with"
+        )
+
         rank_no_cc_axes = combine_axes_no_norm(
             runtime_ranks, energy_ranks, expr_no_cc_ranks
         )
@@ -1566,6 +1681,15 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}", file=f)
+
+        make_extra_table(
+            extra_files[3], rank_no_cc_map,
+            combine_axes_no_norm(
+                runtime_ranks, expr_no_cc_ranks, energy_ranks
+            ),
+            rank_no_cc_lengths, rank_no_cc_scores, all_lang_labels,
+            "rank", "without"
+        )
 
     # Create a plot of the four final rankings. The idea is that we're trying
     # to study the smoothness of the distribution of the 9 data points for each
@@ -1626,8 +1750,13 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("% Table: Final scores tables, distinct languages", file=f)
         print(f"% Generated: {datetime.datetime.now()}", file=f)
 
+        expr1_ranks = [0] * 5
+        rank = 1
+        for x in expr1_ranks_map:
+            expr1_ranks[x] = rank
+            rank += 1
         rank_and_cc_axes = combine_axes_no_norm(
-            runtime_ranks2, energy_ranks2, expr1_ranks_map
+            runtime_ranks2, energy_ranks2, expr1_ranks
         )
         rank_and_cc_lengths = calculate_lengths(rank_and_cc_axes)
         rank_and_cc_scores = rank_and_cc_lengths / rank_and_cc_lengths.min()
@@ -1649,8 +1778,22 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}%", file=f)
 
+        make_extra_table(
+            dist_files[0], rank_and_cc_map,
+            combine_axes_no_norm(
+                runtime_ranks2, expr1_ranks, energy_ranks2
+            ),
+            rank_and_cc_lengths, rank_and_cc_scores, dist_lang_labels,
+            "rank", "with", True
+        )
+
+        expr2_ranks = [0] * 5
+        rank = 1
+        for x in expr2_ranks_map:
+            expr2_ranks[x] = rank
+            rank += 1
         rank_no_cc_axes = combine_axes_no_norm(
-            runtime_ranks2, energy_ranks2, expr2_ranks_map
+            runtime_ranks2, energy_ranks2, expr2_ranks
         )
         rank_no_cc_lengths = calculate_lengths(rank_no_cc_axes)
         rank_no_cc_scores = rank_no_cc_lengths / rank_no_cc_lengths.min()
@@ -1671,6 +1814,15 @@ def create_final_tables(data, expr1_scores, expr2_scores, files):
         print("        \\hline", file=f)
         print("    \\end{tabular}", file=f)
         print("\\end{subtable}", file=f)
+
+        make_extra_table(
+            dist_files[1], rank_no_cc_map,
+            combine_axes_no_norm(
+                runtime_ranks2, expr2_ranks, energy_ranks2
+            ),
+            rank_no_cc_lengths, rank_no_cc_scores, dist_lang_labels,
+            "rank", "without", True
+        )
 
     fig, ax = get_fig_and_ax(large=True)
     xr = range(1, len(UNIQUE_LANGUAGES) + 1)
