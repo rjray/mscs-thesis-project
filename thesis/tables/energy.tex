@@ -1,146 +1,146 @@
 % Table: Comparative energy usage sub-tables
-% Generated: 2022-11-12 18:00:26.812413
-\begin{subtable}{0.33\textwidth}
+% Generated: 2022-11-15 22:08:42.527626
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Knuth-Morris-Pratt}
     \label{table:energy:kmp}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Knuth-Morris-Pratt
         %% Label: table:energy:kmp
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        Rust & 1.0000 \\
-        C (GCC) & 1.0403 \\
-        C (LLVM) & 1.0756 \\
-        C (Intel) & 1.0786 \\
-        C++ (GCC) & 1.0983 \\
-        C++ (LLVM) & 1.1033 \\
-        C++ (Intel) & 1.1102 \\
-        Python & 1.1651 \\
-        Perl & 1.2957 \\
+        Rust & 8.29 & 1.0000 \\
+        C (GCC) & 8.63 & 1.0403 \\
+        C (LLVM) & 8.92 & 1.0756 \\
+        C (Intel) & 8.94 & 1.0786 \\
+        C++ (GCC) & 9.11 & 1.0983 \\
+        C++ (LLVM) & 9.15 & 1.1033 \\
+        C++ (Intel) & 9.20 & 1.1102 \\
+        Python & 9.66 & 1.1651 \\
+        Perl & 10.74 & 1.2957 \\
         \hline
     \end{tabular}
 \end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Boyer-Moore}
     \label{table:energy:boyer_moore}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Boyer-Moore
         %% Label: table:energy:boyer_moore
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        C++ (GCC) & 1.0000 \\
-        C++ (LLVM) & 1.0115 \\
-        Rust & 1.0331 \\
-        C (GCC) & 1.0358 \\
-        C++ (Intel) & 1.0747 \\
-        C (LLVM) & 1.0918 \\
-        C (Intel) & 1.1501 \\
-        Python & 1.2985 \\
-        Perl & 1.3103 \\
+        C++ (GCC) & 8.45 & 1.0000 \\
+        C++ (LLVM) & 8.55 & 1.0115 \\
+        Rust & 8.73 & 1.0331 \\
+        C (GCC) & 8.75 & 1.0358 \\
+        C++ (Intel) & 9.08 & 1.0747 \\
+        C (LLVM) & 9.22 & 1.0918 \\
+        C (Intel) & 9.72 & 1.1501 \\
+        Python & 10.97 & 1.2985 \\
+        Perl & 11.07 & 1.3103 \\
         \hline
     \end{tabular}
-\end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\end{subtable}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Bitap}
     \label{table:energy:shift_or}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Bitap
         %% Label: table:energy:shift_or
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        C++ (LLVM) & 1.0000 \\
-        C (Intel) & 1.0049 \\
-        Rust & 1.0077 \\
-        C (LLVM) & 1.0101 \\
-        C++ (Intel) & 1.0440 \\
-        Python & 1.0799 \\
-        C++ (GCC) & 1.0854 \\
-        C (GCC) & 1.0897 \\
-        Perl & 1.2268 \\
+        C++ (LLVM) & 8.95 & 1.0000 \\
+        C (Intel) & 9.00 & 1.0049 \\
+        Rust & 9.02 & 1.0077 \\
+        C (LLVM) & 9.04 & 1.0101 \\
+        C++ (Intel) & 9.35 & 1.0440 \\
+        Python & 9.67 & 1.0799 \\
+        C++ (GCC) & 9.72 & 1.0854 \\
+        C (GCC) & 9.75 & 1.0897 \\
+        Perl & 10.98 & 1.2268 \\
         \hline
     \end{tabular}
-\end{subtable}
-\begin{subtable}{0.33\textwidth}
+\end{subtable}%
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Aho-Corasick}
     \label{table:energy:aho_corasick}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Aho-Corasick
         %% Label: table:energy:aho_corasick
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        C++ (LLVM) & 1.0000 \\
-        C (Intel) & 1.0303 \\
-        C (GCC) & 1.0332 \\
-        C (LLVM) & 1.0448 \\
-        C++ (Intel) & 1.0471 \\
-        C++ (GCC) & 1.0813 \\
-        Rust & 1.0939 \\
-        Perl & 1.1248 \\
-        Python & 1.1736 \\
+        C++ (LLVM) & 9.28 & 1.0000 \\
+        C (Intel) & 9.56 & 1.0303 \\
+        C (GCC) & 9.58 & 1.0332 \\
+        C (LLVM) & 9.69 & 1.0448 \\
+        C++ (Intel) & 9.71 & 1.0471 \\
+        C++ (GCC) & 10.03 & 1.0813 \\
+        Rust & 10.15 & 1.0939 \\
+        Perl & 10.43 & 1.1248 \\
+        Python & 10.89 & 1.1736 \\
         \hline
     \end{tabular}
-\end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\end{subtable}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{DFA-Gap (k=3)}
     \label{table:energy:dfa_gap}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: DFA-Gap (k=3)
         %% Label: table:energy:dfa_gap
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        Rust & 1.0000 \\
-        C++ (LLVM) & 1.1603 \\
-        C (LLVM) & 1.1812 \\
-        C++ (Intel) & 1.2078 \\
-        C (Intel) & 1.2231 \\
-        C (GCC) & 1.2352 \\
-        C++ (GCC) & 1.2497 \\
-        Python & 1.3140 \\
-        Perl & 1.3897 \\
+        Rust & 7.35 & 1.0000 \\
+        C++ (LLVM) & 8.53 & 1.1603 \\
+        C (LLVM) & 8.68 & 1.1812 \\
+        C++ (Intel) & 8.87 & 1.2078 \\
+        C (Intel) & 8.99 & 1.2231 \\
+        C (GCC) & 9.08 & 1.2352 \\
+        C++ (GCC) & 9.18 & 1.2497 \\
+        Python & 9.65 & 1.3140 \\
+        Perl & 10.21 & 1.3897 \\
         \hline
     \end{tabular}
 \end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Regexp-Gap (k=3)}
     \label{table:energy:regexp}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Regexp-Gap (k=3)
         %% Label: table:energy:regexp
         %% Field(s): ['package', 'dram']
         %% Divisor(s): ['total_runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Energy} & \thead{Score} \\
         \hline
-        C (Intel) & 1.0000 \\
-        C (GCC) & 1.0055 \\
-        C (LLVM) & 1.0094 \\
-        C++ (LLVM) & 1.0428 \\
-        C++ (GCC) & 1.0460 \\
-        C++ (Intel) & 1.0473 \\
-        Perl & 1.0513 \\
-        Rust & 1.0561 \\
-        Python & 1.0618 \\
+        C (Intel) & 10.15 & 1.0000 \\
+        C (GCC) & 10.21 & 1.0055 \\
+        C (LLVM) & 10.25 & 1.0094 \\
+        C++ (LLVM) & 10.59 & 1.0428 \\
+        C++ (GCC) & 10.62 & 1.0460 \\
+        C++ (Intel) & 10.63 & 1.0473 \\
+        Perl & 10.67 & 1.0513 \\
+        Rust & 10.72 & 1.0561 \\
+        Python & 10.78 & 1.0618 \\
         \hline
     \end{tabular}
 \end{subtable}

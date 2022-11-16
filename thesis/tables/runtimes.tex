@@ -1,140 +1,140 @@
 % Table: Comparative runtimes sub-tables
-% Generated: 2022-11-12 18:00:26.811341
-\begin{subtable}{0.33\textwidth}
+% Generated: 2022-11-15 22:08:42.526271
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Knuth-Morris-Pratt}
     \label{table:runtime:kmp}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Knuth-Morris-Pratt
         %% Label: table:runtime:kmp
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        C (LLVM) & 1.0000 \\
-        Rust & 1.1293 \\
-        C++ (LLVM) & 1.1377 \\
-        C (Intel) & 1.1402 \\
-        C++ (Intel) & 1.2406 \\
-        C (GCC) & 1.3146 \\
-        C++ (GCC) & 1.3350 \\
-        Perl & 38.5237 \\
-        Python & 41.4858 \\
+        C (LLVM) & 44.52 & 1.0000 \\
+        Rust & 50.28 & 1.1293 \\
+        C++ (LLVM) & 50.65 & 1.1377 \\
+        C (Intel) & 50.76 & 1.1402 \\
+        C++ (Intel) & 55.23 & 1.2406 \\
+        C (GCC) & 58.53 & 1.3146 \\
+        C++ (GCC) & 59.44 & 1.3350 \\
+        Perl & 1715.18 & 38.5237 \\
+        Python & 1847.06 & 41.4858 \\
         \hline
     \end{tabular}
 \end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Boyer-Moore}
     \label{table:runtime:boyer_moore}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Boyer-Moore
         %% Label: table:runtime:boyer_moore
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        C (Intel) & 1.0000 \\
-        C++ (Intel) & 1.0508 \\
-        C (GCC) & 1.0664 \\
-        Rust & 1.0977 \\
-        C++ (LLVM) & 1.1413 \\
-        C (LLVM) & 1.1549 \\
-        C++ (GCC) & 1.1831 \\
-        Perl & 46.9470 \\
-        Python & 50.9587 \\
+        C (Intel) & 20.66 & 1.0000 \\
+        C++ (Intel) & 21.71 & 1.0508 \\
+        C (GCC) & 22.03 & 1.0664 \\
+        Rust & 22.68 & 1.0977 \\
+        C++ (LLVM) & 23.58 & 1.1413 \\
+        C (LLVM) & 23.86 & 1.1549 \\
+        C++ (GCC) & 24.44 & 1.1831 \\
+        Perl & 969.77 & 46.9470 \\
+        Python & 1052.63 & 50.9587 \\
         \hline
     \end{tabular}
-\end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\end{subtable}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Bitap}
     \label{table:runtime:shift_or}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Bitap
         %% Label: table:runtime:shift_or
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        C (Intel) & 1.0000 \\
-        C (GCC) & 1.0068 \\
-        C++ (Intel) & 1.0475 \\
-        C (LLVM) & 1.1219 \\
-        Rust & 1.1350 \\
-        C++ (GCC) & 1.1616 \\
-        C++ (LLVM) & 1.2381 \\
-        Perl & 155.3435 \\
-        Python & 192.9283 \\
+        C (Intel) & 7.55 & 1.0000 \\
+        C (GCC) & 7.60 & 1.0068 \\
+        C++ (Intel) & 7.91 & 1.0475 \\
+        C (LLVM) & 8.47 & 1.1219 \\
+        Rust & 8.57 & 1.1350 \\
+        C++ (GCC) & 8.77 & 1.1616 \\
+        C++ (LLVM) & 9.35 & 1.2381 \\
+        Perl & 1173.06 & 155.3435 \\
+        Python & 1456.88 & 192.9283 \\
         \hline
     \end{tabular}
-\end{subtable}
-\begin{subtable}{0.33\textwidth}
+\end{subtable}%
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Aho-Corasick}
     \label{table:runtime:aho_corasick}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Aho-Corasick
         %% Label: table:runtime:aho_corasick
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        C (LLVM) & 1.0000 \\
-        C (Intel) & 1.0443 \\
-        C (GCC) & 1.0644 \\
-        C++ (GCC) & 1.1519 \\
-        C++ (LLVM) & 1.1600 \\
-        Rust & 1.1816 \\
-        C++ (Intel) & 1.1988 \\
-        Python & 19.7040 \\
-        Perl & 39.4041 \\
+        C (LLVM) & 1.14 & 1.0000 \\
+        C (Intel) & 1.20 & 1.0443 \\
+        C (GCC) & 1.22 & 1.0644 \\
+        C++ (GCC) & 1.32 & 1.1519 \\
+        C++ (LLVM) & 1.33 & 1.1600 \\
+        Rust & 1.35 & 1.1816 \\
+        C++ (Intel) & 1.37 & 1.1988 \\
+        Python & 22.55 & 19.7040 \\
+        Perl & 45.10 & 39.4041 \\
         \hline
     \end{tabular}
-\end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\end{subtable}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{DFA-Gap (k=3)}
     \label{table:runtime:dfa_gap}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: DFA-Gap (k=3)
         %% Label: table:runtime:dfa_gap
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        C (GCC) & 1.0000 \\
-        C (LLVM) & 1.0749 \\
-        C (Intel) & 1.1561 \\
-        C++ (GCC) & 1.2270 \\
-        C++ (LLVM) & 1.3250 \\
-        C++ (Intel) & 1.3443 \\
-        Rust & 1.7632 \\
-        Perl & 56.2209 \\
-        Python & 57.4437 \\
+        C (GCC) & 100.45 & 1.0000 \\
+        C (LLVM) & 107.97 & 1.0749 \\
+        C (Intel) & 116.13 & 1.1561 \\
+        C++ (GCC) & 123.25 & 1.2270 \\
+        C++ (LLVM) & 133.10 & 1.3250 \\
+        C++ (Intel) & 135.04 & 1.3443 \\
+        Rust & 177.11 & 1.7632 \\
+        Perl & 5647.35 & 56.2209 \\
+        Python & 5770.18 & 57.4437 \\
         \hline
     \end{tabular}
 \end{subtable}%
-\begin{subtable}{0.33\textwidth}
+\begin{subtable}{0.49\textwidth}
     \centering
     \caption{Regexp-Gap (k=3)}
     \label{table:runtime:regexp}
-    \begin{tabular}{|l|r|}
+    \begin{tabular}{|l|r|r|}
         %% Caption: Regexp-Gap (k=3)
         %% Label: table:runtime:regexp
         %% Field(s): ['runtime']
         \hline
-        Language & Score \\
+        \thead{Language} & \thead{Runtime} & \thead{Score} \\
         \hline
-        Rust & 1.0000 \\
-        C++ (LLVM) & 1.1747 \\
-        C++ (GCC) & 1.1753 \\
-        C++ (Intel) & 1.1794 \\
-        C (Intel) & 1.2871 \\
-        C (GCC) & 1.2876 \\
-        C (LLVM) & 1.2888 \\
-        Python & 1.7398 \\
-        Perl & 3.9966 \\
+        Rust & 261.48 & 1.0000 \\
+        C++ (LLVM) & 307.16 & 1.1747 \\
+        C++ (GCC) & 307.32 & 1.1753 \\
+        C++ (Intel) & 308.40 & 1.1794 \\
+        C (Intel) & 336.54 & 1.2871 \\
+        C (GCC) & 336.67 & 1.2876 \\
+        C (LLVM) & 337.00 & 1.2888 \\
+        Python & 454.93 & 1.7398 \\
+        Perl & 1045.03 & 3.9966 \\
         \hline
     \end{tabular}
 \end{subtable}
