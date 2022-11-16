@@ -29,7 +29,18 @@ While there are many varied reasons why people developing software like or disli
 
 Expressiveness can be a significant factor in language selection and use. In~\cite{berkholz}, Berkholz looks at measuring expressiveness by looking at how many lines of code change in an average version control commit for projects written in a range of languages. He found functional languages such as Lisp and Haskell to be the most expressive, and domain-specific languages to be biased towards high levels of expressiveness.
 
-In addition to performance and expressiveness, the energy usage of software is rapidly becoming more important as data-centers try to reduce carbon footprints and developers target battery-driven devices like mobile phones. In~\cite{pereira}, Pereira, et al did an extensive analysis of energy efficiency at the programming language level. Upon seeing the results and the methods used, it became clear that this should be used with the previous two metrics to evaluate a set of languages in even broader terms.
+In addition to performance and expressiveness, the energy usage of software is rapidly becoming more important as data-centers try to reduce carbon footprints and developers target battery-driven mobile devices.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/data-center-energy.png}
+    \caption[Projected energy demands through 2030]{Projected energy demands through 2030 (original source~\cite{garcia2022})}
+    \label{fig:image:energy_demands}
+\end{figure}
+
+In~\cite{garcia2022}, the author reports that the U.S. data center industry alone ``consumed around 196 to 400 terawatt-hours (TWh)'' in 2020. And as their graph above predicts, this could become significantly higher by 2030. But in~\cite{masanet} the authors point out that actual server energy use is on average only 43\% of data center usage. And yet, if accurate, this means that server energy could account for anywhere from 84 to 172 TWh. Even a small reduction in server energy could have an impact.
+
+In~\cite{pereira}, Pereira, et al did an extensive analysis of energy efficiency at the programming language level. Upon seeing the results and the methods used, it became clear that this should be used with the previous two metrics to evaluate a set of languages in even broader terms.
 
 \subsection{Prior Work}
 

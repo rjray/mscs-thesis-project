@@ -230,6 +230,8 @@ Each algorithm module also provides the language-specific equivalent of a ``main
 
 The different algorithms that were chosen are listed here in the order of their implementation. Each of the algorithms was implemented first in C, as a baseline. These C implementations were then used as templates for the other languages' implementations. In addition to helping to keep the implementations approximately similar and equal, this provided insight into the differences that the features and expressiveness of the different languages made in the development process itself.
 
+Any inefficiencies observed in the experiments' implementations are due to this decision.
+
 \subsubsection{Knuth, Morris, and Pratt}
 
 The C implementation of Knuth-Morris-Pratt was adapted from~\cite[Chapter 7]{handbook}. Of note is the discovery that the sample code quietly takes advantage of C's use of a ``null'' byte at the end of a string to stand in for the sentinel character that the algorithm appends to the pattern string. While this optimization was also applicable to C++ (where strings are represented by instances of the \texttt{std::string} class), each of the three remaining languages were required to manually add a sentinel character to each pattern string prior to computing the corresponding ``next'' table.
