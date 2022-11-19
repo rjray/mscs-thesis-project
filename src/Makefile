@@ -156,6 +156,9 @@ memcheck:
 		APPROX_ANSWERS=../$(RANDOM_APPROX_ANSWERS)
 	echo "# Memory check completed:" `date` >> $(MEMCHECK_FILE)
 
+# Rule to run all three of the expressiveness elements.
+expressiveness-data: sloc-data cyclomatic-data compression-data
+
 # A rule to create the SLOC data in CSV format.
 sloc-data:
 	find $(LANG_DIRS) \
