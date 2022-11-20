@@ -64,6 +64,7 @@ FILES = {
     "sloc_data": "sloc.csv",
     "cyclomatic_data": "cyclomatic.%s",
     "total_power_chart": "total_power_usage.png",
+    "total_runtime_chart": "total_algo_runtime.png",
     "pps_chart": "power_per_sec.png",
     "dfa_regexp_chart": "dfa_regexp_comp.png",
     "dfa_regexp_chart2": "dfa_regexp_comp2.png",
@@ -432,6 +433,8 @@ def read_cyclomatic(filename):
     return raw_data
 
 
+# A bar chart of the total power usage, by language. Draws a thin red line
+# horizontally across at the minimum value, for illustration purposes.
 def total_power_usage_chart(
     data, filename, *, languages=LANGUAGES, large=False
 ):
@@ -447,8 +450,6 @@ def total_power_usage_chart(
         for algo in algorithms:
             totals[idx] += data[lang][algo]["package"]["mean"]
             totals[idx] += data[lang][algo]["dram"]["mean"]
-    # Apply a base-10 logarithm to it, because of Perl/Python:
-    # totals = np.log10(totals)
 
     fig, ax = get_fig_and_ax(large)
 
@@ -456,6 +457,39 @@ def total_power_usage_chart(
     ax.set_ylabel("Joules")
     ax.set_ylim(15000)
     ax.set_title("Total Energy (Package + DRAM) by Language (Compiled Only)")
+    ax.axes.tick_params(axis="x", labelrotation=17, labelsize="large")
+    ax.axes.axhline(totals.min(), color="r")
+
+    print(f"    Writing {filename}")
+    fig.savefig(filename)
+
+    return
+
+
+# A bar chart of the total run-time in the algorithms, by language. Draws a
+# thin red line horizontally across at the minimum value, for illustration
+# purposes.
+def total_algo_runtime_chart(
+    data, filename, *, languages=LANGUAGES, large=False
+):
+    # Algorithms
+    algorithms = ALL_ALGORITHMS
+
+    # Language labels
+    labels = [LANGUAGE_LABELS[x] for x in languages]
+
+    # Get the totaled energy usage
+    totals = np.zeros(len(languages))
+    for idx, lang in enumerate(languages):
+        for algo in algorithms:
+            totals[idx] += data[lang][algo]["runtime"]["mean"]
+
+    fig, ax = get_fig_and_ax(large)
+
+    ax.bar(labels, totals)
+    ax.set_ylabel("Seconds")
+    ax.set_ylim(totals.min() / 2)
+    ax.set_title("Total Run-time by Language (Algorithm Code)")
     ax.axes.tick_params(axis="x", labelrotation=17, labelsize="large")
     ax.axes.axhline(totals.min(), color="r")
 
@@ -1936,6 +1970,11 @@ def main():
     )
     print("  Creating power-per-second usage chart...")
     power_per_second_chart(analyzed, FILES["pps_chart"], large=True)
+    print("  Done.")
+    print("  Creating total algorithm run-time chart...")
+    total_algo_runtime_chart(
+        analyzed, FILES["total_runtime_chart"], languages=compiled, large=True
+    )
     print("  Done.")
     print("  Creating DFA vs. Regexp Perl/Python runtimes chart...")
     dfa_regexp_charts(analyzed, FILES["dfa_regexp_chart"], large=True)
