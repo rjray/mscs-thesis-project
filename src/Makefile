@@ -125,7 +125,7 @@ clean-images:
 clean-tex:
 	$(RM) *.tex
 
-clean-get-data:
+clean-gen-data:
 	$(RM) $(SLOC_FILE) $(COMPRESSION_STATS) $(CYCLOMATIC_FILE_CSV) \
 		$(CYCLOMATIC_FILE_JSON) $(CYCLOMATIC_FILE_YAML)
 
