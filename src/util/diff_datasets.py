@@ -232,7 +232,7 @@ def main():
 
         A = runtimes[a]
         B = runtimes[b]
-        diff = np.abs(A - B) / A
+        diff = (A - B) / A
 
         print(f"({a},{b}) runtimes min: {(diff.min() * 100):.4f}%")
         print(f"({a},{b}) runtimes max: {(diff.max() * 100):.4f}%")
@@ -240,7 +240,7 @@ def main():
 
         A = energy[a]
         B = energy[b]
-        diff = np.abs(A - B) / A
+        diff = (A - B) / A
 
         print(f"({a},{b}) energy min: {(diff.min() * 100):.4f}%")
         print(f"({a},{b}) energy max: {(diff.max() * 100):.4f}%")
