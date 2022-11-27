@@ -7,7 +7,7 @@
     * run_approx() - Runs a single-pattern, approximate-matching algorithm
 
   These are mostly identical, but just different-enough to require separate
-  functions. The data-input handling is brought in from input.c.
+  functions. The data-input handling is brought in from `input.c`.
 */
 
 #include <stdio.h>
