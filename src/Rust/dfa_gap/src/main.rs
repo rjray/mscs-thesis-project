@@ -80,6 +80,10 @@ fn create_dfa(
     state
 }
 
+/*
+    Initialize the DFA for the pattern and store the data in the packed form
+    that will be passed to `dfa_gap` for each sequence being matched.
+*/
 fn init_dfa_gap(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
     let mut pattern_data: Vec<ApproxPatternData> = Vec::with_capacity(3);
 
@@ -96,6 +100,10 @@ fn init_dfa_gap(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
     pattern_data
 }
 
+/*
+    Perform the DFA-Gap algorithm on the given sequence, using the pattern data
+    passed in.
+*/
 fn dfa_gap(pat_data: &[ApproxPatternData], sequence: &[u8]) -> i32 {
     // Unpack pat_data:
     let dfa = match &pat_data[0] {

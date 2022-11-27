@@ -1,6 +1,15 @@
 /*
-    This is the "runner" module. It provides the function that will handle
-    running an experiment.
+    This is the "runner" module. It provides the functions that will handle
+    running the experiments. There are three public-facing functions defined
+    here:
+
+        * run() - Runs a single-pattern, exact-matching algorithm
+        * run_multi() - Runs a multi-pattern, exact-matching algorithm
+        * run_approx() - Runs a single-pattern, approximate-matching algorithm
+
+    Each of the three functions also has an associated enum with it, that is
+    used for the packing/unpacking of pattern data between the algorithms'
+    init functions and primary functions.
 */
 
 use crate::input::*;

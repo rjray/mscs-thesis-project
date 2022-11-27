@@ -46,6 +46,11 @@ fn calc_s_positions(
     lim
 }
 
+/*
+    Initialize the pattern for Shift-Or. Here, that means getting the vector
+    `s_positions` set up and packing that along with `lim` into the data that
+    will get passed to `shift_or` for each sequence.
+*/
 fn init_shift_or(pat: &[u8]) -> Vec<PatternData> {
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);
     let mut s_positions: Vec<WordType> = vec![!0; ASIZE];

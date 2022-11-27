@@ -27,6 +27,11 @@ const FAIL: i32 = -1;
 */
 const ALPHA_OFFSETS: &[usize] = &[65, 67, 71, 84];
 
+/*
+    This basic "set" implementation was provided by Andrew Gallant when helping
+    me determine the reason for this version being so much slower than the C
+    and C++ versions.
+*/
 #[derive(Clone, Debug)]
 struct Set {
     elements: Vec<usize>,
@@ -60,6 +65,11 @@ impl Set {
     }
 }
 
+/*
+    As with the "set", above, I implemented the simple queue in the same basic
+    fashion, as the standard-library implementation (Vec::Deque) slowed the
+    program down.
+*/
 #[derive(Clone, Debug)]
 struct Queue {
     elements: Vec<usize>,
@@ -93,7 +103,7 @@ impl Queue {
 }
 
 /*
-   Simple function to create a new state for the goto_fn.
+    Simple function to create a new state for the goto_fn.
 */
 fn create_new_state() -> Vec<i32> {
     let new_state = vec![FAIL; ASIZE];
@@ -147,7 +157,7 @@ fn enter_pattern(
 }
 
 /*
-  Build the goto function and the (partial) output function.
+    Build the goto function and the (partial) output function.
 */
 fn build_goto(
     patterns: &[&[u8]],
@@ -177,7 +187,7 @@ fn build_goto(
 }
 
 /*
-  Build the failure function and complete the output function.
+    Build the failure function and complete the output function.
 */
 fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     // Need a queue of state numbers:
@@ -226,6 +236,10 @@ fn build_failure(goto_fn: &[Vec<i32>], output_fn: &mut [Set]) -> Vec<usize> {
     failure_fn
 }
 
+/*
+    Initialize the DFA structure for Aho-Corasick and pack it into a vector
+    that can be passed to subsequent calls to `aho_corasick` itself.
+*/
 fn init_aho_corasick(patterns: &[&[u8]]) -> Vec<MultiPatternData<Set>> {
     let mut pattern_data: Vec<MultiPatternData<Set>> = Vec::with_capacity(4);
 

@@ -38,6 +38,10 @@ fn build_next_table(pat: &[u8], m: usize) -> Vec<i32> {
     next_table
 }
 
+/*
+    Initialize the pattern for Knuth-Morris-Pratt and save the elements in the
+    packed form for use with calls to `kmp`.
+*/
 fn init_kmp(pat: &[u8]) -> Vec<PatternData> {
     let m = pat.len();
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(2);

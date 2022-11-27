@@ -11,13 +11,21 @@ use std::str;
 
 use pcre2::bytes::Regex;
 
+// This declares a global value into which we can store the compiled regular
+// expression. This is because adding a reference to pcre2::bytes::Regex to
+// the `ApproxPatternData` enum would have required every one of the
+// experiments to be compiled against the PCRE2 library.
 thread_local!(
     static RE: RefCell<Regex> = RefCell::new(Regex::new("").unwrap())
 );
 
+/*
+    Initialize the pattern as a regular expression and store it into the global
+    set up above in the `thread_local` macro.
+*/
 fn init_regexp(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
     let m = pattern.len();
-    // Note that this algorithm doesn't use the `pattern_data` value.
+    // Note that this algorithm doesn't actually use the `pattern_data` value.
     let pattern_data: Vec<ApproxPatternData> = Vec::with_capacity(1);
     let pat_str: &str = str::from_utf8(&pattern).unwrap();
     let pat_chars: Vec<char> = pat_str.chars().collect();
@@ -41,6 +49,9 @@ fn init_regexp(pattern: &[u8], k: u32) -> Vec<ApproxPatternData> {
     pattern_data
 }
 
+/*
+    Perform the regular expression variant matching on the given sequence.
+*/
 fn regexp(_pat_data: &[ApproxPatternData], sequence: &[u8]) -> i32 {
     let mut matches: usize = 0;
 

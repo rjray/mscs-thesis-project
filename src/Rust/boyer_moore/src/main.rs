@@ -94,6 +94,10 @@ fn calc_good_suffix(pat: &[u8], m: usize) -> Vec<i32> {
     good_suffix
 }
 
+/*
+    Initialize the pattern structure for Boyer-Moore that will be passed in to
+    the calls to `boyer_moore`.
+*/
 fn init_boyer_moore(pat: &[u8]) -> Vec<PatternData> {
     let m = pat.len();
     let mut pattern_data: Vec<PatternData> = Vec::with_capacity(3);
