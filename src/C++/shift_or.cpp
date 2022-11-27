@@ -42,6 +42,12 @@ WORD_TYPE calc_s_positions(std::string const &pat, int m,
   return lim;
 }
 
+/*
+  Initialize the structure for Shift-Or (Bitap). Here, that means setting up
+  the `s_positions` array and calculating `lim`. The return value is a vector
+  of the `PatternData` type, which is a type-safe union of sorts that covers
+  the different types that have to be returned.
+*/
 std::vector<PatternData> init_shift_or(std::string const &pattern) {
   int m = pattern.length();
   if (m > WORD) {

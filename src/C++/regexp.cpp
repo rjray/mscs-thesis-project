@@ -18,9 +18,10 @@ typedef jpcre2::select<char> jp;
 jp::Regex re;
 
 /*
-  Initialize the pattern given. Return a single-element vector of the regexp
-  from processing the pattern. The original pattern will not be needed for
-  matching.
+  Initialize the pattern given. This is a break from the usual init/algorithm
+  pattern, because adding the jp::Regex type to one of the std::variant defs
+  in `run.hpp` would have required all algorithm experiments to link against
+  the PCRE2 library. So, for here, I just use a global.
 */
 std::vector<ApproxPatternData> init_regexp(std::string const &pattern, int k) {
   std::vector<ApproxPatternData> return_val;

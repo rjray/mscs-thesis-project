@@ -32,6 +32,12 @@ void make_next_table(std::string const &pat, int m,
   }
 }
 
+/*
+  Initialize the structure for Knuth-Morris-Pratt. Here, that means setting up
+  the `next_table` array. The return value is a vector of the `PatternData`
+  type, which is a type-safe union of sorts that covers the different types
+  that have to be returned.
+*/
 std::vector<PatternData> init_kmp(std::string const &pattern) {
   std::vector<PatternData> return_val;
   return_val.reserve(2);

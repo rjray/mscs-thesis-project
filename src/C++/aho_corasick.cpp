@@ -142,6 +142,12 @@ std::vector<int> build_failure(std::vector<std::vector<int>> const &goto_fn,
   return failure_fn;
 }
 
+/*
+  Initialize the structure for Aho-Corasick. Here, that means merging the list
+  of patterns into a single DFA. The return value is a vector of the
+  `MultiPatternData` type, which is a type-safe union of sorts that covers the
+  different types that have to be returned.
+*/
 std::vector<MultiPatternData>
 init_aho_corasick(std::vector<std::string> const &patterns_data) {
   std::vector<MultiPatternData> return_val;

@@ -69,6 +69,12 @@ void calc_good_suffix(std::string const &pat, int m,
     good_suffix[m - 1 - suffixes[i]] = m - 1 - i;
 }
 
+/*
+  Initialize the structure for Boyer-Moore. Here, that means setting up the
+  pair of jump-tables. The return value is a vector of the `PatternData` type,
+  which is a type-safe union of sorts that covers the different types that have
+  to be returned.
+*/
 std::vector<PatternData> init_boyer_moore(std::string const &pattern) {
   std::vector<PatternData> return_val;
   return_val.reserve(3);
