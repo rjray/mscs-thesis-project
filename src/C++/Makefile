@@ -18,6 +18,7 @@ INTEL_APPROX_TARGETS := $(addprefix ./,$(addsuffix -cpp-intel,$(APPROX_ALGORITHM
 # These start out without Intel, in case the user doesn't want the Intel stuff
 # used.
 TARGETS := $(GCC_TARGETS) $(LLVM_TARGETS)
+APPROX_TARGETS := $(GCC_APPROX_TARGETS) $(LLVM_APPROX_TARGETS)
 TOP_TARGETS := gcc llvm
 
 # Default this to unset
