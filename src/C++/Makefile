@@ -1,5 +1,13 @@
+# This is the Makefile for the C++ implementation of the algorithms.
+#
+# This is as long and complex as the C Makefile, for the same reasons (multiple
+# compilers, etc.). Someone better versed in GNU Make could probably shorten
+# this considerably with some choice macros.
+
 include ../defines.mk
 
+# Define all the sets of targets by adding the language (cpp) and toolchain to
+# the algorithm names.
 GCC_TARGETS := $(addprefix ./,$(addsuffix -cpp-gcc,$(ALGORITHMS)))
 LLVM_TARGETS := $(addprefix ./,$(addsuffix -cpp-llvm,$(ALGORITHMS)))
 INTEL_TARGETS := $(addprefix ./,$(addsuffix -cpp-intel,$(ALGORITHMS)))
@@ -34,6 +42,8 @@ APPROX_TARGETS += $(INTEL_APPROX_TARGETS)
 TOP_TARGETS += intel
 endif
 
+# Define the groupings of experiments, again by toolchain as well as by exact
+# vs. approximate.
 TEST_EXPERIMENTS := $(addprefix test-experiments-,$(TOP_TARGETS))
 TEST_APPROX_EXPERIMENTS := $(addprefix test-approx-experiments-,$(TOP_TARGETS))
 EXPERIMENTS := $(addprefix experiments-,$(TOP_TARGETS))

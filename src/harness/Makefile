@@ -1,3 +1,8 @@
+# The is the Makefile for the harness application.
+#
+# This is just two C modules, with one "local" header file and the header file
+# `subprocess.h` that is used by `harness.c` for subprocess manipulation.
+
 all: harness
 
 CC=gcc

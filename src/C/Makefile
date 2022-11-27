@@ -1,5 +1,17 @@
+# This is the Makefile for the C implementation of the algorithms.
+#
+# This looks pretty complex and certainly redundant. It build all programs for
+# (up to) three toolchains so that the data gathered compares the toolchains as
+# well as the languages.
+#
+# Someone much better at GNU Make than I am could probably shorten this quite a
+# bit with some good macro-programming and more cleverness in the build-rules
+# that are repeated for each toolchain.
+
 include ../defines.mk
 
+# Define all the sets of targets by adding the language (c) and toolchain to
+# the algorithm names.
 GCC_TARGETS := $(addprefix ./,$(addsuffix -c-gcc,$(ALGORITHMS)))
 LLVM_TARGETS := $(addprefix ./,$(addsuffix -c-llvm,$(ALGORITHMS)))
 INTEL_TARGETS := $(addprefix ./,$(addsuffix -c-intel,$(ALGORITHMS)))
@@ -35,6 +47,8 @@ APPROX_TARGETS += $(INTEL_APPROX_TARGETS)
 TOP_TARGETS += intel
 endif
 
+# Define the groupings of experiments, again by toolchain as well as by exact
+# vs. approximate.
 TEST_EXPERIMENTS := $(addprefix test-experiments-,$(TOP_TARGETS))
 TEST_APPROX_EXPERIMENTS := $(addprefix test-approx-experiments-,$(TOP_TARGETS))
 EXPERIMENTS := $(addprefix experiments-,$(TOP_TARGETS))
