@@ -1,5 +1,10 @@
 #!/usr/bin/env perl
 
+# This is the Perl implementation of the Knuth-Morris-Pratt algorithm. It is
+# adapted from the C implementation, which itself is based heavily on the code
+# given in chapter 7 of the book, "Handbook of Exact String-Matching
+# Algorithms," by Christian Charras and Thierry Lecroq.
+
 use strict;
 use warnings;
 use FindBin qw($Bin);
@@ -31,6 +36,8 @@ sub make_next_table {
     return \@next_table;
 }
 
+# Set up the packed pattern representation that will be passed to each call of
+# `kmp`.
 sub init_kmp {
     my ($pattern) = @_;
     my $m = scalar @{$pattern};
@@ -39,6 +46,8 @@ sub init_kmp {
     return [ $pat, make_next_table($pat, $m) ];
 }
 
+# Run the Knuth-Morris-Pratt algorithm on the sequence given with the packed
+# pattern data given. Returns the number of matches found.
 sub kmp {
     my ($pat_data, $seq) = @_;
     my ($pat, $next_table) = @{$pat_data};

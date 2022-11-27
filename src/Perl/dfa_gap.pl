@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# This is the Perl implementation of the novel DFA-Gap algorithm developed for
+# this research. It is based on the C implementation.
+
 use strict;
 use warnings;
 use FindBin qw($Bin);
@@ -11,6 +14,7 @@ use Run qw(run_approx);
 
 my @ALPHABET = qw(65 67 71 84);
 
+# Create the DFA structure from the given pattern.
 sub create_dfa {
     my ($pattern, $m, $k) = @_;
 
@@ -59,6 +63,8 @@ sub create_dfa {
     return \@dfa, $terminal;
 }
 
+# Create the packed representation of the pattern that will be passed to each
+# call of `dfa_gap`.
 sub init_dfa_gap {
     my ($pattern, $k) = @_;
     my $m = scalar @{$pattern};
@@ -68,6 +74,8 @@ sub init_dfa_gap {
     return [ $dfa, $terminal, $m ];
 }
 
+# Run the DFA-Gap algorithm on the given sequence using the packed pattern data
+# given in $pat_data. Returns the number of matches found.
 sub dfa_gap {
     my ($pat_data, $sequence) = @_;
     my ($dfa, $terminal, $m) = @{$pat_data};

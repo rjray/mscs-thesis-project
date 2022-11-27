@@ -1,5 +1,10 @@
 #!/usr/bin/env perl
 
+# This is the implementation of the Shift-Or (Bitap) algorithm for Perl. It is
+# adapted from the C code, which is based heavily on the code given in chapter 5
+# of the book, "Handbook of Exact String-Matching Algorithms," by Christian
+# Charras and Thierry Lecroq.
+
 use strict;
 use warnings;
 use FindBin qw($Bin);
@@ -9,6 +14,9 @@ use constant WORD => 64;
 
 use Run qw(run);
 
+# Calculate the s_positions table from the pattern characters. In this case, the
+# pattern is already converted from characters to integers. This also calculates
+# the value of $lim, and returns both elements.
 sub calc_s_positions {
     my ($pat, $m) = @_;
     my ($i, $j, $lim);
@@ -28,6 +36,8 @@ sub calc_s_positions {
     return $lim, \@s_positions;
 }
 
+# Initialize the pattern representation for use by the `shift_or` function on
+# each sequence.
 sub init_shift_or {
     my ($pattern) = @_;
     my $m = scalar @{$pattern};
@@ -39,6 +49,8 @@ sub init_shift_or {
     return [ calc_s_positions($pattern, $m) ];
 }
 
+# Run the Shift-Or algorithm on the given sequence, using the packed pattern
+# data.
 sub shift_or {
     my ($pat_data, $seq) = @_;
     my ($lim, $s_positions) = @{$pat_data};

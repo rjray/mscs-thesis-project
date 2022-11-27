@@ -1,3 +1,6 @@
+# Handle the reading and input of all the sequences/patterns/answers files over
+# all of the Perl-based experiments.
+
 package Input;
 
 use strict;
@@ -5,8 +8,11 @@ use warnings;
 
 use Exporter qw(import);
 
+# Every user of this uses all three, so no need for @EXPORT_OK here.
 our @EXPORT = qw(read_sequences read_patterns read_answers);
 
+# Read the first line of an open filehandle, expecting it to be a list of
+# numbers separated by spaces.
 sub read_header {
     my $fh = shift;
 
@@ -17,6 +23,9 @@ sub read_header {
     return @parts;
 }
 
+# Read the sequences data file. Gets the number of expected lines from the
+# first line/header and checks that the correct number of lines were read after
+# the header.
 sub read_sequences {
     my $file = shift;
     my @data;
@@ -38,12 +47,19 @@ sub read_sequences {
     return \@data;
 }
 
+# Read the patterns data file. This is the same format as the sequences file,
+# so just thread through to read_patterns().
 sub read_patterns {
     my $file = shift;
 
     return read_sequences($file);
 }
 
+# Read the answers data file. Here, the header is more meaningful; we need the
+# second number for sanity-checking and we might need the third number as well.
+# The third number is the value of `k` for the approximate-matching algorithms
+# and will need to be checked against the `k` that was given on the command
+# line.
 sub read_answers {
     my ($file, $kref) = @_;
     my @data;

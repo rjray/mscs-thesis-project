@@ -1,5 +1,10 @@
 #!/usr/bin/env perl
 
+# This is the implementation of the Aho-Corasick algorithm, in Perl. This was
+# not adapted from existing code (as the C versions of KMP, Boyer-Moore and
+# Shift-Or were), but from the C code that was written directly from the
+# published algorithm in the original paper.
+
 use 5.010;
 use strict;
 use warnings;
@@ -14,6 +19,7 @@ use Run qw(run_multi);
 
 my @ALPHA_OFFSETS = qw(65 67 71 84);
 
+# Create a new state for the goto_fn part of the DFA.
 sub add_goto_state {
     my $goto_fn = shift;
 
@@ -22,6 +28,7 @@ sub add_goto_state {
     return;
 }
 
+# Add one pattern to the given goto_fn and record its index in the output_fn.
 sub enter_pattern {
     my ($pat, $idx, $goto_fn, $output_fn) = @_;
     my $len = scalar @{$pat};
@@ -48,6 +55,8 @@ sub enter_pattern {
     return;
 }
 
+# This will completely build goto_fn, but only partially build the output_fn.
+# It initializes the two, then adds each pattern in turn to goto_fn.
 sub build_goto {
     my ($patterns, $goto_fn, $output_fn) = @_;
 
@@ -71,6 +80,7 @@ sub build_goto {
     return;
 }
 
+# Build failure_fn, and complete the construction of output_fn.
 sub build_failure {
     my ($goto_fn, $output_fn) = @_;
     my @failure_fn = ();
@@ -116,6 +126,8 @@ sub build_failure {
     return \@failure_fn;
 }
 
+# Initialize the Aho-Corasick structure that will be passed to the main routine
+# for each target sequence being matched against.
 sub init_aho_corasick {
     my $patterns = shift;
     my $pattern_count = scalar @{$patterns};
@@ -135,6 +147,7 @@ sub init_aho_corasick {
 # number of patterns ($pattern_count).
 sub aho_corasick {
     my ($pat_data, $sequence) = @_;
+    # Unpack $pat_data
     my ($pattern_count, $goto_fn, $failure_fn, $output_fn) = @{$pat_data};
 
     my @matches = (0) x $pattern_count;

@@ -1,3 +1,13 @@
+# This module provides the "runner" functions for actually executing a given
+# algorithm. There are four public-facing functions:
+#
+#   * run() - Runs a single-pattern, exact-matching algorithm
+#   * run_multi() - Runs a multi-pattern, exact-matching algorithm
+#   * run_approx() - Runs a single-pattern, approximate-matching algorithm
+#   * run_approx_raw() - Also runs a single-pattern approximate algorithm,
+#                        but skips the step of converting the strings to
+#                        arrays of integers.
+
 package Run;
 
 use strict;
@@ -11,6 +21,10 @@ use Input;
 
 our @EXPORT_OK = qw(run run_multi run_approx run_approx_raw);
 
+# This is the basic runner. It handles a single pattern that is intended to be
+# matched in an exact manner. It pre-processes the data from strings to arrays
+# of integers, because some of the algorithms operate on numbers either
+# exclusively or optionally.
 sub run {
     my ($init, $code, $name, $argv) = @_;
     my ($sequences_file, $patterns_file, $answers_file) = @{$argv};
@@ -133,6 +147,9 @@ sub run_multi {
     return $return_code;
 }
 
+# This is the "real" approximate-matching runner. It is front-ended by the two
+# public-facing functions that control whether the data gets the pre-processing
+# treatment or not.
 sub run_approx_main {
     my ($init, $code, $name, $argv, $skip_preprocess) = @_;
     my ($k, $sequences_file, $patterns_file, $answers_file) = @{$argv};
@@ -197,10 +214,12 @@ sub run_approx_main {
     return $return_code;
 }
 
+# Run the approximate matching with the data converted to arrays of ints.
 sub run_approx {
     return run_approx_main(@_);
 }
 
+# Run the approximate matching with no data pre-processing.
 sub run_approx_raw {
     return run_approx_main(@_, 'no-preprocess');
 }
