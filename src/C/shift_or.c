@@ -42,8 +42,16 @@ WORD_TYPE calc_s_positions(unsigned char *pat, int m, WORD_TYPE s_positions[]) {
   return lim;
 }
 
+/*
+  Initialize the pattern given. Return a two-element array of the processed
+  `s_positions` table and the value of `lim`. Note that once this pre-processing
+  is done, the pattern itself is no longer needed.
+*/
 void **init_shift_or(unsigned char *pattern) {
+  // Allocate one pointer-slot more than is needed, as the final NULL will be
+  // the signal to the loop that is freeing memory.
   void **return_val = (void **)calloc(3, sizeof(void *));
+
   WORD_TYPE *lim = calloc(1, sizeof(WORD_TYPE));
   WORD_TYPE *s_positions = calloc(ASIZE, sizeof(WORD_TYPE));
 
@@ -57,6 +65,8 @@ void **init_shift_or(unsigned char *pattern) {
   /* Preprocessing */
   *lim = calc_s_positions(pattern, m, s_positions);
 
+  // Save these values in the void** structure. The `shift_or` function will
+  // unpack them in the same order, for use.
   return_val[0] = (void *)lim;
   return_val[1] = (void *)s_positions;
 
@@ -68,8 +78,10 @@ void **init_shift_or(unsigned char *pattern) {
   the sequence of length n.
 */
 int shift_or(void **pat_data, unsigned char *sequence) {
+  // Unpack pat_data:
   WORD_TYPE *lim = (WORD_TYPE *)pat_data[0];
   WORD_TYPE *s_positions = (WORD_TYPE *)pat_data[1];
+
   WORD_TYPE state;
   int matches = 0;
   int j;

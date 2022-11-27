@@ -1,8 +1,9 @@
 /*
   C implementation of the (tentatively-titled) DFA-Gap algorithm for
-  approximate string matching, regular expression version.
+  approximate string matching, regular expression variant.
 */
 
+// This must be set before pcre2.h is included.
 #define PCRE2_CODE_UNIT_WIDTH 8
 
 #include <pcre2.h>
@@ -17,10 +18,16 @@
   processing the pattern. The original pattern will not be needed for matching.
 */
 void **init_regexp(unsigned char *pattern, int k) {
+  // Allocate one pointer-slot more than is needed, as the final NULL will be
+  // the signal to the loop that is freeing memory.
   void **return_val = (void **)calloc(2, sizeof(void *));
+
   int m = strlen((const char *)pattern);
   int errornumber;
   PCRE2_SIZE erroroffset;
+  // The estimated length of the RE that will be built is (m*10 + 7), where `m`
+  // is the length of the pattern. One more is added for the NULL byte at the
+  // end.
   unsigned char *re_buf = (unsigned char *)calloc(m * 10 + 8, sizeof(char));
   int bufptr = 0;
 
@@ -44,6 +51,7 @@ void **init_regexp(unsigned char *pattern, int k) {
     exit(1);
   }
 
+  // There is only the one value that is carried over to the `regexp` function.
   return_val[0] = (void *)re;
   free(re_buf);
 

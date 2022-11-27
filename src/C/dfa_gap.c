@@ -39,9 +39,10 @@ void create_dfa(unsigned char *pattern, int m, int k, int **dfa,
     fprintf(stderr, "build_goto: create_dfa malloc failed\n");
     exit(-1);
   }
+  // Initialize all of `new_dfa` to FAIL.
   for (int i = 0; i < max_states; i++)
     for (int j = 0; j < ASIZE; j++)
-      new_dfa[i * ASIZE + j] = -1;
+      new_dfa[i * ASIZE + j] = FAIL;
 
   // Start building the DFA. Start with state 0 and iterate through the
   // characters of `pattern`.
@@ -95,6 +96,8 @@ void create_dfa(unsigned char *pattern, int m, int k, int **dfa,
   original pattern will not be needed for matching.
 */
 void **init_dfa_gap(unsigned char *pattern, int k) {
+  // Allocate one pointer-slot more than is needed, as the final NULL will be
+  // the signal to the loop that is freeing memory.
   void **return_val = (void **)calloc(4, sizeof(void *));
 
   // Set up the DFA structure for the algorithm to use:
@@ -104,6 +107,8 @@ void **init_dfa_gap(unsigned char *pattern, int k) {
   int *terminal = (int *)calloc(1, sizeof(int));
   create_dfa(pattern, *m, k, &dfa, terminal);
 
+  // Save these three values in the void** structure. The `dfa_gap` function
+  // will unpack them in the same order, for use.
   return_val[0] = (void *)dfa;
   return_val[1] = (void *)terminal;
   return_val[2] = (void *)m;

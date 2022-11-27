@@ -1,6 +1,13 @@
 /*
-  This is the "runner" module. It provides the function that will handle running
-  an experiment.
+  This is the "runner" module. It provides the functions that will handle
+  running the experiments. There are three primary runner functions here:
+
+    * run() - Runs a single-pattern, exact-matching algorithm
+    * run_multi() - Runs a multi-pattern, exact-matching algorithm
+    * run_approx() - Runs a single-pattern, approximate-matching algorithm
+
+  These are mostly identical, but just different-enough to require separate
+  functions. The data-input handling is brought in from input.c.
 */
 
 #include <stdio.h>
@@ -11,6 +18,7 @@
 #include "input.h"
 #include "run.h"
 
+// Identify the language by the compiler.
 #if defined(__INTEL_LLVM_COMPILER)
 #define LANG "c-intel"
 #elif defined(__llvm__)
@@ -29,9 +37,9 @@ double get_time() {
 }
 
 /*
-  The "runner" function. This takes pointers to the algorithm initializer and
-  implementation, the name of the algorithm, argc and argv from the invocation,
-  and runs the experiment over the given algorithm.
+  The basic "runner" function. This takes pointers to the algorithm initializer
+  and implementation, the name of the algorithm, argc and argv from the
+  invocation, and runs the experiment over the given algorithm.
 
   The return value is 0 if the experiment correctly identified all pattern
   instances in all sequences, and the number of misses otherwise.
@@ -119,8 +127,8 @@ int run(initializer init, algorithm code, char *name, int argc, char *argv[]) {
 }
 
 /*
-  This is a variation of "run" that handles algorithms that do multi-pattern
-  matching.
+  This is a variation of `run` that handles algorithms that do multi-pattern
+  matching. It has the same signature as `run`, above.
 */
 int run_multi(mp_initializer init, mp_algorithm code, char *name, int argc,
               char *argv[]) {
@@ -154,9 +162,10 @@ int run_multi(mp_initializer init, mp_algorithm code, char *name, int argc,
     }
   }
 
-  // Run it. For each sequence, try each pattern against it. The code function
-  // pointer will return the number of matches found, which will be compared to
-  // the table of answers for that pattern. Report any mismatches.
+  // Run it. For each sequence, try the combined group of patterns against it.
+  // The code function pointer will return the number of matches found, which
+  // will be compared to the table of answers for that pattern. Report any
+  // mismatches.
   double start_time = get_time();
   int return_code = 0; // Used for noting if some number of matches fail
 
@@ -208,6 +217,12 @@ int run_multi(mp_initializer init, mp_algorithm code, char *name, int argc,
   return return_code;
 }
 
+/*
+  This is a variation of `run` that handles algorithms that do approximate
+  matching. It has the same signature as `run`, above. Here, we have to contend
+  with an additional command-line parameter that specifies the value of k for
+  the approximate-matching process.
+*/
 int run_approx(am_initializer init, am_algorithm code, char *name, int argc,
                char *argv[]) {
   if (argc < 4 || argc > 5) {

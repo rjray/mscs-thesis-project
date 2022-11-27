@@ -34,7 +34,7 @@ static int ALPHA_OFFSETS[OFFSETS_COUNT] = {65, 67, 71, 84};
 */
 
 // How big to create the set-storage. The set isn't designed to grow, so this
-// has to equal to or greater than the largest expected output_fn value.
+// has to be equal to or greater than the largest expected output_fn value.
 #define SET_SIZE 100
 struct _Set {
   int elements[SET_SIZE];
@@ -78,7 +78,7 @@ void set_union(Set *set1, Set *set2) {
 
 /*
   Also need a simple integer queue to use for building the failure function. I
-  can't predict the size that will be needed, so it too will have to grow
+  can't predict the size that will be needed, so it will have to grow
   dynamically as needed.
 */
 
@@ -281,13 +281,17 @@ void build_failure(int **failure_fn, int *goto_fn, Set *output_fn,
   // algorithm. Their mnemonic isn't clear, or else I'd use more meaningful
   // names.
   while (!queue_empty(queue)) {
+    // `r` is the state we are currently processing.
     int r = dequeue(queue);
+    // This loop will go over all states `s` that are reachable from `r`.
     for (int i = 0; i < OFFSETS_COUNT; i++) {
+      // Use the offsets table to avoid scanning all 128 "alphabet" entries.
       int a = ALPHA_OFFSETS[i];
       int s = goto_fn[r * ASIZE + a];
       if (s == FAIL)
         continue;
 
+      // `s` is a (non-fail) state reachable from `r`
       enqueue(queue, s);
       int state = failure[r];
       while (goto_fn[state * ASIZE + a] == FAIL)
@@ -297,13 +301,23 @@ void build_failure(int **failure_fn, int *goto_fn, Set *output_fn,
     }
   }
 
+  // Free up the memory for `queue`.
   delete_queue(queue);
   *failure_fn = failure;
   return;
 }
 
+/*
+  Initialize the Aho-Corasick algorithm for the given list of patterns. Returns
+  a void** pointing to the elements that need to be carried over to the
+  algorithm itself.
+*/
 void **init_aho_corasick(unsigned char **patterns_data, int patterns_count) {
+  // Allocate one pointer more than we need, as the ending NULL will signal the
+  // clean-up code when to stop.
   void **return_val = (void **)calloc(5, sizeof(void *));
+  // Make a local copy of `patterns_count`, as it needs to be carried over and
+  // the memory will eventually have to be freed.
   int *pat_count = (int *)calloc(1, sizeof(int));
   *pat_count = patterns_count;
 
@@ -316,6 +330,8 @@ void **init_aho_corasick(unsigned char **patterns_data, int patterns_count) {
              &output_fn, &num_states);
   build_failure(&failure_fn, goto_fn, output_fn, num_states);
 
+  // Save these four values in the void** structure. The `aho_corasick`
+  // function will unpack them in the same order, for use.
   return_val[0] = (void *)pat_count;
   return_val[1] = (void *)goto_fn;
   return_val[2] = (void *)failure_fn;
@@ -342,17 +358,27 @@ int *aho_corasick(void **pat_data, unsigned char *sequence) {
   int *failure_fn = (int *)pat_data[2];
   Set *output_fn = (Set *)pat_data[3];
 
+  // First, allocate an array of ints for counting the matches. Must match the
+  // size of the original list of patterns.
   int *matches = (int *)calloc(*pattern_count, sizeof(int));
   if (matches == NULL) {
     fprintf(stderr, "aho_corasick: matches calloc failed\n");
     exit(-1);
   }
 
+  // The actual execution of this algorithm is very compact and efficient. It
+  // will only traverse the sequence once, and while doing so will count ALL
+  // matches (including overlapping matches) of all patterns and collect them
+  // in the `matches` array.
   for (int i = 0; i < n; i++) {
+    // If the current character has a fail-state value, consult the
+    // `failure_fn` table until we get to a state that is not pointing to FAIL.
     while (goto_fn[state * ASIZE + sequence[i]] == FAIL)
       state = failure_fn[state];
 
+    // Move the value of `state` to this new position.
     state = goto_fn[state * ASIZE + sequence[i]];
+    // For all/any outputs at this new state, record them.
     for (int m = 0; m < output_fn[state].used; m++)
       matches[output_fn[state].elements[m]]++;
   }

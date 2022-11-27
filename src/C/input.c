@@ -18,11 +18,14 @@ void read_header(FILE *input, int numbers[]) {
   char line[80] = {0};
   char *s;
 
+  // The first line of a file is only ever the 2-3 integers we're expecting, so
+  // it's safe to assume that 80 characters is enough.
   if (fgets(line, 80, input) == NULL) {
     fprintf(stderr, "Error reading file's header line, stopped\n");
     exit(-1);
   }
 
+  // Use strtok() with " " as the separator.
   s = strtok(line, " ");
   int idx = 0;
   while (s != NULL) {
@@ -91,6 +94,7 @@ int read_sequences(const char *fname, char ***data) {
   fclose(input);
   free(line);
 
+  // Simple check to make sure we read as many lines as expected:
   if (count != num_lines) {
     fprintf(stderr, "Incorrect number of lines read from %s: %d/%d\n", fname,
             count, num_lines);
@@ -187,6 +191,7 @@ int read_answers(const char *fname, int ***data, int *k) {
   fclose(input);
   free(line);
 
+  // Simple check to make sure we read as many lines as expected:
   if (count != num_lines) {
     fprintf(stderr, "Incorrect number of lines read from %s: %d/%d\n", fname,
             count, num_lines);

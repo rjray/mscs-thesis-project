@@ -77,7 +77,14 @@ void calc_good_suffix(unsigned char *pat, int m, int good_suffix[]) {
   return;
 }
 
+/*
+  Initialize the pattern data for the given pattern. This will return a void**
+  structure with the elements that the actual `boyer_moore` function will need
+  to find matches.
+*/
 void **init_boyer_moore(unsigned char *pattern) {
+  // Allocate one pointer-slot more than is needed, as the final NULL will be
+  // the signal to the loop that is freeing memory.
   void **return_val = (void **)calloc(4, sizeof(void *));
   int m = strlen((const char *)pattern);
   // Allocate space for the good-suffix/bad-char tables:
@@ -88,6 +95,8 @@ void **init_boyer_moore(unsigned char *pattern) {
   calc_good_suffix(pattern, m, good_suffix);
   calc_bad_char(pattern, m, bad_char);
 
+  // Save these three values in the void** structure. The `boyer_moore`
+  // function will unpack them in the same order, for use.
   return_val[0] = (void *)strdup((const char *)pattern);
   return_val[1] = (void *)good_suffix;
   return_val[2] = (void *)bad_char;
@@ -101,9 +110,12 @@ void **init_boyer_moore(unsigned char *pattern) {
 */
 int boyer_moore(void **pat_data, unsigned char *sequence) {
   int i, j;
+
+  // Unpack pat_data:
   unsigned char *pattern = (unsigned char *)pat_data[0];
   int *good_suffix = (int *)pat_data[1];
   int *bad_char = (int *)pat_data[2];
+
   int matches = 0;
 
   // Sizes of pattern and sequence.

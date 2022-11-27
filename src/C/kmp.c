@@ -39,12 +39,17 @@ void make_next_table(unsigned char *pat, int m, int next_table[]) {
   pattern and the `next_table`.
 */
 void **init_kmp(unsigned char *pattern) {
+  // Allocate one pointer-slot more than is needed, as the final NULL will be
+  // the signal to the loop that is freeing memory.
   void **return_val = (void **)calloc(3, sizeof(void *));
+
   // Set up the next_table array for the algorithm to use:
   int m = strlen((const char *)pattern);
   int *next_table = (int *)calloc(m + 1, sizeof(int));
   make_next_table(pattern, m, next_table);
 
+  // Save these values in the void** structure. The `kmp` function will unpack
+  // them in the same order, for use.
   return_val[0] = (void *)strdup((const char *)pattern);
   return_val[1] = (void *)next_table;
 
@@ -57,8 +62,11 @@ void **init_kmp(unsigned char *pattern) {
 */
 int kmp(void **pat_data, unsigned char *sequence) {
   int i, j;
+
+  // Unpack pat_data:
   unsigned char *pattern = (unsigned char *)pat_data[0];
   int *next_table = (int *)pat_data[1];
+
   int matches = 0;
 
   // Sizes of pattern and sequence.
