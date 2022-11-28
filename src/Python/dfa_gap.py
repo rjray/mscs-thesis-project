@@ -3,11 +3,17 @@
 from run import run_approx
 from sys import argv
 
+# Rather than do any contortions to limit the alphabet to just 4 characters,
+# define it to be the ASCII range.
 ASIZE = 128
 FAIL = -1
+# This list is used to keep some loops down to just the characters we're
+# interested in.
 ALPHABET = [65, 67, 71, 84]
 
 
+# Create the DFA that underlies the DFA-Gap algorithm, based on the pattern,
+# its length, and the parameter `k`.
 def create_dfa(pattern, m, k):
     # We know that the number of states will be 1 + m + k(m - 1).
     max_states = 1 + m + k * (m - 1)
@@ -48,6 +54,9 @@ def create_dfa(pattern, m, k):
     return dfa, terminal
 
 
+# Initialize the algorithm for the given `pattern` and value of `k`. Return a
+# list that will be passed to `dfa_gap` with each target sequence to be
+# matched in.
 def init_dfa_gap(pattern, k):
     m = len(pattern)
     dfa, terminal = create_dfa(pattern, m, k)
@@ -55,6 +64,8 @@ def init_dfa_gap(pattern, k):
     return [dfa, terminal, m]
 
 
+# Apply the DFA-Gap algorithm to the given `sequence`, using the pattern data
+# packed into `pat_data`.
 def dfa_gap(pat_data, sequence):
     dfa, terminal, m = pat_data
 

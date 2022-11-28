@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
+# Python implementation of the Boyer-Moore algorithm.
+
 from copy import copy
 from run import run
 from sys import argv
 
+# Rather than do any contortions to limit the alphabet to just 4 characters,
+# define it to be the ASCII range.
 ASIZE = 128
 
 
+# Create the bad_char jump-table.
 def calc_bad_char(pat, m):
     bad_char = [m] * ASIZE
 
@@ -16,6 +21,7 @@ def calc_bad_char(pat, m):
     return bad_char
 
 
+# Calculate the suffixes that are in turn used to create the good_suffix table.
 def calc_suffixes(pat, m):
     suffix_list = [0] * m
 
@@ -39,6 +45,7 @@ def calc_suffixes(pat, m):
     return suffix_list
 
 
+# Create the good_suffix jump-table.
 def calc_good_suffix(pat, m):
     suffixes = calc_suffixes(pat, m)
     good_suffix = [m] * m
@@ -61,6 +68,9 @@ def calc_good_suffix(pat, m):
     return good_suffix
 
 
+# Initialize the pattern data for the algorithm. That means creating the
+# `bad_char` and `good_suffix` tables and returning a list with the pattern
+# and those tables.
 def init_boyer_moore(pattern):
     m = len(pattern)
     pat = copy(pattern)
@@ -69,6 +79,8 @@ def init_boyer_moore(pattern):
     return [pat, calc_good_suffix(pat, m), calc_bad_char(pat, m)]
 
 
+# Perform the Boyer-Moore search algorithm on the given sequence `seq`, using
+# the pattern data in `pat_data`. Return the number of matches found.
 def boyer_moore(pat_data, seq):
     pat, good_suffix, bad_char = pat_data
     matches = 0

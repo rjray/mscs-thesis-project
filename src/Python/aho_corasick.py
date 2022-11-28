@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
 
+# Python implementation of the Aho-Corasick algorithm.
+
 from collections import deque
 from run import run_multi
 from sys import argv
 
+# Rather than do any contortions to limit the alphabet to just 4 characters,
+# define it to be the ASCII range.
 ASIZE = 128
 FAIL = -1
+# This list is used to keep some loops down to just the characters we're
+# interested in.
 ALPHA_OFFSETS = [65, 67, 71, 84]
 # This global is used only by enter_pattern() to track the index of new states
 # as they're added to the goto_fn and output_fn arrays.
 new_state = 0
 
 
+# Create a new state for the goto_fn.
 def add_goto_state(goto_fn):
     goto_fn.append([FAIL] * ASIZE)
 
 
+# Add the given pattern to the goto_fn and output_fn.
 def enter_pattern(pat, idx, goto_fn, output_fn):
     length = len(pat)
     j = 0
@@ -38,6 +46,7 @@ def enter_pattern(pat, idx, goto_fn, output_fn):
     return
 
 
+# Build the goto_fn and partially build the output_fn.
 def build_goto(patterns, goto_fn, output_fn):
     # Add initial values for state 0:
     add_goto_state(goto_fn)
@@ -55,6 +64,7 @@ def build_goto(patterns, goto_fn, output_fn):
     return
 
 
+# Build the failure_fn and complete the output_fn.
 def build_failure(goto_fn, output_fn):
     queue = deque()
 
@@ -91,6 +101,8 @@ def build_failure(goto_fn, output_fn):
     return failure_fn
 
 
+# Initialize the pattern data for the list of patterns given. Return the list
+# that will be passed to `aho_corasick` with each sequence string.
 def init_aho_corasick(patterns_data):
     goto_fn = []
     output_fn = []

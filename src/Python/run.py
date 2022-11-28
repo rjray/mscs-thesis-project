@@ -1,8 +1,21 @@
+# This is the runner module for the Python experiments. It provides the
+# following importable functions:
+#
+#   * run() - Run one single-pattern, exact-matching experiment
+#   * run_multi() - Run one multi-pattern, exact-matching experiment
+#   * run_approx() - Run one single-pattern, approximate-matching experiment
+#   * run_approx_raw() - Run one single-pattern, approximate-matching
+#                        experiment without the usual pre-processing of the
+#                        pattern and sequence data
+
 from input import read_sequences, read_patterns, read_answers
 from sys import stderr
 from time import perf_counter
 
 
+# Run a single-pattern, exact-matching experiment. Takes the init function
+# pointer, the algorithm function pointer, the algorithm name (for reporting),
+# and the arguments passed to the script.
 def run(init, code, name, argv):
     if len(argv) < 3 or len(argv) > 4:
         raise Exception(f"Usage: {argv[0]} sequences patterns <answers>")
@@ -50,6 +63,9 @@ def run(init, code, name, argv):
     return return_code
 
 
+# Run a multi-pattern, exact-matching experiment. Takes the init function
+# pointer, the algorithm function pointer, the algorithm name (for reporting),
+# and the arguments passed to the script.
 def run_multi(init, code, name, argv):
     if len(argv) < 3 or len(argv) > 4:
         raise Exception(f"Usage: {argv[0]} sequences patterns <answers>")
@@ -98,6 +114,10 @@ def run_multi(init, code, name, argv):
     return return_code
 
 
+# Run a single-pattern, approximate-matching experiment. Takes the same
+# arguments as the previous two, with one optional argument that tells whether
+# the data gets pre-processed. This is because the regular expression variant
+# does not need the data pre-processed.
 def run_approx_main(init, code, name, argv, preprocess=True):
     if len(argv) < 4 or len(argv) > 5:
         raise Exception(f"Usage: {argv[0]} k sequences patterns <answers>")
@@ -153,9 +173,11 @@ def run_approx_main(init, code, name, argv, preprocess=True):
     return return_code
 
 
+# Front-end to the previous function that runs *with* pre-processing.
 def run_approx(init, code, name, argv):
     return run_approx_main(init, code, name, argv)
 
 
+# Front-end to `run_approx_main` that runs *without* pre-processing.
 def run_approx_raw(init, code, name, argv):
     return run_approx_main(init, code, name, argv, False)

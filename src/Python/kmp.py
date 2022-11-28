@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+# Python implementation of the Knuth-Morris-Pratt algorithm.
+
 from copy import copy
 from run import run
 from sys import argv
 
 
+# Calculate the `next_table` jump-table.
 def make_next_table(pattern, m):
     i = 0
     next_table = [0 for _ in range(m + 1)]
@@ -24,6 +27,9 @@ def make_next_table(pattern, m):
     return next_table
 
 
+# Initialize the algorithm for the given pattern. Requires adding a sentinel
+# character to the pattern and creating the `next_table` array. Return an
+# array of the data that will be needed to use this for matching to sequences.
 def init_kmp(pattern):
     m = len(pattern)
     pat = copy(pattern)
@@ -32,6 +38,8 @@ def init_kmp(pattern):
     return [pat, make_next_table(pat, m)]
 
 
+# Run the KMP algorithm over the given `sequence` using the pattern encoded in
+# `pat_data`. Return the number of matches found.
 def kmp(pat_data, sequence):
     pat, next_table = pat_data
     matches = 0
