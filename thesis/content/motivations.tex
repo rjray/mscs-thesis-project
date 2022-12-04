@@ -55,3 +55,9 @@ Neamatollahi, et al~\cite{neamatollahi} describe three pattern matching algorith
 The concept of multiple-pattern-matching for exact matches is explored by Bhuka and Somayajulu in~\cite{bhukya}. Their approach is based on the use of pair indexing for both the sequence and the pattern. This paper gave weight to the idea of multi-pattern matching and led to the decision to take the Aho \& Corasick algorithm~\cite{aho} as one of the evaluation algorithms.
 
 In~\cite{cheng2003approximate}, Cheng, et al describe a novel data structure and use it in two new parallel approximate matching algorithms. Ultimately, this was not used directly as the multiple-machine clusters would have greatly increased the complexity of taking energy usage measurements.
+
+Ahmed, et al~\cite{ahmed2020efficient} presents an efficient implementation for maximal exact matching (MEM) seeds in long DNA reads, using GPU computing. While the algorithm itself appeared very sound, adding a MEM algorithm to the experiments was not practical in general. Additionally, CUDA computing was not available to all five of the chosen languages.
+
+Xylogiannopoulos~\cite{xylogiannopoulos2019exhaustive} describes a novel methodology for exact string matching based on a pipeline of data structures and algorithms. This approach would have been beyond the scope of the goals of this paper, as the focus here is on using basic individual algorithms.
+
+Alazzam and Sharieh~\cite{alazzam2018parallel} developed a parallel $n$-gram approach to approximate matching. As a parallel algorithm, it would not have been applicable equally across the selected languages as some (such as Python) have limitations on multi-threaded operation.
