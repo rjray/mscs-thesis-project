@@ -134,7 +134,7 @@ Each language section includes a sample of the language, implementing a naive (O
 
 \subsubsection{C}
 
-The C programming language is the oldest and most-established of the chosen languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO).
+The C programming language is the oldest and most-established of the chosen languages. Originally designed in the early 1970's by Dennis Ritchie, it remains a very widely-used and influential language since its first appearance in 1972. Since 1989, it has been standardized by both ANSI (the American National Standards Institute) and by the International Organization for Standardization (ISO). C was chosen because it is a foundational language in the history of programming languages, and is still in wide use across many fields.
 
 C relies on what is referred to as \textit{manual memory management}, meaning that the programmer is responsible for all allocation and freeing of dynamic memory. This approach can often lead to several major classes of bugs when used incorrectly, such as memory safety issues or memory leaks. Multiple pointers to the same region of memory can become ``dangling pointers'' when one pointer frees the memory without the other pointers being invalidated at the same time. Further attempts to use any of the other pointers can lead to memory corruption or segmentation faults.
 
@@ -146,7 +146,7 @@ Experiments using the C language were run on three different compiler toolchains
 
 \subsubsection{C++}
 
-C++ was developed initially as an extension of C, by Bjarne Stroustrup while working at AT\&T Bell Labs. It first appeared in 1985 and was initially standardized in 1998. At first envisioned as ``C with Classes'', the language has been significantly expanded over the years to include many more features while still maintaining low-level memory accessibility. C++ attempts to offer more expressive, concise coding than C, with many of C's memory-management concerns dealt with automatically by class constructors and destructors.
+C++ was developed initially as an extension of C, by Bjarne Stroustrup while working at AT\&T Bell Labs. It first appeared in 1985 and was initially standardized in 1998. At first envisioned as ``C with Classes'', the language has been significantly expanded over the years to include many more features while still maintaining low-level memory accessibility. C++ attempts to offer more expressive, concise coding than C, with many of C's memory-management concerns dealt with automatically by class constructors and destructors. This language was added to the experiments because of its current level of popularity in the sciences, high-performance computing, and other fields. With the addition of C++, it would be possible to compare it directly to C in terms of not just performance but expressiveness and other metrics as well.
 
 In C++, Stroustrup originated the programming idiom of \textit{resource acquisition is initialization}~\cite{cpp} (RAII). Most dynamic memory is managed via class constructors and destructors, though C++ also supports the \texttt{malloc}-based memory management mechanisms inherited from C.
 
@@ -158,7 +158,7 @@ Experiments using the C++ language were also run on the same three compiler tool
 
 Perl is an interpreted language developed by Larry Wall while working as a programmer at Unisys. The first version, 1.0, was released on December 18, 1987. The current version as of this writing is 5.36.0, released on May 28, 2022.
 
-Perl's reach grew tremendously with the introduction of the World Wide Web's Common Gateway Interface due to its native support for regular expressions and strong text-processing capabilities. Initially developed as a general-purpose scripting language, Perl borrowed features from languages such as C, Awk, Sed, and the \texttt{sh} shell. Perl also offers features generally associated with functional programming, including first-class and higher order functions, lexical closures, garbage collection, and list comprehensions.
+Perl's reach grew tremendously with the introduction of the World Wide Web's Common Gateway Interface due to its native support for regular expressions and strong text-processing capabilities. Initially developed as a general-purpose scripting language, Perl borrowed features from languages such as C, Awk, Sed, and the \texttt{sh} shell. Perl also offers features generally associated with functional programming, including first-class and higher order functions, lexical closures, garbage collection, and list comprehensions. Perl was chosen for the fact that it has a history with bioinformatics programming that reaches back to the Human Genome Project~\cite{bioperl}, and continues to be popular for rapid development.
 
 Perl is dynamically-typed and multi-paradigm in nature. It supports procedural as well as object-oriented programming styles as well as metaprogramming. Its garbage collection approach to memory management is based on reference counting.
 
@@ -168,7 +168,7 @@ A Perl implementation of the naive algorithm is given in listing~\ref{lst:naive_
 
 \subsubsection{Python}
 
-Python is another interpreted language, developed by Guido van Rossum while at Centrum Wiskunde \& Informatica in the late 1980's and first released as version 0.9.0 in 1991. Like Perl, it is also dynamically-typed and multi-paradigm in its nature. As a language, Python consistently ranks high in user popularity on such measures as the TIOBE Programming Community Index\footnote{TIOBE Index: \texttt{\url{https://www.tiobe.com/tiobe-index/}}}.
+Python is another interpreted language, developed by Guido van Rossum while at Centrum Wiskunde \& Informatica in the late 1980's and first released as version 0.9.0 in 1991. Like Perl, it is also dynamically-typed and multi-paradigm in its nature. As a language, Python consistently ranks high in user popularity on such measures as the TIOBE Programming Community Index\footnote{TIOBE Index: \texttt{\url{https://www.tiobe.com/tiobe-index/}}}. Python was added to the list of experiments due to this very high overall popularity, as well as its presence in bioinformatics programming. It is noted for its expressiveness and the ease with which applications can be quickly prototyped.
 
 Python's memory management is a combination of reference counting and a cycle-detecting garbage collector. A Python implementation of the naive algorithm is given in listing~\ref{lst:naive_python}.
 
@@ -176,7 +176,7 @@ Python's memory management is a combination of reference counting and a cycle-de
 
 \subsubsection{Rust}
 
-Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.65.0 and was released in November of 2022.
+Rust is the newest of the languages, having first appeared in 2010. Rust offers a promise of expressiveness with greater safety in the areas of memory management and ownership. It is a multi-paradigm, general-purpose language that draws from several previous languages including C++, Haskell, and Standard ML. While often referred to as a systems programming language, its usage is spreading rapidly to other areas including to some scientific programming disciplines~\cite{nature}. The language began in 2006 as a personal project of Graydon Hoare, an employee of the Mozilla Corporation, with Mozilla beginning to sponsor the work in 2009 and officially announcing the project in 2010~\cite{asay}. The first pre-alpha numbered version of the compiler was Rust 0.1, which was released in January of 2012. The current (as of this writing) version of Rust is 1.65.0 and was released in November of 2022. Rust was chosen in an interest to see how its performance would compare to the other compiled languages (C and C++), and to see in which ways the increased memory safety and other features would contribute to the development process.
 
 An area where Rust is distinct from other C-based languages is in the way it manages memory and tracks values on the stack and heap. Rust uses an ownership system~\cite[Chapter~4]{programming}, with the ability to specify lifetime information for reference types. There is no automated garbage collection, and resources are managed through the same convention of \textit{resource acquisition is initialization} as in C++, with optional reference counting. Rust's design for memory safety does not permit null pointers, dangling pointers, or data races.
 
@@ -187,6 +187,10 @@ In contrast, Rust integrates the concept of ownership directly into the language
 Listing~\ref{lst:naive_rust} shows the naive algorithm as implemented in Rust. Note that the subroutine is named slightly differently in this case, as \texttt{match} is a keyword in Rust.
 
 \input{code/naive.rs}
+
+\subsubsection{Languages Not Used}
+
+There were several languages that were considered but ultimately not chosen for the experiments. The Go language is a compiled language growing popularity in data centers. It was set aside in favor of Rust due to the desire to only have one ``young'' language in the set, so as to not distract from the research at hand. The Java language was also considered, but was ultimately not chosen because the additional layer of the Java Virtual Machine might have affected the efforts to gather accurate energy readings. Languages such as C\# that are designed for the .NET framework were passed on over concerns about full Linux usability. Ultimately, it was decided that five languages would be a sufficient set with which to evaluate the chosen metrics and the methodology itself.
 
 \subsection{General Implementation of the Algorithms}
 

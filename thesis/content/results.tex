@@ -72,7 +72,7 @@ While regular expressions improved the performance of both Perl and Python drama
 
 \subsubsection{Collected Performance Results}
 
-After the decision was made to implement the regular expression variant throughout, processing of the full performance results was done. The collection of sub-tables in table~\ref{table:runtime:comparative-algorithm} shows the comparative performance of the languages on each of the algorithms. The time measurements are based on the algorithm run-time as opposed to the total run-time. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest.
+After the decision was made to implement the regular expression variant throughout, processing of the full performance results was done. The collection of sub-tables in table~\ref{table:runtime:comparative-algorithm} shows the comparative performance of the languages on each of the algorithms. The time measurements are based on the algorithm run-time as opposed to the total run-time. In each table, the fastest language is listed first with the remaining ones following in order of performance. Run times are scaled by the fastest time. This has the result of showing each slower language's time as a percentage over the fastest. To obtain the run-time values used in the tables and charts, the mean run-times for each individual experiment were added together to represent each distinct language.
 
 \begin{table}[!htb]
 \input{tables/runtimes}
@@ -297,7 +297,7 @@ These results are further illustrated by figure~\ref{fig:graph:power_per_sec}. I
     \label{fig:graph:power_per_sec}
 \end{figure}
 
-The fact that Rust was the overall best performer in terms of energy usage is underscored by the chart in figure~\ref{fig:graph:total_power_usage}. In this chart, the total (mean) energy usage by all experiments in each language is shown. Here, the Perl and Python languages have been removed again due to the fact that their longer run-times lead to energy numbers well out of scale with respect to the compiled languages. The red horizontal line shows the total usage by Rust and illustrates the differences with C and C++ across all three of their toolchains.
+The fact that Rust was the overall best performer in terms of energy usage is underscored by the chart in figure~\ref{fig:graph:total_power_usage}. In this chart, the value for each language as shown is the total of the mean values from all 14 experiments. Here, the Perl and Python languages have been removed again due to the fact that their longer run-times lead to energy numbers well out of scale with respect to the compiled languages. The red horizontal line shows the total usage by Rust and illustrates the differences with C and C++ across all three of their toolchains.
 
 \begin{figure}[h]
 	\centering

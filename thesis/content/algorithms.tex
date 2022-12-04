@@ -9,7 +9,7 @@ During the process of running experiments and analyzing the results, it was deci
 
 \subsection{Knuth, Morris, and Pratt}
 
-The Knuth-Morris-Pratt~\cite{knuth} algorithm is one of the foundational algorithms in the area of string matching and text searching. It is still used in the present day, with implementations as recent as the Rust-Bio project~\cite{rust}. This was chosen primarily for historical significance, but also for ease of implementation.
+The Knuth-Morris-Pratt~\cite{knuth} algorithm is one of the foundational algorithms in the area of string matching and text searching. This was chosen primarily for historical significance, but also for ease of implementation. Implementations of this algorithm are still being written, as recently as the Rust-Bio project~\cite{rust}.
 
 Knuth-Morris-Pratt is an \textit{exact matching} algorithm, meaning that it matches the desired pattern exactly or not at all. It finds all instances of the pattern within the target string, including overlapping instances, in time-complexity linear to the sum of the pattern length and the target length.
 
@@ -54,7 +54,7 @@ Here, the Knuth-Morris-Pratt algorithm has found the match in 10 character compa
 
 \subsection{Boyer and Moore}
 
-In the same year that Knuth, Morris and Pratt published their paper, Boyer and Moore published as well~\cite{boyer}. This algorithm is also an exact matching approach, that is based on the research of Knuth, et al. The Boyer-Moore performance improvements are based on searching from the end of the pattern rather than the beginning, and computing two tables to use in optimizing the jumps through the sequence string when mismatches are discovered. This algorithm was chosen as an example of refinement and improvement of another sample algorithm.
+In the same year that Knuth, Morris and Pratt published their paper, Boyer and Moore published as well~\cite{boyer}. This algorithm is also an exact matching approach, that is based on the research of Knuth, et al. The Boyer-Moore performance improvements are based on searching from the end of the pattern rather than the beginning, and computing two tables to use in optimizing the jumps through the sequence string when mismatches are discovered. This algorithm was chosen as an example of doing refinement and improvement of another sample algorithm. It shows a modest performance improvement can be had in exchange for a little more pre-processing.
 
 Boyer and Moore postulated that, ``more information is gained by matching the pattern from the right than from the left.'' For example: If the target character that corresponds to the current location of the last character from the pattern is not only a mismatch but also does not appear in the pattern at all, the pattern may then be shifted right by its full length. They refer to this algorithm as being ``usually sublinear,'' meaning that when finding the location of the pattern within the target the number of compared characters is usually less than $i+m-1$ (where $m$ is the pattern length and $i$ is the position within the target where the match of the pattern begins).
 
@@ -94,7 +94,7 @@ While the Knuth-Morris-Pratt algorithm had made 10 character comparisons to find
 
 \subsection{Bitap}
 
-The Bitap algorithm (sometimes known as ``Shift-Or'', or ``Shift-Add'') was initially developed by B\'{a}lint D\"{o}m\"{o}lki in 1964. In 1989 it was re-invented by Ricardo Baeza-Yates and Gaston H. Gonnet, and published in~\cite{baeza} in 1992. Here, it has been chosen for the distinctive approach when compared to the other algorithms.
+The Bitap algorithm (sometimes known as ``Shift-Or'', or ``Shift-Add'') was initially developed by B\'{a}lint D\"{o}m\"{o}lki in 1964. In 1989 it was re-invented by Ricardo Baeza-Yates and Gaston H. Gonnet, and published in~\cite{baeza} in 1992. Here, it has been chosen for the distinctive approach when compared to the other algorithms. Both the pattern data and the target sequence are treated as streams of bits, rather than comparing characters directly.
 
 In terms of time complexity, the algorithm is on the same terms as the previous ones, having a preprocessing time of O($m+\sigma$) (the length of the pattern plus the size of the alphabet) and a running time of O($n$). However, the operations it performs are all bit-oriented: shifts, complements, bitwise-and and bitwise-or. This resulted in this algorithm running significantly faster than either of Knuth-Morris-Pratt or Boyer-Moore on the experiment input data.
 
@@ -128,7 +128,7 @@ In this example the Bitap algorithm found the match after 8 rounds of the shift-
 
 \subsection{Aho and Corasick}
 
-Alfred V. Aho and Margaret J. Corasick published their algorithm for searching multiple patterns at once in 1975~\cite{aho}. In their algorithm, a finite number of patterns are merged into a single deterministic finite automaton (DFA) which can then be applied over any number of target strings. The DFA is capable of finding all locations of all patterns in the set, with overlapping, in a single pass through the target string. This makes the algorithm significantly faster than the others for the simple reason that Aho-Corasick scans each target string once, regardless of the number of patterns. By contrast, each of the single-pattern algorithms scans the target string once per pattern. The choice of this algorithm was driven by an interest in comparing a multi-pattern algorithm to the single-pattern options, and an interest in exploring the use of a finite automaton for the matching process.
+Alfred V. Aho and Margaret J. Corasick published their algorithm for searching multiple patterns at once in 1975~\cite{aho}. In their algorithm, a finite number of patterns are merged into a single deterministic finite automaton (DFA) which can then be applied over any number of target strings. The DFA is capable of finding all locations of all patterns in the set, with overlapping, in a single pass through the target string. This makes the algorithm significantly faster than the others for the simple reason that Aho-Corasick scans each target string once, regardless of the number of patterns. By contrast, each of the single-pattern algorithms scans the target string once per pattern. The choice of this algorithm was driven by an interest in comparing a multi-pattern algorithm to the single-pattern options, and an interest in exploring the use of a finite automaton for the matching process. This algorithm would also help inspire the approximate-matching algorithm introduced later.
 
 Aho and Corasick designed the pattern matching machine as a collection of three functions:
 
@@ -185,7 +185,7 @@ Here, the Aho-Corasick algorithm has positively identified the presence of two o
 \subsection{Approximate Matching with Gaps}
 \label{subsec:dfa_gap}
 
-For the fifth algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern.
+For the fifth algorithm in the suite of experiments, it was decided to implement an approximate-matching algorithm. In this case, the algorithm chosen is a new algorithm that takes a different approach to approximate-matching: building a DFA with additional states that allow for measured gaps between the characters of the pattern. This algorithm was chosen and developed out of an interest in exploring approximate-matching and furthering the DFA concepts from the Aho-Corasick algorithm.
 
 The idea of using a DFA to represent the pattern is inspired primarily by~\cite{aho} and~\cite{becchi}. Becchi and Crowley, in particular, address the problem of representing the concept of \textit{counting} states in an extended definition of a finite automaton. In their work, they put forward a means of having special states that track the number of times they've been entered in sequence, only allowing exit from the state when the given number (count) of visits is satisfied.
 
@@ -372,7 +372,7 @@ At this point the loop would resume with $i=2$, but this sufficiently illustrate
 \subsection{A Regular Expression Variant}
 \label{subsec:regexp_variant}
 
-Experimentation with the DFA-Gap algorithm led to some speculation as to whether the performance might be better if the search were performed by means of an actual regular expression in place of a specialized DFA. The general focus of the algorithm remained the same, the only difference being the use of a regular expression engine in place of the automatically-generated automaton.
+Experimentation with the DFA-Gap algorithm led to some speculation as to whether the performance might be better if the search were performed by means of an actual regular expression in place of a specialized DFA. The general focus of the algorithm remained the same, the only difference being the use of a regular expression engine in place of the automatically-generated automaton. Implementing this variant was chosen to allow comparison of the DFA-based approach to an established regular expression library.
 
 The requirements of using a regular expression were summarized as:
 
