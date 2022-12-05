@@ -331,29 +331,18 @@ The decision was made to examine all combinations of these two variables. Table~
 \label{table:totals:all_metrics}
 \end{table}
 
-Comparing the two sub-tables that include complexity values, it can be seen that the difference between the top (GCC C++) and bottom (Perl) is slightly higher in \ref{table:final:scale_and_cc} than in \ref{table:final:rank_and_cc}. This difference is even more pronounced in the two non-complexity tables. In addition to this, the growth of the score value is smoother when the languages are arranged based on rank. This is illustrated in figure~\ref{fig:graph:final_scores_plot}.
+Comparing the two sub-tables that include complexity values, it can be seen that the difference between the top (GCC C++) and bottom (Perl) is slightly higher in \ref{table:final:scale_and_cc} than in \ref{table:final:rank_and_cc}. This difference is even more pronounced in the two non-complexity tables.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.85\textwidth]{figures/final_scores_plot.png}
-	\caption{Plot of the rise in final score by ranking}
-	\label{fig:graph:final_scores_plot}
-\end{figure}
+\subsection{Confidence Intervals of the Data}
+\label{subsec:confidence-intervals}
 
-In the lines for the score-based ordering (marked by solid circles on the plot), the final scores remain well under 1.5 until the \nth{8} and \nth{9} positions (which correspond to Python and Perl respectively). This is due to the fact that score-based ordering would necessarily be very reactive to the significant jumps in the final scores for run-time and energy usage. Looking at the lines for ranking-based ordering (solid triangles), these follow a more linear path while the final scores for Perl still ending up in the same general range as for the score-based ordering.
+The data used thus far is from the first of three complete series of experiments. In order to establish a level of confidence in the consistency of the results, confidence intervals were calculated over both the algorithmic run-times and the energy usage data. These are shown in table~\ref{table:ci:runtime:runs} and table~\ref{table:ci:energy:runs}.
 
-The lines for score-based ordering also show the effect of the top three entries' scores being within a range of 0.07\%, resulting in flat lines until the \nth{4} data-point. The ranking-based ordering exhibits this same pattern for the first two data-points as well, due to the entries in \nth{1} and \nth{2} positions having identical expressiveness rankings and reciprocal rankings for run-time and energy.
+\input{tables/ci_runtime_runs}
 
-Throughout these experiments, the C and C++ languages have been evaluated for three different toolchains each. What would the final results look like, if each of C and C++ were represented by only their best-scoring variants?
+\input{tables/ci_energy_runs}
 
-In figure~\ref{fig:graph:final_distinct_plot}, the line for the first four rankings is much more straight than had been in figure~\ref{fig:graph:final_scores_plot}. It is worth noting that the change between Python in \nth{4} place and Perl in \nth{5} is much smaller than for the previous places.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.85\textwidth]{figures/final_distinct.png}
-	\caption{Plot of the rise in final score, using distinct languages}
-	\label{fig:graph:final_distinct_plot}
-\end{figure}
+Here, the tables show confidence intervals for confidence levels of 90\%, 95\%, and 99\%. These scores are based on a small initial sample size (three full series), but help to illustrate a strong level of consistency between these samples.
 
 \subsection{Final Rankings}
 \label{subsec:final-rankings}

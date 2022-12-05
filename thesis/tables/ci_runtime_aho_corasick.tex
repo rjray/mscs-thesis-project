@@ -1,0 +1,29 @@
+% Table: Runtime Confidence Intervals for Aho-Corasick
+% Generated: 2022-12-04 18:11:43.075219
+\begin{table}[h!]
+    \begin{center}
+        \begin{tabular}{|c|r|r|r|r|r|r|}
+            \hline
+            & \multicolumn{2}{c|}{\thead{90\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{95\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{99\% \\ Confidence}} \\
+            \hline
+            \thead{Language} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} \\
+            \hline
+            \makecell{C (GCC) \\ (N=75)} & 1.2186 & 1.2196 & 1.2185 & 1.2197 & 1.2183 & 1.2199 \\
+            \hline
+            \makecell{C (LLVM) \\ (N=75)} & 1.1452 & 1.1476 & 1.1450 & 1.1478 & 1.1445 & 1.1483 \\
+            \hline
+            \makecell{C (Intel) \\ (N=75)} & 1.1965 & 1.1980 & 1.1963 & 1.1982 & 1.1960 & 1.1985 \\
+            \hline
+            \makecell{C++ (GCC) \\ (N=75)} & 1.3198 & 1.3234 & 1.3195 & 1.3238 & 1.3187 & 1.3245 \\
+            \hline
+            \makecell{C++ (LLVM) \\ (N=75)} & 1.3298 & 1.3329 & 1.3294 & 1.3332 & 1.3288 & 1.3339 \\
+            \hline
+            \makecell{C++ (Intel) \\ (N=75)} & 1.3743 & 1.3774 & 1.3740 & 1.3777 & 1.3734 & 1.3783 \\
+            \hline
+            \makecell{Rust \\ (N=75)} & 1.3516 & 1.3538 & 1.3514 & 1.3540 & 1.3510 & 1.3544 \\
+            \hline
+        \end{tabular}
+        \caption{Runtime Confidence Intervals for Aho-Corasick}
+        \label{table:ci:runtime:aho_corasick}
+    \end{center}
+\end{table}

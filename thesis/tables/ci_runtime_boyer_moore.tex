@@ -1,0 +1,29 @@
+% Table: Runtime Confidence Intervals for Boyer-Moore
+% Generated: 2022-12-04 18:11:43.055782
+\begin{table}[h!]
+    \begin{center}
+        \begin{tabular}{|c|r|r|r|r|r|r|}
+            \hline
+            & \multicolumn{2}{c|}{\thead{90\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{95\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{99\% \\ Confidence}} \\
+            \hline
+            \thead{Language} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} \\
+            \hline
+            \makecell{C (GCC) \\ (N=75)} & 22.0298 & 22.0307 & 22.0297 & 22.0308 & 22.0295 & 22.0310 \\
+            \hline
+            \makecell{C (LLVM) \\ (N=75)} & 23.8557 & 23.8650 & 23.8548 & 23.8659 & 23.8530 & 23.8677 \\
+            \hline
+            \makecell{C (Intel) \\ (N=75)} & 20.6545 & 20.6567 & 20.6543 & 20.6569 & 20.6539 & 20.6574 \\
+            \hline
+            \makecell{C++ (GCC) \\ (N=75)} & 24.4363 & 24.4404 & 24.4359 & 24.4408 & 24.4351 & 24.4416 \\
+            \hline
+            \makecell{C++ (LLVM) \\ (N=75)} & 23.5711 & 23.5810 & 23.5701 & 23.5819 & 23.5682 & 23.5839 \\
+            \hline
+            \makecell{C++ (Intel) \\ (N=75)} & 21.7048 & 21.7126 & 21.7040 & 21.7134 & 21.7025 & 21.7149 \\
+            \hline
+            \makecell{Rust \\ (N=75)} & 22.6714 & 22.6761 & 22.6709 & 22.6765 & 22.6700 & 22.6775 \\
+            \hline
+        \end{tabular}
+        \caption{Runtime Confidence Intervals for Boyer-Moore}
+        \label{table:ci:runtime:boyer_moore}
+    \end{center}
+\end{table}

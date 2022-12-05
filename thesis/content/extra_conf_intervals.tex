@@ -1,0 +1,35 @@
+\section{Confidence Interval Data}
+
+This appendix provides the collected tables for the Confidence Intervals over run-time (algorithmic run-time, not total run-time) and energy usage. Due to their oversized values for these metrics, the Perl and Python languages have been excluded from these tables.
+
+\subsection{Runtime Confidence Intervals}
+
+These six tables (\ref{table:ci:runtime:kmp} to \ref{table:ci:runtime:regexp(3)}) cover the run-time values. Tables are for the four exact-matching algorithms and for the two approximate-matching algorithms at values of $k=3$. The tables for the other values of $k$ follow a similar pattern and are omitted for brevity.
+
+\input{tables/ci_runtime_kmp.tex}
+
+\input{tables/ci_runtime_boyer_moore.tex}
+
+\input{tables/ci_runtime_shift_or.tex}
+
+\input{tables/ci_runtime_aho_corasick.tex}
+
+\input{tables/ci_runtime_dfa_gap(3).tex}
+
+\input{tables/ci_runtime_regexp(3).tex}
+
+\subsection{Energy Usage Confidence Intervals}
+
+These six tables (\ref{table:ci:energy:kmp} to \ref{table:ci:energy:regexp(3)}) cover the energy usage values. They are in an identical order and arrangement as the tables in the previous section. As with the previous section, only DFA-Gap and Regexp-Gap tables for $k=3$, in the interest of brevity.
+
+\input{tables/ci_energy_kmp.tex}
+
+\input{tables/ci_energy_boyer_moore.tex}
+
+\input{tables/ci_energy_shift_or.tex}
+
+\input{tables/ci_energy_aho_corasick.tex}
+
+\input{tables/ci_energy_dfa_gap(3).tex}
+
+\input{tables/ci_energy_regexp(3).tex}

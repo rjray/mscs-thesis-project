@@ -1,0 +1,29 @@
+% Table: Runtime Confidence Intervals for Knuth-Morris-Pratt
+% Generated: 2022-12-04 18:11:43.045800
+\begin{table}[h!]
+    \begin{center}
+        \begin{tabular}{|c|r|r|r|r|r|r|}
+            \hline
+            & \multicolumn{2}{c|}{\thead{90\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{95\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{99\% \\ Confidence}} \\
+            \hline
+            \thead{Language} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} \\
+            \hline
+            \makecell{C (GCC) \\ (N=75)} & 58.5199 & 58.5412 & 58.5178 & 58.5433 & 58.5137 & 58.5475 \\
+            \hline
+            \makecell{C (LLVM) \\ (N=75)} & 44.4738 & 44.5014 & 44.4711 & 44.5041 & 44.4657 & 44.5095 \\
+            \hline
+            \makecell{C (Intel) \\ (N=75)} & 50.7623 & 50.7656 & 50.7620 & 50.7659 & 50.7614 & 50.7666 \\
+            \hline
+            \makecell{C++ (GCC) \\ (N=75)} & 59.4358 & 59.4430 & 59.4350 & 59.4437 & 59.4336 & 59.4451 \\
+            \hline
+            \makecell{C++ (LLVM) \\ (N=75)} & 50.6489 & 50.6556 & 50.6482 & 50.6563 & 50.6469 & 50.6576 \\
+            \hline
+            \makecell{C++ (Intel) \\ (N=75)} & 55.2293 & 55.2341 & 55.2288 & 55.2346 & 55.2279 & 55.2355 \\
+            \hline
+            \makecell{Rust \\ (N=75)} & 50.2715 & 50.2967 & 50.2691 & 50.2992 & 50.2641 & 50.3041 \\
+            \hline
+        \end{tabular}
+        \caption{Runtime Confidence Intervals for Knuth-Morris-Pratt}
+        \label{table:ci:runtime:kmp}
+    \end{center}
+\end{table}

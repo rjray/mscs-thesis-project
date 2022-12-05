@@ -1,0 +1,29 @@
+% Table: Runtime Confidence Intervals for three full sets
+% Generated: 2022-12-04 23:36:37.683263
+\begin{table}[h!]
+    \begin{center}
+        \begin{tabular}{|c|r|r|r|r|r|r|}
+            \hline
+            & \multicolumn{2}{c|}{\thead{90\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{95\% \\ Confidence}} & \multicolumn{2}{c|}{\thead{99\% \\ Confidence}} \\
+            \hline
+            \thead{Language} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} & \thead{Low} & \thead{High} \\
+            \hline
+            \makecell{C (GCC)} & 2538.5359 & 2541.6513 & 2537.7982 & 2542.3889 & 2534.7990 & 2545.3882 \\
+            \hline
+            \makecell{C (LLVM)} & 2565.3070 & 2568.7560 & 2564.4905 & 2569.5725 & 2561.1701 & 2572.8929 \\
+            \hline
+            \makecell{C (Intel)} & 2605.8051 & 2609.7787 & 2604.8643 & 2610.7195 & 2601.0389 & 2614.5449 \\
+            \hline
+            \makecell{C++ (GCC)} & 2450.6925 & 2453.9782 & 2449.9146 & 2454.7562 & 2446.7514 & 2457.9194 \\
+            \hline
+            \makecell{C++ (LLVM)} & 2478.0164 & 2497.5892 & 2473.3824 & 2502.2233 & 2454.5395 & 2521.0661 \\
+            \hline
+            \makecell{C++ (Intel)} & 2498.1748 & 2501.3544 & 2497.4220 & 2502.1072 & 2494.3610 & 2505.1682 \\
+            \hline
+            \makecell{Rust} & 2321.1177 & 2326.7827 & 2319.7765 & 2328.1239 & 2314.3228 & 2333.5776 \\
+            \hline
+        \end{tabular}
+        \caption{Runtime Confidence Intervals for three full sets}
+        \label{table:ci:runtime:runs}
+    \end{center}
+\end{table}
